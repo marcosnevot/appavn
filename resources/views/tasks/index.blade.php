@@ -8,7 +8,7 @@
 
 
 <!-- Contenedor de la tabla con scroll -->
-<div class="table-container" style="max-height: 80vh; width: 78vw; overflow-x: auto; overflow-y: auto;">
+<div class="table-container" style="max-height: 80vh; width: 100%; overflow-x: auto; overflow-y: auto;">
     <!-- Tabla de tareas -->
     <table class="min-w-full table-auto bg-white dark:bg-gray-800">
         <thead>
@@ -83,6 +83,10 @@
     </table>
 </div>
 
+<!-- Pasamos los datos de clientes como un atributo data -->
+<div id="clientes-data" data-clientes='@json($clientes)'></div>
+
+
 <!-- Formulario de nueva tarea en un menú desplegable -->
 <div id="task-form" class="task-form hide">
     <h3 class="form-title">Nueva Tarea</h3>
@@ -91,16 +95,16 @@
         @csrf
         <!-- Fila 1: Cliente, Asunto, Tipo, Subtipo, Estado -->
         <div class="form-row">
-            <div class="form-group">
+            <div class="form-group wide">
                 <label for="cliente_id">Cliente:</label>
-                <select name="cliente_id" id="cliente_id" required>
-                    @foreach($clientes as $cliente)
-                    <option value="{{ $cliente->id }}">{{ $cliente->nombre_fiscal }}</option>
-                    @endforeach
-                </select>
+                <div class="autocomplete">
+                    <input type="text" id="cliente-input" class="autocomplete-input" placeholder="Buscar cliente...">
+                    <input type="hidden" name="cliente_id" id="cliente-id-input"> <!-- Campo oculto para el id del cliente -->
+                    <ul id="cliente-list" class="autocomplete-list"></ul>
+                </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group wide">
                 <label for="asunto_id">Asunto:</label>
                 <select name="asunto_id" id="asunto_id" required>
                     @foreach($asuntos as $asunto)
@@ -109,7 +113,7 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group medium">
                 <label for="tipo_id">Tipo de Tarea:</label>
                 <select name="tipo_id" id="tipo_id">
                     @foreach($tipos as $tipo)
@@ -118,7 +122,7 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group medium">
                 <label for="subtipo">Subtipo:</label>
                 <select name="subtipo" id="subtipo">
                     <option value="ORDINARIA">Ordinaria</option>
@@ -126,7 +130,7 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group narrow">
                 <label for="estado">Estado:</label>
                 <select name="estado" id="estado">
                     <option value="PENDIENTE">Pendiente</option>
@@ -138,7 +142,7 @@
 
         <!-- Fila 2: Asignado a, Archivo, Descripción, Observaciones -->
         <div class="form-row">
-            <div class="form-group">
+            <div class="form-group narrow">
                 <label for="users">Asignado a:</label>
                 <select name="users[]" id="users" multiple>
                     @foreach($usuarios as $user)
@@ -147,17 +151,17 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group narrow">
                 <label for="archivo">Archivo:</label>
                 <input type="text" name="archivo" id="archivo">
             </div>
 
-            <div class="form-group">
+            <div class="form-group wide">
                 <label for="descripcion">Descripción:</label>
                 <textarea name="descripcion" id="descripcion" rows="2"></textarea>
             </div>
 
-            <div class="form-group">
+            <div class="form-group wide">
                 <label for="observaciones">Observaciones:</label>
                 <textarea name="observaciones" id="observaciones" rows="2"></textarea>
             </div>
@@ -210,12 +214,12 @@
 
             <div class="form-group">
                 <label for="tiempo_previsto">Tiempo Previsto (Horas):</label>
-                <input type="number" step="0.1" name="tiempo_previsto" id="tiempo_previsto">
+                <input type="number" step="0.25" name="tiempo_previsto" id="tiempo_previsto">
             </div>
 
             <div class="form-group">
                 <label for="tiempo_real">Tiempo Real (Horas):</label>
-                <input type="number" step="0.1" name="tiempo_real" id="tiempo_real">
+                <input type="number" step="0.25" name="tiempo_real" id="tiempo_real">
             </div>
         </div>
 
@@ -254,12 +258,28 @@
 
         // Ocultar el formulario cuando se pulsa el botón de cerrar
         document.getElementById('close-task-form').addEventListener('click', function() {
+            closeTaskForm();
+        });
+
+        // Ocultar el formulario cuando se hace clic fuera de él
+        document.addEventListener('click', function(event) {
+            // Verifica si el clic no es dentro del formulario y tampoco en el botón para abrirlo
+            if (!taskForm.contains(event.target) && !document.getElementById('new-task-button').contains(event.target)) {
+                if (taskForm.classList.contains('show')) {
+                    closeTaskForm();
+                }
+            }
+        });
+
+        // Función para cerrar el formulario
+        function closeTaskForm() {
             taskForm.classList.remove('show');
             taskForm.classList.add('hide');
             setTimeout(() => {
                 taskForm.style.display = 'none';
             }, 400);
-        });
+        }
+
 
 
         // Manejar el evento de envío del formulario
@@ -268,7 +288,7 @@
 
             // Recoger los datos del formulario
             const formData = {
-                cliente_id: document.querySelector('select[name="cliente_id"]').value,
+                cliente_id: document.querySelector('input[name="cliente_id"]').value,
                 asunto_id: document.querySelector('select[name="asunto_id"]').value,
                 tipo_id: document.querySelector('select[name="tipo_id"]').value,
                 subtipo: document.querySelector('select[name="subtipo"]').value,
@@ -329,14 +349,105 @@
                 console.log('Nueva tarea creada:', e);
                 updateTaskTable(e.task); // Actualiza la tabla cuando se crea una nueva tarea
             });
+
+        // Buscador de clientes
+
+        // Obtener los datos de clientes desde el atributo data-clientes
+        const clientesData = document.getElementById('clientes-data');
+        const clientes = JSON.parse(clientesData.getAttribute('data-clientes'));
+
+        const input = document.getElementById('cliente-input');
+        const clienteIdInput = document.getElementById('cliente-id-input'); // Campo oculto para el ID del cliente
+        const clienteList = document.getElementById('cliente-list');
+        let selectedIndex = -1;
+
+        // Función para mostrar la lista filtrada
+        function filterClientes(query) {
+            const filtered = clientes.filter(cliente =>
+                cliente.nombre_fiscal.toLowerCase().includes(query.toLowerCase())
+            );
+            renderList(filtered);
+        }
+
+        // Función para renderizar la lista
+        function renderList(filtered) {
+            clienteList.innerHTML = '';
+            if (filtered.length === 0) {
+                clienteList.style.display = 'none';
+                return;
+            }
+            clienteList.style.display = 'block';
+            filtered.forEach((cliente, index) => {
+                const li = document.createElement('li');
+                li.textContent = cliente.nombre_fiscal;
+                li.setAttribute('data-id', cliente.id);
+                li.classList.add('autocomplete-item');
+                if (index === selectedIndex) {
+                    li.classList.add('active');
+                }
+                li.addEventListener('click', () => selectCliente(cliente));
+                clienteList.appendChild(li);
+            });
+        }
+
+        // Función para seleccionar un cliente y autocompletar el input
+        function selectCliente(cliente) {
+            input.value = cliente.nombre_fiscal;
+            clienteIdInput.value = cliente.id; // Almacena el id en el campo oculto
+            clienteList.style.display = 'none';
+        }
+
+        // Mostrar lista completa de clientes al hacer clic en el campo
+        input.addEventListener('focus', function() {
+            if (input.value === '') {
+                renderList(clientes); // Muestra la lista completa si no se ha escrito nada
+            }
+        });
+
+        // Manejador del evento input para filtrar clientes
+        input.addEventListener('input', function() {
+            selectedIndex = -1;
+            filterClientes(this.value);
+            clienteIdInput.value = '';
+        });
+
+        // Manejador para la navegación por teclado
+        input.addEventListener('keydown', function(e) {
+            const items = document.querySelectorAll('.autocomplete-item');
+            if (e.key === 'ArrowDown') {
+                selectedIndex = (selectedIndex + 1) % items.length;
+                updateActiveItem(items);
+            } else if (e.key === 'ArrowUp') {
+                selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                updateActiveItem(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault(); // Prevenir el comportamiento por defecto de 'Enter'
+                if (selectedIndex >= 0 && selectedIndex < items.length) {
+                    const selectedCliente = clientes.find(cliente =>
+                        cliente.nombre_fiscal === items[selectedIndex].textContent
+                    );
+                    selectCliente(selectedCliente);
+                }
+            }
+        });
+
+        // Función para actualizar el ítem activo en la lista
+        function updateActiveItem(items) {
+            items.forEach(item => item.classList.remove('active'));
+            if (items[selectedIndex]) {
+                items[selectedIndex].classList.add('active');
+            }
+        }
+
+        // Cerrar la lista si se hace clic fuera
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.autocomplete')) {
+                clienteList.style.display = 'none';
+            }
+        });
+
+
     });
-
-
-
-
-
-
-
 
 
     // Función para actualizar la tabla con la nueva tarea

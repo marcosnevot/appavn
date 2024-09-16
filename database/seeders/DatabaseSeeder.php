@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     {
       // Ejecutar seeders individuales
       $this->call([
-     // UserSeeder::class,
+      // UserSeeder::class,
        // ClienteSeeder::class,
         TareaSeeder::class,
         // Puedes añadir más seeders aquí si los tienes
