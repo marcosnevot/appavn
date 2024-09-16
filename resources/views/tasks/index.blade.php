@@ -241,6 +241,7 @@
         console.log('El script ha sido cargado correctamente.');
 
         const taskForm = document.getElementById('task-form');
+        const addTaskForm = document.getElementById('add-task-form'); // El propio formulario
 
         // Mostrar el formulario cuando se pulsa el botón de "Nueva Tarea"
         document.getElementById('new-task-button').addEventListener('click', function() {
@@ -261,14 +262,37 @@
         });
 
 
-        document.getElementById('submit-task-button').addEventListener('click', function() {
+        // Manejar el evento de envío del formulario
+        addTaskForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado de recargar la página
 
-            // Recoge los datos del formulario
+            // Recoger los datos del formulario
             const formData = {
-                cliente_id: document.querySelector('input[name="cliente_id"]').value,
-                asunto_id: document.querySelector('input[name="asunto_id"]').value,
-                // Otros campos...
+                cliente_id: document.querySelector('select[name="cliente_id"]').value,
+                asunto_id: document.querySelector('select[name="asunto_id"]').value,
+                tipo_id: document.querySelector('select[name="tipo_id"]').value,
+                subtipo: document.querySelector('select[name="subtipo"]').value,
+                estado: document.querySelector('select[name="estado"]').value,
+
+                users: Array.from(document.querySelectorAll('select[name="users[]"] option:checked')).map(option => option.value),
+
+                archivo: document.querySelector('input[name="archivo"]').value,
+                descripcion: document.querySelector('textarea[name="descripcion"]').value,
+                observaciones: document.querySelector('textarea[name="observaciones"]').value,
+
+                facturable: document.querySelector('input[name="facturable"]').checked ? 1 : 0,
+                facturado: document.querySelector('input[name="facturado"]').value,
+                precio: document.querySelector('input[name="precio"]').value,
+                suplido: document.querySelector('input[name="suplido"]').value,
+                coste: document.querySelector('input[name="coste"]').value,
+
+                fecha_inicio: document.querySelector('input[name="fecha_inicio"]').value,
+                fecha_vencimiento: document.querySelector('input[name="fecha_vencimiento"]').value,
+                fecha_imputacion: document.querySelector('input[name="fecha_imputacion"]').value,
+                tiempo_previsto: document.querySelector('input[name="tiempo_previsto"]').value,
+                tiempo_real: document.querySelector('input[name="tiempo_real"]').value
             };
+
 
             console.log('Datos del formulario:', formData); // Verifica que los datos están siendo recogidos
 
@@ -290,15 +314,14 @@
                 .then(data => {
                     if (data.success) {
                         console.log('Tarea creada:', data.task);
-                        // updateTaskTable(data.task);
-                        document.getElementById('add-task-form').reset();
+                        // updateTaskTable(data.task); // Actualiza la tabla
+                        document.getElementById('add-task-form').reset(); // Resetea el formulario
                     } else {
                         console.error('Errores de validación:', data.errors);
                     }
                 })
                 .catch(error => console.error('Error en la solicitud:', error));
         });
-
 
         // Escuchar el canal y el evento del WebSocket
         window.Echo.channel('tasks')
