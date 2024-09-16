@@ -1,0 +1,217 @@
+.header-tareas {
+    display: flex;
+    justify-content: space-between;
+    /* Espaciado entre los elementos */
+    align-items: center;
+    /* Alinea verticalmente al centro */
+    margin-bottom: 20px;
+    /* Espacio debajo del contenedor */
+}
+
+.header-tareas h2 {
+    margin: 0;
+    /* Asegura que no haya margen extra en el h2 */
+}
+
+.header-tareas .btn-new-task {
+    margin-left: auto;
+    /* Alinea el botón a la derecha */
+}
+
+/* Estilos del botón de nueva tarea */
+.btn-new-task {
+    padding: 12px 25px;
+    background-color: #1E1E1E;
+    /* Usamos el mismo gris oscuro que el sidebar */
+    color: #FFFFFF;
+    /* Texto blanco para buen contraste */
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    /* Bordes ligeramente redondeados */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* Sombra ligera para darle profundidad */
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    /* Suavizamos las transiciones */
+    cursor: pointer;
+}
+
+.btn-new-task:hover {
+    background-color: #333333;
+    /* Cambia a un gris ligeramente más claro en hover */
+    transform: translateY(-2px);
+    /* Efecto de levantamiento suave */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    /* Sombra más pronunciada al hacer hover */
+}
+
+.btn-new-task:active {
+    background-color: #4A4A4A;
+    /* Un color intermedio entre el gris claro y oscuro para la acción activa */
+    transform: translateY(0);
+    /* Vuelve a su posición original */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* Sombra original cuando se hace clic */
+}
+
+
+/* Estilos del formulario de tarea */
+.task-form {
+    position: absolute; /* Mantener el formulario dentro de su contenedor relativo */
+    bottom: 0;
+    left: 0;
+    width: 100%; /* Ocupa el 100% del contenedor padre */
+    background-color: #FFFFFF;
+    padding: 30px;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    transform: translateY(100%); /* Oculto fuera de la pantalla */
+    transition: transform 0.4s ease-in-out;
+    display: none;
+    opacity: 0; /* Inicialmente invisible */
+}
+
+.task-form.show {
+    display: block;
+    transform: translateY(0); /* Desplazar hacia arriba */
+    opacity: 1; /* Hacer visible */
+    transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+}
+
+.task-form.hide {
+    transform: translateY(100%); /* Deslizar hacia abajo */
+    opacity: 0; /* Invisibilidad gradual */
+    transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+}
+
+
+.form-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 20px;
+    background-color: #F7F7F7;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #333333;
+    text-align: center;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 5px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 15px;
+    color: #333333;
+    font-weight: 500;
+}
+
+/* Aseguramos que todos los inputs, selects y textareas tengan el mismo alto */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    height: 40px;
+    /* Altura fija para todos los campos */
+    border: 1px solid #CCCCCC;
+    border-radius: 6px;
+    background-color: #F7F7F7;
+    color: #333333;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* Ajuste para textareas */
+.form-group textarea {
+    height: 40px;
+    /* Para asegurar que las textareas tengan la misma altura que los inputs */
+    resize: none;
+    /* Desactivamos el redimensionado para mantener la coherencia */
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #4A90E2;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+/* Estilos de los botones */
+.form-buttons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+}
+
+.btn-submit,
+.btn-close {
+    padding: 10px 25px;
+    height: 40px;
+    /* Altura consistente con los campos */
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.btn-submit {
+    background-color: #1E1E1E;
+    color: white;
+}
+
+.btn-submit:hover {
+    background-color: #333333;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-submit:active {
+    background-color: #4A4A4A;
+}
+
+.btn-close {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-close:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-close:active {
+    background-color: #b21f2d;
+}
+
+/* Definimos el layout en filas y columnas */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Para pantallas más pequeñas */
+@media (max-width: 1024px) {
+    .form-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

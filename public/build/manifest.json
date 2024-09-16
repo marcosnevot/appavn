@@ -1,0 +1,23 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-DM6lPmjB.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/panel.css": {
+    "file": "assets/panel.css",
+    "src": "resources/css/panel.css",
+    "isEntry": true
+  },
+  "resources/css/tareas.css": {
+    "file": "assets/tareas.css",
+    "src": "resources/css/tareas.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-NjygHGYW.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}
