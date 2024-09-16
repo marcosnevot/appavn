@@ -1,0 +1,229 @@
+/* General Panel Layout */
+.panel {
+    background-color: #F7F7F7;
+    /* Fondo claro para diferenciar del sidebar */
+    color: #333333;
+    /* Texto oscuro */
+    padding: 30px;
+    border-radius: 2px;
+    /* Bordes redondeados */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    /* Sombra suave */
+    font-family: 'Nunito', sans-serif;
+    /* Tipografía limpia */
+}
+
+/* Encabezados */
+.panel h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 20px;
+}
+
+.panel h2,
+.panel h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #333333;
+    margin-bottom: 15px;
+}
+
+/* Separadores */
+.panel hr {
+    border: 0;
+    height: 1px;
+    background-color: #E0E0E0;
+    margin: 30px 0;
+}
+
+/* Estilo de Botones */
+.button {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #4A90E2;
+    /* Azul atractivo para el botón */
+    color: #FFFFFF;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #357ABD;
+    /* Cambio de color en hover */
+    cursor: pointer;
+}
+
+/* Contenedores de contenido */
+.panel-content {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.panel-box {
+    background-color: #FFFFFF;
+    /* Fondo claro para los contenedores */
+    padding: 20px;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 300px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Sombra suave */
+}
+
+.panel-box h3 {
+    font-size: 1.3rem;
+    color: #333333;
+}
+
+.panel-box p {
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+    margin-top: 10px;
+}
+
+/* Tablas */
+.panel table {
+    width: 100%;
+    border-collapse: collapse;
+   
+    background-color: #f9f9f9;
+    /* Fondo claro para la tabla */
+    color: #333333;
+    /* Color de texto oscuro para mejor legibilidad */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    /* Sombra para dar profundidad */
+    border-radius: 4px;
+    /* Bordes redondeados */
+    overflow: auto;
+    /* Para aplicar bordes redondeados en todos los lados */
+
+}
+
+/* Encabezados de la tabla */
+.panel table thead {
+    background-color: #1E1E1E;
+    /* Azul oscuro para el encabezado */
+    text-transform: uppercase;
+    /* Letras en mayúscula */
+    letter-spacing: 0.05em;
+    /* Espaciado entre letras */
+    position: sticky;
+    z-index: 2;
+    top: 0;
+}
+
+.panel table thead th {
+    padding: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-align: center;
+    font-weight: 600;
+    color: #FFFFFF;
+    /* Blanco para mejor contraste */
+    border-bottom: 2px solid #E0E0E0;
+    /* Línea clara para separación */
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* Filas del cuerpo de la tabla */
+.panel table tbody tr {
+    background-color: #f1f1f1;
+    /* Fondo gris claro para las filas */
+    border-bottom: 1px solid #dddddd;
+    /* Línea de separación entre filas */
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Filas alternas para mayor claridad */
+.panel table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+    /* Alterna con blanco */
+}
+
+/* Efecto hover en las filas */
+.panel table tbody tr:hover {
+    background-color: #e2e2e2;
+    /* Cambia a un gris muy claro al hacer hover */
+}
+
+/* Celdas de las filas */
+.panel table tbody td {
+    padding: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 0.875rem;
+    /* Tamaño de fuente ligeramente más pequeño */
+    color: #333333;
+    /* Texto oscuro */
+    text-align: left;
+    /* Alineación a la izquierda */
+    vertical-align: middle;
+    /* Centra verticalmente */
+
+}
+
+/* Scroll bar horizontal */
+.panel table-container {
+    max-height: 80vh;
+    /* Ocupará el 80% de la pantalla de forma responsiva */
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+
+/* Scroll bar styling */
+.panel table-container::-webkit-scrollbar {
+    width: 10px;
+    /* Ancho de la barra de scroll */
+    height: 10px;
+    /* Altura de la barra de scroll */
+}
+
+.panel table-container::-webkit-scrollbar-track {
+    background-color: #1E1E1E;
+    /* Color del track (fondo del scroll) */
+}
+
+.panel table-container::-webkit-scrollbar-thumb {
+    background-color: #E24A4A;
+    /* Color de la barra de scroll */
+    border-radius: 10px;
+}
+
+.panel table-container::-webkit-scrollbar-thumb:hover {
+    background-color: #F27474;
+    /* Color más claro cuando haces hover */
+}
+
+
+/* Input fields */
+.panel input[type="text"],
+.panel input[type="email"],
+.panel select,
+.panel textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #CCCCCC;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #333333;
+    margin-bottom: 20px;
+    transition: border-color 0.3s ease;
+}
+
+.panel input:focus,
+.panel select:focus,
+.panel textarea:focus {
+    border-color: #4A90E2;
+    outline: none;
+}
