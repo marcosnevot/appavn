@@ -21,7 +21,6 @@
     display: flex;
     align-items: center;
     gap: 20px;
-    width: 30%;
     /* Espacio entre el select y el botón */
 }
 
@@ -30,7 +29,8 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 100%; /* Para que tenga la misma altura que el botón */
+    height: 100%;
+    /* Para que tenga la misma altura que el botón */
     align-items: left;
     width: 170px;
 }
@@ -50,7 +50,8 @@
     border-radius: 6px;
     background-color: #f7f7f7;
     color: #333;
-    height: 40px; /* Misma altura que el botón */
+    height: 40px;
+    /* Misma altura que el botón */
     transition: border-color 0.3s ease;
 }
 
@@ -97,6 +98,75 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     /* Sombra original cuando se hace clic */
 }
+
+
+/* Estilo general de la notificación */
+.notification {
+    position: absolute;
+    top: -100px;
+    /* Fuera de la vista al cargar */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745;
+    /* Verde de éxito */
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    font-weight: 500;
+    z-index: 1000;
+    opacity: 0;
+    /* Inicialmente invisible */
+    transition: all 0.5s ease;
+    /* Suave transición */
+}
+
+/* Estilo del contenido de la notificación */
+.notification-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Icono de éxito */
+.notification-icon {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.notification-message {
+    font-weight: bold; /* Aplica negrita */
+}
+
+/* Barra de progreso */
+.notification-timer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.5); /* Blanco semitransparente */
+    transition: width 3s linear;
+    /* Reducción en 3 segundos */
+}
+
+/* Estilo al mostrar la notificación */
+.notification.show {
+    top: 20px;
+    /* Visible a 20px del top */
+    opacity: 1;
+    /* Totalmente visible */
+}
+
+/* Estilo al ocultar la notificación */
+.notification.hide {
+    top: -100px;
+    /* Vuelve a ocultarse */
+    opacity: 0;
+}
+
+
 
 
 /* Estilos del formulario de tarea */
@@ -361,4 +431,71 @@
 .autocomplete-list li.active,
 .autocomplete-list li:hover {
     background-color: #f0f0f0;
+}
+
+/* Estilos del Modal */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.modal-actions .btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-confirm {
+    background-color: #28a745; /* Color verde para confirmar */
+    color: white;
+}
+
+.btn-confirm:hover {
+    background-color: #218838;
+}
+
+.btn-cancel {
+    background-color: #dc3545; /* Color rojo para cancelar */
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #c82333;
 }
