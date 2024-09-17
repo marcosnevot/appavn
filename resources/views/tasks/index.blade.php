@@ -3,8 +3,23 @@
 @section('content')
 <div class="header-tareas">
     <h2 class="title">Tareas</h2>
-    <button id="new-task-button" class="btn-new-task">Nueva Tarea</button>
+    <div class="actions">
+        <!-- Desplegable de Ordenar por -->
+        <div class="sort-container">
+            <label for="sort-select" class="sort-label">Ordenar por:</label>
+            <select id="sort-select" class="sort-select">
+                <option value="fecha_creacion" selected>Fecha de Creación</option>
+                <option value="cliente">Cliente</option>
+                <option value="asunto">Asunto</option>
+                <option value="estado">Estado</option>
+            </select>
+        </div>
+
+        <!-- Botón de Nueva Tarea -->
+        <button id="new-task-button" class="btn-new-task">Nueva Tarea</button>
+    </div>
 </div>
+
 
 
 <!-- Contenedor de la tabla con scroll -->
@@ -33,6 +48,7 @@
                 <th>Fecha Imputación</th>
                 <th>Tiempo Previsto</th>
                 <th>Tiempo Real</th>
+                <th style="display: none;">Fecha de Creación</th> <!-- Columna oculta para created_at -->
             </tr>
         </thead>
         <tbody>
@@ -71,6 +87,7 @@
                 <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{{ $task->fecha_imputacion ? \Carbon\Carbon::parse($task->fecha_imputacion)->format('d/m/Y') : 'Sin fecha' }}</td>
                 <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{{ $task->tiempo_previsto ?? 'N/A' }}</td>
                 <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{{ $task->tiempo_real ?? 'N/A' }}</td>
+                <td style="display: none;">{{ $task->created_at }}</td> <!-- Campo oculto para created_at -->
 
 
             </tr>
@@ -199,7 +216,7 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="fecha_inicio">Fecha de Inicio:</label>
-                <input type="date" name="fecha_inicio" id="fecha_inicio">
+                <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ now()->format('Y-m-d') }}">
             </div>
 
             <div class="form-group">
@@ -286,6 +303,21 @@
         addTaskForm.addEventListener('submit', function(event) {
             event.preventDefault(); // Prevenir el comportamiento predeterminado de recargar la página
 
+            // Validar si el cliente seleccionado está en la lista
+            const clienteInputValue = document.getElementById('cliente-input').value;
+            const clienteIdValue = document.getElementById('cliente-id-input').value;
+
+            // Buscar si el cliente existe en los datos (por nombre y NIF)
+            const clienteValido = clientes.some(cliente =>
+                `${cliente.nombre_fiscal} (${cliente.nif})` === clienteInputValue && cliente.id == clienteIdValue
+            );
+
+            if (!clienteValido) {
+                alert("Por favor, selecciona un cliente válido de la lista.");
+                return;
+            }
+
+
             // Recoger los datos del formulario
             const formData = {
                 cliente_id: document.querySelector('input[name="cliente_id"]').value,
@@ -336,6 +368,8 @@
                         console.log('Tarea creada:', data.task);
                         // updateTaskTable(data.task); // Actualiza la tabla
                         document.getElementById('add-task-form').reset(); // Resetea el formulario
+                        // fechaInicioInput.value = getTodayDate(); // Volvemos a establecer la fecha de hoy en el campo
+
                     } else {
                         console.error('Errores de validación:', data.errors);
                     }
@@ -364,7 +398,8 @@
         // Función para mostrar la lista filtrada
         function filterClientes(query) {
             const filtered = clientes.filter(cliente =>
-                cliente.nombre_fiscal.toLowerCase().includes(query.toLowerCase())
+                cliente.nombre_fiscal.toLowerCase().includes(query.toLowerCase()) ||
+                cliente.nif.toLowerCase().includes(query.toLowerCase()) // Comparar con NIF
             );
             renderList(filtered);
         }
@@ -379,7 +414,7 @@
             clienteList.style.display = 'block';
             filtered.forEach((cliente, index) => {
                 const li = document.createElement('li');
-                li.textContent = cliente.nombre_fiscal;
+                li.textContent = `${cliente.nombre_fiscal} (${cliente.nif})`; // Mostrar nombre y NIF
                 li.setAttribute('data-id', cliente.id);
                 li.classList.add('autocomplete-item');
                 if (index === selectedIndex) {
@@ -392,7 +427,7 @@
 
         // Función para seleccionar un cliente y autocompletar el input
         function selectCliente(cliente) {
-            input.value = cliente.nombre_fiscal;
+            input.value = `${cliente.nombre_fiscal} (${cliente.nif})`; // Mostrar tanto el nombre como el NIF
             clienteIdInput.value = cliente.id; // Almacena el id en el campo oculto
             clienteList.style.display = 'none';
         }
@@ -424,7 +459,7 @@
                 e.preventDefault(); // Prevenir el comportamiento por defecto de 'Enter'
                 if (selectedIndex >= 0 && selectedIndex < items.length) {
                     const selectedCliente = clientes.find(cliente =>
-                        cliente.nombre_fiscal === items[selectedIndex].textContent
+                        `${cliente.nombre_fiscal} (${cliente.nif})` === items[selectedIndex].textContent
                     );
                     selectCliente(selectedCliente);
                 }
@@ -446,6 +481,58 @@
             }
         });
 
+        
+        const tableBody = document.querySelector('table tbody');
+        const sortSelect = document.getElementById('sort-select');
+
+        // Función para ordenar la tabla
+        function sortTableBy(attribute) {
+            // Obtener las filas actuales de la tabla
+            let rows = Array.from(tableBody.querySelectorAll('tr'));
+
+            // Definir la lógica de ordenación según el atributo seleccionado
+            rows.sort((a, b) => {
+                let valA, valB;
+
+                switch (attribute) {
+                    case 'cliente':
+                        valA = a.children[2].textContent.trim().toLowerCase();
+                        valB = b.children[2].textContent.trim().toLowerCase();
+                        break;
+                    case 'asunto':
+                        valA = a.children[1].textContent.trim().toLowerCase();
+                        valB = b.children[1].textContent.trim().toLowerCase();
+                        break;
+                    case 'estado':
+                        valA = a.children[5].textContent.trim().toLowerCase();
+                        valB = b.children[5].textContent.trim().toLowerCase();
+                        break;
+                    case 'fecha_creacion':
+                    default:
+                        // Utilizar created_at (última columna oculta)
+                        valA = new Date(a.children[20].textContent); // Índice de created_at
+                        valB = new Date(b.children[20].textContent);
+                        return valB - valA; // Orden descendente por fecha de creación
+                }
+
+                // Ordenar alfabéticamente para otros atributos
+                return valA > valB ? 1 : (valA < valB ? -1 : 0);
+            });
+
+            // Vaciar el contenido de la tabla y agregar las filas ordenadas
+            tableBody.innerHTML = '';
+            rows.forEach(row => tableBody.appendChild(row));
+        }
+
+        // Evento para cambiar la ordenación cuando se selecciona un nuevo atributo
+        sortSelect.addEventListener('change', function() {
+            const selectedAttribute = this.value;
+            sortTableBy(selectedAttribute);
+        });
+
+        // Ordenar inicialmente por fecha de creación (ID)
+        sortTableBy('fecha_creacion');
+
 
     });
 
@@ -463,8 +550,8 @@
             <td>${task.subtipo}</td>
             <td>${task.estado}</td>
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
-            <td>${task.descripcion}</td>
-            <td>${task.observaciones}</td>
+            <td>${task.descripcion || ''}</td>
+            <td>${task.observaciones || ''}</td>
             <td>${task.archivo || 'No disponible'}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
             <td>${task.facturado || 'No facturado'}</td>
@@ -478,7 +565,12 @@
             <td>${task.tiempo_real || 'N/A'}</td>
         `;
 
-        tableBody.appendChild(row);
+        // Insertar la nueva fila al principio del cuerpo de la tabla
+        if (tableBody.firstChild) {
+            tableBody.insertBefore(row, tableBody.firstChild);
+        } else {
+            tableBody.appendChild(row);
+        }
     }
 </script>
 @endsection

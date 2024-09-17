@@ -3,9 +3,7 @@
     justify-content: space-between;
     /* Espaciado entre los elementos */
     align-items: center;
-    /* Alinea verticalmente al centro */
-    margin-bottom: 20px;
-    /* Espacio debajo del contenedor */
+
 }
 
 .header-tareas h2 {
@@ -16,6 +14,50 @@
 .header-tareas .btn-new-task {
     margin-left: auto;
     /* Alinea el botón a la derecha */
+}
+
+/* Contenedor de las acciones a la derecha */
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 30%;
+    /* Espacio entre el select y el botón */
+}
+
+/* Contenedor para el label y el select, ambos dentro de un bloque */
+.sort-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%; /* Para que tenga la misma altura que el botón */
+    align-items: left;
+    width: 170px;
+}
+
+/* Estilos del label de ordenar por, centrado */
+.sort-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+}
+
+/* Estilos del select */
+.sort-select {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f7f7f7;
+    color: #333;
+    height: 40px; /* Misma altura que el botón */
+    transition: border-color 0.3s ease;
+}
+
+.sort-select:hover,
+.sort-select:focus {
+    border-color: #4A90E2;
+    outline: none;
 }
 
 /* Estilos del botón de nueva tarea */
@@ -35,6 +77,7 @@
     transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     /* Suavizamos las transiciones */
     cursor: pointer;
+
 }
 
 .btn-new-task:hover {

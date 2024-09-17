@@ -10,6 +10,7 @@ use App\Models\Cliente;
 use App\Models\Tarea;
 use App\Models\Tipo;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
 
@@ -22,8 +23,10 @@ class TaskController extends Controller
      */
     public function index()
     {
-        // Obtener todas las tareas de la base de datos
-        $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])->get();
+        // Obtener todas las tareas de la base de datos, ordenadas por las más recientes
+        $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
+            ->orderBy('created_at', 'desc') // Ordenar por la fecha de creación, de más reciente a más antigua
+            ->get();
 
         // Obtener datos adicionales necesarios para el formulario
         $clientes = Cliente::all();
@@ -40,6 +43,7 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         try {
+
             // Validar la solicitud
             $validated = $request->validate([
                 'cliente_id' => 'required|exists:clientes,id',
@@ -52,6 +56,9 @@ class TaskController extends Controller
                 'facturable' => 'nullable|boolean',
                 'fecha_inicio' => 'nullable|date',
                 'fecha_vencimiento' => 'nullable|date',
+                'fecha_imputacion' => 'nullable|date', 
+                'tiempo_previsto' => 'nullable|numeric', 
+                'tiempo_real' => 'nullable|numeric', 
             ]);
 
             // Crear la tarea
@@ -64,9 +71,19 @@ class TaskController extends Controller
                 'descripcion' => $validated['descripcion'] ?? null,
                 'observaciones' => $validated['observaciones'] ?? null,
                 'facturable' => $validated['facturable'] ?? false,
-                'fecha_inicio' => $validated['fecha_inicio'] ?? null,
-                'fecha_vencimiento' => $validated['fecha_vencimiento'] ?? null,
+                'fecha_inicio' => isset($validated['fecha_inicio'])
+                    ? Carbon::parse($validated['fecha_inicio'])->format('Y-m-d')
+                    : null,
+                'fecha_vencimiento' => isset($validated['fecha_vencimiento'])
+                    ? Carbon::parse($validated['fecha_vencimiento'])->format('Y-m-d')
+                    : null,
+                'fecha_imputacion' => isset($validated['fecha_imputacion'])
+                    ? Carbon::parse($validated['fecha_imputacion'])->format('Y-m-d')
+                    : null, // Formato correcto para fecha_imputacion
+                'tiempo_previsto' => $validated['tiempo_previsto'] ?? null, // Guardar tiempo previsto
+                'tiempo_real' => $validated['tiempo_real'] ?? null, // Guardar tiempo real
             ]);
+
 
             // Emite el evento
             broadcast(new TaskCreated($task))->toOthers();
@@ -100,6 +117,4 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Tarea actualizada.']);
     }
-
-
 }
