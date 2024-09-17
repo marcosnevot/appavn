@@ -9,7 +9,7 @@
             <div class="form-group wide">
                 <label for="cliente_id">Cliente:</label>
                 <div class="autocomplete">
-                    <input type="text" id="cliente-input" class="autocomplete-input" placeholder="Buscar cliente..." autocomplete="off">
+                    <input type="text" id="cliente-input" class="autocomplete-input" placeholder="Buscar cliente..." autocomplete="off" required>
                     <input type="hidden" name="cliente_id" id="cliente-id-input"> <!-- Campo oculto para el id del cliente -->
                     <ul id="cliente-list" class="autocomplete-list"></ul>
                 </div>

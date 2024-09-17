@@ -107,9 +107,33 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error('Errores de validación:', data.errors);
                 }
             })
-            .catch(error => console.error('Error en la solicitud:', error));
+            .catch(errorData => {
+                // Manejar y mostrar los errores
+                if (errorData.errors) {
+                    displayFormErrors(errorData.errors);
+                } else {
+                    console.error('Error:', errorData.message || 'Error desconocido');
+                }
+            });
     }
 
+    // Función para mostrar los errores en los campos del formulario
+    function displayFormErrors(errors) {
+        // Limpiar mensajes de error previos
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach(msg => msg.remove());
+
+        // Iterar sobre los errores y mostrarlos
+        Object.keys(errors).forEach(key => {
+            const field = document.querySelector(`[name="${key}"]`);
+            if (field) {
+                const errorMessage = document.createElement('div');
+                errorMessage.classList.add('error-message');
+                errorMessage.textContent = errors[key][0];  // Mostrar solo el primer error por campo
+                field.parentNode.appendChild(errorMessage); // Añadir el mensaje de error al lado del campo
+            }
+        });
+    }
 
 
 
