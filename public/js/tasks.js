@@ -9,8 +9,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const asuntoIdInput = document.getElementById('asunto-id-input'); // Campo oculto para el ID del asunto
     let asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
 
+    const tipoInput = document.getElementById('tipo-input');
+    const tipoIdInput = document.getElementById('tipo-id-input'); // Campo oculto para el ID del tipo
+    let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+
     const modal = document.getElementById('confirm-modal'); // Modal de confirmación
     const modalMessage = document.getElementById('modal-message');
+    const modalAsuntoMessage = document.getElementById('modal-asunto-message');
+    const modalTipoMessage = document.getElementById('modal-tipo-message');
+    let nuevoAsunto = null;
+    let nuevoTipo = null;
 
     // Mostrar el formulario cuando se pulsa el botón de "Nueva Tarea"
     document.getElementById('new-task-button').addEventListener('click', function () {
@@ -56,8 +64,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const formData = {
             cliente_id: document.querySelector('input[name="cliente_id"]').value,
             asunto_id: asuntoIdInput.value, // Si el asunto es nuevo, esto estará vacío
-            asunto_nombre: asuntoIdInput.value === '' ? asuntoInput.value : null, // Si es nuevo, se envía el nombre
-            tipo_id: document.querySelector('select[name="tipo_id"]').value,
+            asunto_nombre: nuevoAsunto || '',
+            tipo_id: tipoIdInput.value, // Si el tipo es nuevo, esto estará vacío
+            tipo_nombre: nuevoTipo || '', // Enviar nuevo tipo si no existe
             subtipo: document.querySelector('select[name="subtipo"]').value,
             estado: document.querySelector('select[name="estado"]').value,
             users: Array.from(document.querySelectorAll('select[name="users[]"] option:checked')).map(option => option.value),
@@ -101,19 +110,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         asuntosData.push(data.task.asunto); // Añadir el nuevo asunto a la lista de asuntos
                     }
 
+                    // Si hay un nuevo tipo en la respuesta, lo añadimos a la lista de tipos
+                    if (data.task.tipo) {
+                        tiposData.push(data.task.tipo); // Añadir el nuevo tipo a la lista de tipos
+                    }
+
                     showSuccessNotification();
                     document.getElementById('add-task-form').reset(); // Resetear el formulario
                 } else {
                     console.error('Errores de validación:', data.errors);
                 }
             })
-            .catch(errorData => {
-                // Manejar y mostrar los errores
-                if (errorData.errors) {
-                    displayFormErrors(errorData.errors);
-                } else {
-                    console.error('Error:', errorData.message || 'Error desconocido');
-                }
+            .catch(error => {
+                console.error('Error en la solicitud:', error.message);
             });
     }
 
@@ -141,6 +150,9 @@ document.addEventListener('DOMContentLoaded', function () {
     addTaskForm.addEventListener('submit', function (event) {
         event.preventDefault(); // Prevenir el comportamiento predeterminado de recargar la página
 
+        nuevoAsunto = null; // Limpiar variables de nuevos valores
+        nuevoTipo = null;
+
         // Validar si el cliente seleccionado está en la lista
         const clienteInputValue = document.getElementById('cliente-input').value;
         const clienteIdValue = document.getElementById('cliente-id-input').value;
@@ -154,15 +166,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Validar si el asunto existe o si es nuevo
-        const asuntoInputValue = asuntoInput.value.trim(); // Asegurarse de eliminar espacios innecesarios
+        const asuntoInputValue = asuntoInput.value.trim();
         const asuntoValido = asuntosData.some(asunto =>
-            asunto.nombre.toUpperCase() === asuntoInputValue.toUpperCase() // Comparación estricta en mayúsculas
+            asunto.nombre.toUpperCase() === asuntoInputValue.toUpperCase()
         );
 
         if (!asuntoValido) {
-            showModalConfirmAsunto(asuntoInputValue);
+            nuevoAsunto = asuntoInputValue; // Almacenar el nuevo asunto si no existe
+        }
+
+        // Validar si el tipo de tarea existe o si es nuevo
+        const tipoInputValue = tipoInput.value.trim();
+        const tipoValido = tiposData.some(tipo =>
+            tipo.nombre.toUpperCase() === tipoInputValue.toUpperCase()
+        );
+
+        if (!tipoValido) {
+            nuevoTipo = tipoInputValue; // Almacenar el nuevo tipo si no existe
+        }
+
+        // Si hay un nuevo asunto o un nuevo tipo, mostrar el modal
+        if (nuevoAsunto || nuevoTipo) {
+            showModalConfirm();
         } else {
-            submitTaskForm();
+            submitTaskForm(); // Si ambos son válidos, se envía el formulario directamente
         }
     });
 
@@ -274,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Obtener los datos de asuntos desde el atributo data-asuntos
     const asuntoList = document.getElementById('asunto-list');
-    let selectedAsuntoIndex = -1;
+    let selectedAsuntoIndex = -1; // Inicializar correctamente
 
     // Función para mostrar la lista filtrada de asuntos
     function filterAsuntos(query) {
@@ -282,8 +309,6 @@ document.addEventListener('DOMContentLoaded', function () {
             asunto.nombre.toLowerCase().includes(query.toLowerCase())
         );
     }
-
-
 
     // Mostrar la lista completa al hacer clic
     asuntoInput.addEventListener('focus', function () {
@@ -302,23 +327,23 @@ document.addEventListener('DOMContentLoaded', function () {
         if (filteredAsuntos.length === 0) {
             asuntoIdInput.value = '';  // Limpiar el campo oculto para nuevos asuntos
         }
+        selectedAsuntoIndex = -1; // Reiniciar el índice seleccionado
     });
-
 
     // Manejar la navegación por teclado
     asuntoInput.addEventListener('keydown', function (e) {
         const items = document.querySelectorAll('.autocomplete-item');
         if (e.key === 'ArrowDown') {
-            asuntoSelectedIndex = (asuntoSelectedIndex + 1) % items.length;
+            selectedAsuntoIndex = (selectedAsuntoIndex + 1) % items.length;
             updateActiveAsuntoItem(items);
         } else if (e.key === 'ArrowUp') {
-            asuntoSelectedIndex = (asuntoSelectedIndex - 1 + items.length) % items.length;
+            selectedAsuntoIndex = (selectedAsuntoIndex - 1 + items.length) % items.length;
             updateActiveAsuntoItem(items);
         } else if (e.key === 'Enter') {
             e.preventDefault();
-            if (asuntoSelectedIndex >= 0 && asuntoSelectedIndex < items.length) {
+            if (selectedAsuntoIndex >= 0 && selectedAsuntoIndex < items.length) {
                 const selectedAsunto = asuntosData.find(asunto =>
-                    asunto.nombre === items[asuntoSelectedIndex].textContent
+                    asunto.nombre === items[selectedAsuntoIndex].textContent
                 );
                 selectAsunto(selectedAsunto);
             }
@@ -328,8 +353,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Actualizar el ítem activo de la lista de asuntos
     function updateActiveAsuntoItem(items) {
         items.forEach(item => item.classList.remove('active'));
-        if (items[asuntoSelectedIndex]) {
-            items[asuntoSelectedIndex].classList.add('active');
+        if (items[selectedAsuntoIndex]) {
+            items[selectedAsuntoIndex].classList.add('active');
+            items[selectedAsuntoIndex].scrollIntoView({ block: "nearest" }); // Asegurar que esté visible
         }
     }
 
@@ -358,36 +384,130 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-
+    // Función para seleccionar un asunto y autocompletar el input
     function selectAsunto(asunto) {
-        const asuntoInput = document.getElementById('asunto-input');
-        const asuntoIdInput = document.getElementById('asunto-id-input');
         asuntoInput.value = asunto.nombre;
         asuntoIdInput.value = asunto.id;
-        document.getElementById('asunto-list').style.display = 'none';
+        asuntoList.style.display = 'none';  // Ocultar la lista después de la selección
+    }
+
+    // Tipo - Autocompletado y creación de nuevos tipos
+
+    // Obtener los datos de asuntos desde el atributo data-asuntos
+    const tipoList = document.getElementById('tipo-list');
+    let selectedTipoIndex = -1; // Inicializar correctamente
+
+    // Función para mostrar la lista filtrada de asuntos
+    function filterTipos(query) {
+        return tiposData.filter(tipo =>
+            tipo.nombre.toLowerCase().includes(query.toLowerCase())
+        );
+    }
+
+    // Mostrar la lista completa al hacer clic
+    tipoInput.addEventListener('focus', function () {
+        if (tipoInput.value === '') {
+            renderTipoList(tiposData); // Mostrar todos los asuntos
+        }
+    });
+
+    // Filtrar tipos en tiempo real mientras se escribe
+    tipoInput.addEventListener('input', function () {
+        this.value = this.value.toUpperCase();  // Convertir el texto a mayúsculas
+        const filteredTipos = filterTipos(this.value);
+        renderTipoList(filteredTipos);
+
+        // Si no hay coincidencias, se permite crear un nuevo tipo
+        if (filteredTipos.length === 0) {
+            tipoIdInput.value = '';  // Limpiar el campo oculto para nuevos tipos
+        }
+        selectedTipoIndex = -1; // Reiniciar el índice seleccionado
+    });
+
+    // Manejar la navegación por teclado
+    tipoInput.addEventListener('keydown', function (e) {
+        const items = document.querySelectorAll('.autocomplete-item');
+        if (e.key === 'ArrowDown') {
+            selectedTipoIndex = (selectedTipoIndex + 1) % items.length;
+            updateActiveTipoItem(items);
+        } else if (e.key === 'ArrowUp') {
+            selectedTipoIndex = (selectedTipoIndex - 1 + items.length) % items.length;
+            updateActiveTipoItem(items);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (selectedTipoIndex >= 0 && selectedTipoIndex < items.length) {
+                const selectedTipo = tiposData.find(tipo =>
+                    tipo.nombre === items[selectedTipoIndex].textContent
+                );
+                selectTipo(selectedTipo);
+            }
+        }
+    });
+
+    // Actualizar el ítem tipo de la lista de asuntos
+    function updateActiveTipoItem(items) {
+        items.forEach(item => item.classList.remove('active'));
+        if (items[selectedTipoIndex]) {
+            items[selectedTipoIndex].classList.add('active');
+            items[selectedTipoIndex].scrollIntoView({ block: "nearest" }); // Asegurar que esté visible
+        }
+    }
+
+    // Cerrar la lista si se hace clic fuera
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.autocomplete')) {
+            tipoList.style.display = 'none';
+        }
+    });
+
+    // Función para renderizar la lista de tipos actualizada
+    function renderTipoList(filtered) {
+        tipoList.innerHTML = '';  // Limpiar la lista previa
+        if (filtered.length === 0) {
+            tipoList.style.display = 'none';  // Si no hay resultados, oculta la lista
+            return;
+        }
+        tipoList.style.display = 'block';  // Muestra la lista si hay resultados
+        filtered.forEach((tipo, index) => {
+            const li = document.createElement('li');
+            li.textContent = tipo.nombre;
+            li.setAttribute('data-id', tipo.id);
+            li.classList.add('autocomplete-item');
+            li.addEventListener('click', () => selectTipo(tipo));  // Permite seleccionar el asunto
+            tipoList.appendChild(li);  // Añadir el asunto a la lista
+        });
+    }
+
+    // Función para seleccionar un asunto y autocompletar el input
+    function selectTipo(tipo) {
+        tipoInput.value = tipo.nombre;
+        tipoIdInput.value = tipo.id;
+        tipoList.style.display = 'none';  // Ocultar la lista después de la selección
     }
 
     // Mostrar el modal de confirmación
-    function showModalConfirmAsunto(asunto) {
-        modalMessage.textContent = `El asunto "${asunto}" no existe en la base de datos. ¿Deseas crearlo como un nuevo asunto?`;
-        modal.style.display = 'flex'; // Usamos flex para centrar el modal
+    function showModalConfirm() {
+        if (modalAsuntoMessage) {
+            modalAsuntoMessage.textContent = nuevoAsunto
+                ? `El asunto "${nuevoAsunto}" no existe. ¿Deseas crearlo?`
+                : '';
+        }
 
-        // Evitar el cierre al hacer clic fuera del modal
-        modal.addEventListener('click', function (event) {
-            if (event.target === modal) {
-                event.stopPropagation(); // Prevenir cierre por clic fuera del modal
-            }
-        });
+        if (modalTipoMessage) {
+            modalTipoMessage.textContent = nuevoTipo
+                ? `El tipo de tarea "${nuevoTipo}" no existe. ¿Deseas crearlo?`
+                : '';
+        }
+        modal.style.display = 'flex'; // Mostrar el modal
 
-        // Confirmar creación del asunto
+        // Confirmación modal
         document.getElementById('confirm-modal-yes').addEventListener('click', function () {
             modal.style.display = 'none';
-            submitTaskForm(); // Enviar formulario con nuevo asunto
+            submitTaskForm();
         });
 
-        // Cancelar la creación
         document.getElementById('confirm-modal-no').addEventListener('click', function () {
-            modal.style.display = 'none'; // Solo cerrar si presiona "No"
+            modal.style.display = 'none';
         });
     }
 

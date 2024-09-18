@@ -32,9 +32,10 @@
 <!-- Contenedor de la tabla de tareas -->
 @include('tasks.partials.task-table')
 
-<!-- Pasamos los datos de clientes y asuntos como un atributo data -->
+<!-- Pasamos los datos de clientes, asuntos y tipos como un atributo data -->
 <div id="clientes-data" data-clientes='@json($clientes)'></div>
 <div id="asuntos-data" data-asuntos='@json($asuntos)'></div>
+<div id="tipos-data" data-tipos='@json($tipos)'></div>
 
 <!-- Incluir el formulario de nueva tarea -->
 @include('tasks.partials.task-form')

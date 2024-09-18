@@ -24,14 +24,13 @@
                 </div>
             </div>
 
-
             <div class="form-group medium">
                 <label for="tipo_id">Tipo de Tarea:</label>
-                <select name="tipo_id" id="tipo_id">
-                    @foreach($tipos as $tipo)
-                    <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
-                    @endforeach
-                </select>
+                <div class="autocomplete">
+                    <input type="text" id="tipo-input" class="autocomplete-input" placeholder="Buscar o crear tipo..." autocomplete="off" required>
+                    <input type="hidden" name="tipo_id" id="tipo-id-input"> <!-- Campo oculto para el id del tipo -->
+                    <ul id="tipo-list" class="autocomplete-list"></ul>
+                </div>
             </div>
 
             <div class="form-group medium">
@@ -144,13 +143,16 @@
 </div>
 
 <!-- Modal de confirmación para crear un asunto nuevo -->
-<div id="confirm-modal" class="modal">
+<div id="confirm-modal" class="modal" style="display: none;">
     <div class="modal-content">
-        <p id="modal-message" class="modal-message"></p>
+        <!-- Mensajes de confirmación para asunto y tipo -->
+        <p id="modal-message" class="modal-message">
+            <span id="modal-asunto-message"></span><br>
+            <span id="modal-tipo-message"></span>
+        </p>
         <div class="modal-actions">
             <button id="confirm-modal-yes" class="btn btn-confirm">Sí, crear</button>
             <button id="confirm-modal-no" class="btn btn-cancel">No, cancelar</button>
         </div>
     </div>
 </div>
-
