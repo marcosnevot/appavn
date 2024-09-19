@@ -68,6 +68,8 @@ class TaskController extends Controller
                 'fecha_imputacion' => 'nullable|date',
                 'tiempo_previsto' => 'nullable|numeric',
                 'tiempo_real' => 'nullable|numeric',
+                'users' => 'nullable|array', // Validar que sea un array de usuarios
+                'users.*' => 'exists:users,id' // Validar que cada usuario exista en la tabla 'users'
             ]);
 
             Log::debug('Datos validados:', $validated);
@@ -127,6 +129,11 @@ class TaskController extends Controller
                 'tiempo_previsto' => $validated['tiempo_previsto'] ?? null,
                 'tiempo_real' => $validated['tiempo_real'] ?? null,
             ]);
+
+            // Asociar los usuarios a la tarea (si se han seleccionado)
+            if (!empty($validated['users'])) {
+                $task->users()->sync($validated['users']); // Asocia los usuarios a la tarea
+            }
 
             // Emitir el evento para otros usuarios
             broadcast(new TaskCreated($task))->toOthers();

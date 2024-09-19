@@ -36,6 +36,7 @@
 <div id="clientes-data" data-clientes='@json($clientes)'></div>
 <div id="asuntos-data" data-asuntos='@json($asuntos)'></div>
 <div id="tipos-data" data-tipos='@json($tipos)'></div>
+<div id="usuarios-data" data-usuarios='@json($usuarios)'></div>
 
 <!-- Incluir el formulario de nueva tarea -->
 @include('tasks.partials.task-form')

@@ -506,3 +506,83 @@
     font-size: 0.9em;
     margin-top: 0.2em;
 }
+
+
+/* Seleccionar usuarios asignados a la tarea*/
+/* Seleccionar usuarios asignados a la tarea */
+.custom-select {
+    border: 1px solid #ccc;
+    padding: 5px;
+    position: relative;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    border-radius: 4px;
+}
+
+.dropdown-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown-list li {
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Personalización del checkbox */
+.custom-checkbox {
+    appearance: none; /* Elimina el estilo predeterminado del navegador */
+    -webkit-appearance: none;
+    width: 14px; /* Ajuste para un tamaño más pequeño */
+    height: 14px; /* Ajuste para un tamaño más pequeño */
+    border: 1px solid #666;
+    border-radius: 3px;
+    background-color: white;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.custom-checkbox:checked {
+    background-color: #4285f4;
+    border-color: #4285f4;
+}
+
+/* Hover and focus states */
+.dropdown-list li:hover,
+.dropdown-list li:focus-within {
+    background-color: #f0f0f0;
+}
+
+/* Para los usuarios seleccionados */
+.selected-users {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.selected-users span {
+    background-color: #e0e0e0;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -54,13 +54,25 @@
         <!-- Fila 2: Asignado a, Archivo, Descripción, Observaciones -->
         <div class="form-row">
             <div class="form-group narrow">
-                <label for="users">Asignado a:</label>
-                <select name="users[]" id="users" multiple>
-                    @foreach($usuarios as $user)
-                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                    @endforeach
-                </select>
+                <label for="user-select">Asignado a:</label>
+                <div class="custom-select" tabindex="0" id="user-select">
+                    <div id="selected-users" class="selected-users">
+                        <!-- Aquí se añadirán los usuarios seleccionados -->
+                    </div>
+                    <div id="user-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            @foreach($usuarios as $user)
+                            <li>
+                                <input type="checkbox" id="user-{{ $user->id }}" value="{{ $user->id }}">
+                                <label for="user-{{ $user->id }}">{{ $user->name }}</label>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="users" id="user-ids"> <!-- Campo oculto para los IDs de usuarios seleccionados -->
             </div>
+
 
             <div class="form-group narrow">
                 <label for="archivo">Archivo:</label>
