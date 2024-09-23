@@ -167,6 +167,112 @@ class TaskController extends Controller
         }
     }
 
+    public function filter(Request $request)
+    {
+        try {
+            // Obtener los filtros enviados desde el frontend
+            $filters = $request->all();
+
+            // Crear una consulta base para filtrar las tareas
+            $query = Tarea::with(['cliente', 'asunto', 'tipo', 'users']); // Asegurarse de cargar las relaciones
+
+            // Filtrar por cliente
+            if (!empty($filters['cliente'])) {
+                $query->where('cliente_id', $filters['cliente']);
+            }
+
+            // Filtrar por asunto
+            if (!empty($filters['asunto'])) {
+                // Buscar el asunto por nombre
+                $asunto = Asunto::where('nombre', 'like', '%' . $filters['asunto'] . '%')->first();
+                if ($asunto) {
+                    $query->where('asunto_id', $asunto->id);
+                }
+            }
+
+            // Filtrar por tipo
+            if (!empty($filters['tipo'])) {
+                // Buscar el tipo por nombre
+                $tipo = Tipo::where('nombre', 'like', '%' . $filters['tipo'] . '%')->first();
+                if ($tipo) {
+                    $query->where('tipo_id', $tipo->id);
+                }
+            }
+
+            // Filtrar por subtipo
+            if (!empty($filters['subtipo'])) {
+                $query->where('subtipo', $filters['subtipo']);
+            }
+
+            // Filtrar por estado
+            if (!empty($filters['estado'])) {
+                $query->where('estado', $filters['estado']);
+            }
+
+            // Filtrar por usuario asignado
+            if (!empty($filters['usuario'])) {
+                // Convertir los IDs separados por comas en un array
+                $userIds = explode(',', $filters['usuario']);
+
+                // Filtrar las tareas que tienen al menos uno de estos usuarios asignados
+                $query->whereHas('users', function ($q) use ($userIds) {
+                    // Asegurarse de especificar que 'id' es de la tabla 'users'
+                    $q->whereIn('users.id', $userIds);
+                });
+            }
+
+
+            // Filtrar por archivo
+            if (!empty($filters['archivo'])) {
+                $query->where('archivo', 'like', '%' . $filters['archivo'] . '%');
+            }
+
+            // Filtrar por facturable
+            if (isset($filters['facturable'])) {
+                $query->where('facturable', $filters['facturable']);
+            }
+
+            // Filtrar por fechas
+            if (!empty($filters['fecha_inicio'])) {
+                $query->whereDate('fecha_inicio', '>=', $filters['fecha_inicio']);
+            }
+
+            if (!empty($filters['fecha_vencimiento'])) {
+                $query->whereDate('fecha_vencimiento', '<=', $filters['fecha_vencimiento']);
+            }
+
+            // Filtrar por precio
+            if (!empty($filters['precio'])) {
+                $query->where('precio', '=', $filters['precio']);
+            }
+
+            // Filtrar por tiempo previsto y tiempo real
+            if (!empty($filters['tiempo_previsto'])) {
+                $query->where('tiempo_previsto', '=', $filters['tiempo_previsto']);
+            }
+
+            if (!empty($filters['tiempo_real'])) {
+                $query->where('tiempo_real', '=', $filters['tiempo_real']);
+            }
+
+            // Añadir el orden por fecha de creación, de más reciente a más antigua
+            $query->orderBy('created_at', 'desc');
+
+            // Ejecutar la consulta y obtener las tareas filtradas
+            $filteredTasks = $query->get();
+
+            // Devolver las tareas filtradas como respuesta JSON
+            return response()->json([
+                'success' => true,
+                'filteredTasks' => $filteredTasks
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 
 
 

@@ -15,6 +15,9 @@
             </select>
         </div>
 
+        <!-- Botón de Filtrar Tarea -->
+        <button id="filter-task-button" class="btn-new-task">Filtrar</button>
+
         <!-- Botón de Nueva Tarea -->
         <button id="new-task-button" class="btn-new-task">Nueva Tarea</button>
     </div>
@@ -41,10 +44,15 @@
 <!-- Incluir el formulario de nueva tarea -->
 @include('tasks.partials.task-form')
 
+<!-- Incluir el formulario de filtrar tareas -->
+@include('tasks.partials.filter-task-form')
+
 @endsection
 
 @section('scripts')
 
 <script src="{{ asset('js/tasks.js') }}"></script>
+<script src="{{ asset('js/filter-tasks.js') }}"></script>
+
 
 @endsection

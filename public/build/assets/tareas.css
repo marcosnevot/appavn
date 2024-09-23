@@ -323,7 +323,8 @@
 }
 
 .btn-submit,
-.btn-close {
+.btn-close,
+.btn-clear {
     padding: 10px 25px;
     height: 40px;
     font-weight: 600;
@@ -342,6 +343,20 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
+
+.btn-clear {
+    background-color: #356fdc;
+    /* Color rojo para cancelar */
+    color: white;
+}
+
+.btn-clear:hover {
+    background-color: #2c58b8;
+    /* Un tono más oscuro en hover */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
 
 .btn-close {
     background-color: #dc3545;
@@ -507,6 +522,8 @@
 .btn-confirm:hover {
     background-color: #218838;
 }
+
+
 
 .btn-cancel {
     background-color: #dc3545;

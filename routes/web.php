@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/tareas', [TaskController::class, 'index'])->name('tasks.index');
     Route::post('/tareas', [TaskController::class, 'store'])->name('tasks.store');
+    Route::post('/tareas/filtrar', [TaskController::class, 'filter'])->name('tareas.filtrar');
 
     Route::post('/tareas/{id}', [TaskController::class, 'update']);
 

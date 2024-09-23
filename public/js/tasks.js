@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    
+
 
 
 
@@ -256,7 +256,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.Echo.channel('tasks')
         .listen('TaskCreated', (e) => {
             console.log('Nueva tarea creada:', e);
-            updateTaskTable(e.task); // Actualiza la tabla cuando se crea una nueva tarea
+            const currentFilters = getCurrentFilters(); // Obtener los filtros actuales
+            updateTaskTable(e.task, true, currentFilters);
         });
 
     // Buscador de clientes
@@ -763,43 +764,118 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 });
-
-
 // Función para actualizar la tabla con la nueva tarea
-function updateTaskTable(task) {
+function updateTaskTable(tasks, isSingleTask = false, currentFilters = null) {
     const tableBody = document.querySelector('table tbody');
-    const row = document.createElement('tr');
 
-    row.innerHTML = `
-        <td>${task.id}</td>
-        <td>${task.asunto.nombre || 'Sin asunto'}</td>
-        <td>${task.cliente.nombre_fiscal || 'Sin cliente'}</td>
-        <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-        <td>${task.subtipo}</td>
-        <td>${task.estado}</td>
-        <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
-        <td>${task.descripcion || ''}</td>
-        <td>${task.observaciones || ''}</td>
-        <td>${task.archivo || 'No disponible'}</td>
-        <td>${task.facturable ? 'Sí' : 'No'}</td>
-        <td>${task.facturado || 'No facturado'}</td>
-        <td>${task.precio || 'N/A'}</td>
-        <td>${task.suplido || 'N/A'}</td>
-        <td>${task.coste || 'N/A'}</td>
-        <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-        <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-        <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-        <td>${task.tiempo_previsto || 'N/A'}</td>
-        <td>${task.tiempo_real || 'N/A'}</td>
-    `;
-
-    // Insertar la nueva fila al principio del cuerpo de la tabla
-    if (tableBody.firstChild) {
-        tableBody.insertBefore(row, tableBody.firstChild);
-    } else {
-        tableBody.appendChild(row);
+    // Si no es una tarea única (por ejemplo, en filtrado), limpiamos la tabla
+    if (!isSingleTask) {
+        tableBody.innerHTML = ''; // Limpiar la tabla existente
     }
+
+    // Convertir el parámetro `tasks` a un array si es un solo objeto
+    const tasksArray = isSingleTask ? [tasks] : tasks;
+
+    tasksArray.forEach(task => {
+        // Verificar si la tarea coincide con los filtros actuales (si es que hay filtros)
+        if (currentFilters && !taskMatchesFilters(task, currentFilters)) {
+            // Si no coincide con los filtros actuales, no la mostramos
+            return;
+        }
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${task.id}</td>
+            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
+            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
+            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+            <td>${task.subtipo || ''}</td>
+            <td>${task.estado}</td>
+            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+            <td>${task.descripcion || ''}</td>
+            <td>${task.observaciones || ''}</td>
+            <td>${task.archivo || 'No disponible'}</td>
+            <td>${task.facturable ? 'Sí' : 'No'}</td>
+            <td>${task.facturado || 'No facturado'}</td>
+            <td>${task.precio || 'N/A'}</td>
+            <td>${task.suplido || 'N/A'}</td>
+            <td>${task.coste || 'N/A'}</td>
+            <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>${task.tiempo_previsto || 'N/A'}</td>
+            <td>${task.tiempo_real || 'N/A'}</td>
+            <td style="display: none;">${task.created_at || 'Sin fecha'}</td> <!-- Campo oculto para created_at -->
+        `;
+
+        // Insertar la nueva fila al principio si es una tarea única (añadir tarea)
+        if (isSingleTask && tableBody.firstChild) {
+            tableBody.insertBefore(row, tableBody.firstChild);
+        } else {
+            tableBody.appendChild(row);
+        }
+    });
 }
+
+
+// Función para verificar si una tarea coincide con los filtros actuales
+function taskMatchesFilters(task, filters) {
+    // Verificar cada filtro
+    if (filters.cliente && (!task.cliente || !task.cliente.nombre_fiscal.includes(filters.cliente))) {
+        return false;
+    }
+
+    if (filters.asunto && (!task.asunto || !task.asunto.nombre.includes(filters.asunto))) {
+        return false;
+    }
+
+    if (filters.tipo && (!task.tipo || !task.tipo.nombre.includes(filters.tipo))) {
+        return false;
+    }
+
+    if (filters.subtipo && task.subtipo !== filters.subtipo) {
+        return false;
+    }
+
+    if (filters.estado && task.estado !== filters.estado) {
+        return false;
+    }
+
+    if (filters.usuario && (!task.users || !task.users.some(user => user.name.includes(filters.usuario)))) {
+        return false;
+    }
+
+    if (filters.facturable !== '' && task.facturable !== Boolean(Number(filters.facturable))) {
+        return false;
+    }
+
+    // Agregar más condiciones para otros filtros (archivo, fechas, etc.) si es necesario
+    return true;
+}
+
+function getCurrentFilters() {
+    return {
+        cliente: document.getElementById('filter-cliente-input').value || '',
+        asunto: document.getElementById('filter-asunto-input').value || '',
+        tipo: document.getElementById('filter-tipo-input').value || '',
+        subtipo: document.getElementById('filter-subtipo').value || '',
+        estado: document.getElementById('filter-estado').value || '',
+        usuario: document.getElementById('filter-user-input').value || '',
+        archivo: document.getElementById('filter-archivo').value || '',
+        facturable: document.getElementById('filter-facturable').value || '',
+        facturado: document.getElementById('filter-facturado').value || '',
+        precio: document.getElementById('filter-precio').value || '',
+        suplido: document.getElementById('filter-suplido').value || '',
+        coste: document.getElementById('filter-coste').value || '',
+        fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
+        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
+        fecha_imputacion: document.getElementById('filter-fecha-imputacion').value || '',
+        tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
+        tiempo_real: document.getElementById('filter-tiempo-real').value || ''
+    };
+}
+
+
 
 // Función para mostrar la notificación de éxito
 function showSuccessNotification(message = "Tarea creada exitosamente") {
