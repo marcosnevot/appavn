@@ -55,7 +55,7 @@
         <div class="form-row">
             <div class="form-group narrow">
                 <label for="user-select">Asignado a:</label>
-                <div class="custom-select" tabindex="0" id="user-select">
+                <div class="custom-select" name="user-select" tabindex="0" id="user-select">
                     <div id="selected-users" class="selected-users">
                         <!-- Aquí se añadirán los usuarios seleccionados -->
                     </div>
@@ -63,7 +63,7 @@
                         <ul>
                             @foreach($usuarios as $user)
                             <li>
-                                <input type="checkbox" id="user-{{ $user->id }}" value="{{ $user->id }}">
+                                <input class="user-checkbox" type="checkbox" id="user-{{ $user->id }}" value="{{ $user->id }}">
                                 <label for="user-{{ $user->id }}">{{ $user->name }}</label>
                             </li>
                             @endforeach
@@ -103,7 +103,7 @@
             </div>
 
             <div class="form-group">
-                <label for="precio">Precio (€):</label>
+                <label for="precio" >Precio (€):</label>
                 <input type="number" step="0.01" name="precio" id="precio">
             </div>
 

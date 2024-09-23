@@ -136,7 +136,8 @@
 }
 
 .notification-message {
-    font-weight: bold; /* Aplica negrita */
+    font-weight: bold;
+    /* Aplica negrita */
 }
 
 /* Barra de progreso */
@@ -146,7 +147,8 @@
     left: 0;
     width: 100%;
     height: 4px;
-    background-color: rgba(255, 255, 255, 0.5); /* Blanco semitransparente */
+    background-color: rgba(255, 255, 255, 0.5);
+    /* Blanco semitransparente */
     transition: width 3s linear;
     /* Reducción en 3 segundos */
 }
@@ -287,6 +289,17 @@
 .form-row.fila-2 .form-group {
     flex-basis: 25%;
     /* Cambia este valor para personalizar cada campo */
+}
+
+.user-checkbox {
+    flex-basis: 10%;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.custom-select {
+    height: 40px;
+
 }
 
 /* Fila 3: Facturable, Facturado, Precio, Suplido, Coste */
@@ -435,14 +448,16 @@
 
 /* Estilos del Modal */
 .modal {
-    display: none; /* Oculto por defecto */
+    display: none;
+    /* Oculto por defecto */
     position: fixed;
     z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Fondo semitransparente */
     justify-content: center;
     align-items: center;
 }
@@ -462,6 +477,7 @@
         opacity: 0;
         transform: translateY(-10%);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -483,7 +499,8 @@
 }
 
 .btn-confirm {
-    background-color: #28a745; /* Color verde para confirmar */
+    background-color: #28a745;
+    /* Color verde para confirmar */
     color: white;
 }
 
@@ -492,7 +509,8 @@
 }
 
 .btn-cancel {
-    background-color: #dc3545; /* Color rojo para cancelar */
+    background-color: #dc3545;
+    /* Color rojo para cancelar */
     color: white;
 }
 
@@ -547,10 +565,13 @@
 
 /* Personalización del checkbox */
 .custom-checkbox {
-    appearance: none; /* Elimina el estilo predeterminado del navegador */
+    appearance: none;
+    /* Elimina el estilo predeterminado del navegador */
     -webkit-appearance: none;
-    width: 14px; /* Ajuste para un tamaño más pequeño */
-    height: 14px; /* Ajuste para un tamaño más pequeño */
+    width: 14px;
+    /* Ajuste para un tamaño más pequeño */
+    height: 14px;
+    /* Ajuste para un tamaño más pequeño */
     border: 1px solid #666;
     border-radius: 3px;
     background-color: white;

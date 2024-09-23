@@ -63,6 +63,10 @@ class TaskController extends Controller
                 'descripcion' => 'nullable|string',
                 'observaciones' => 'nullable|string',
                 'facturable' => 'nullable|boolean',
+                'facturado' => 'nullable|string', // Añadir validación para facturado
+                'precio' => 'nullable|numeric', // Añadir validación para precio
+                'suplido' => 'nullable|numeric', // Añadir validación para suplido
+                'coste' => 'nullable|numeric', // Añadir validación para coste
                 'fecha_inicio' => 'nullable|date',
                 'fecha_vencimiento' => 'nullable|date',
                 'fecha_imputacion' => 'nullable|date',
@@ -71,7 +75,6 @@ class TaskController extends Controller
                 'users' => 'nullable|array', // Validar que sea un array de usuarios
                 'users.*' => 'exists:users,id' // Validar que cada usuario exista en la tabla 'users'
             ]);
-
             Log::debug('Datos validados:', $validated);
 
 
@@ -117,6 +120,10 @@ class TaskController extends Controller
                 'descripcion' => $validated['descripcion'] ?? null,
                 'observaciones' => $validated['observaciones'] ?? null,
                 'facturable' => $validated['facturable'] ?? false,
+                'facturado' => $validated['facturado'] ?? null, // Crear el campo facturado
+                'precio' => $validated['precio'] ?? null, // Crear el campo precio
+                'suplido' => $validated['suplido'] ?? null, // Crear el campo suplido
+                'coste' => $validated['coste'] ?? null, // Crear el campo coste
                 'fecha_inicio' => isset($validated['fecha_inicio'])
                     ? Carbon::parse($validated['fecha_inicio'])->format('Y-m-d')
                     : null,

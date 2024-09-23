@@ -65,6 +65,34 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectedUsers = Array.from(document.querySelectorAll('#user-list input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.value); // Obtener los IDs de los usuarios seleccionados
 
+        // Verificar si el asunto ingresado manualmente ya existe
+        const asuntoInputValue = asuntoInput.value.trim().toUpperCase();
+        let asuntoExistente = asuntosData.find(asunto => asunto.nombre.toUpperCase() === asuntoInputValue);
+
+        // Si el asunto no existe, marcarlo como nuevo
+        if (!asuntoExistente) {
+            nuevoAsunto = asuntoInputValue;
+            asuntoIdInput.value = ''; // Si es nuevo, dejar vacío el ID
+        } else {
+            // Si el asunto ya existe, asegurarse de que el ID esté asignado
+            asuntoIdInput.value = asuntoExistente.id;
+            nuevoAsunto = null; // No es necesario crear un nuevo asunto
+        }
+
+        // Verificar si el tipo ingresado manualmente ya existe
+        const tipoInputValue = tipoInput.value.trim().toUpperCase();
+        let tipoExistente = tiposData.find(tipo => tipo.nombre.toUpperCase() === tipoInputValue);
+
+        // Si el tipo no existe, marcarlo como nuevo
+        if (!tipoExistente) {
+            nuevoTipo = tipoInputValue;
+            tipoIdInput.value = ''; // Si es nuevo, dejar vacío el ID
+        } else {
+            // Si el tipo ya existe, asegurarse de que el ID esté asignado
+            tipoIdInput.value = tipoExistente.id;
+            nuevoTipo = null; // No es necesario crear un nuevo tipo
+        }
+
         const formData = {
             cliente_id: document.querySelector('input[name="cliente_id"]').value,
             asunto_id: asuntoIdInput.value, // Si el asunto es nuevo, esto estará vacío
@@ -110,12 +138,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.log('Tarea creada:', data.task);
 
                     // Si hay un nuevo asunto en la respuesta, lo añadimos a la lista de asuntos
-                    if (data.task.asunto) {
+                    if (data.task.asunto && !asuntosData.some(a => a.id === data.task.asunto.id)) {
                         asuntosData.push(data.task.asunto); // Añadir el nuevo asunto a la lista de asuntos
                     }
 
                     // Si hay un nuevo tipo en la respuesta, lo añadimos a la lista de tipos
-                    if (data.task.tipo) {
+                    if (data.task.tipo && !tiposData.some(t => t.id === data.task.tipo.id)) {
                         tiposData.push(data.task.tipo); // Añadir el nuevo tipo a la lista de tipos
                     }
 
@@ -131,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error en la solicitud:', error.message);
             });
     }
-    
+
     // Función para limpiar los usuarios seleccionados
     function resetSelectedUsers() {
         const selectedUsersContainer = document.getElementById('selected-users');
@@ -168,6 +196,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    
+
 
 
 
@@ -214,7 +245,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (nuevoAsunto || nuevoTipo) {
             showModalConfirm();
         } else {
-            submitTaskForm(); // Si ambos son válidos, se envía el formulario directamente
+            // Confirmar antes de enviar
+            if (confirm("¿Estás seguro de que deseas enviar el formulario?")) {
+                submitTaskForm(); // Si se confirma, enviar el formulario
+            }
         }
     });
 
@@ -277,7 +311,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Mostrar la lista de clientes al ganar el foco, ya sea con clic o tabulador
     clienteInput.addEventListener('focus', function () {
         selectedClienteIndex = -1;
-        filterClientes(clienteInput.value); // Filtra y muestra la lista basada en el valor actual del input
+        filterClientes(clienteInput.value);
+        asuntoList.style.display = 'none';
+        tipoList.style.display = 'none';
     });
 
     // Manejador del evento input para filtrar clientes
@@ -320,21 +356,6 @@ document.addEventListener('DOMContentLoaded', function () {
             items[index].scrollIntoView({ block: "nearest" }); // Asegurar que esté visible
         }
     }
-
-
-    // Cerrar la lista si se hace clic fuera del campo
-    document.addEventListener('click', function (e) {
-        if (!e.target.closest('.autocomplete') && e.target !== clienteInput) {
-            clienteList.style.display = 'none';
-        }
-    });
-
-    // Cerrar la lista al perder el foco del campo
-    clienteInput.addEventListener('blur', function () {
-        setTimeout(() => {
-            clienteList.style.display = 'none';
-        }, 100); // Pequeño retraso para permitir la selección con click
-    });
 
 
 
@@ -387,7 +408,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Mostrar la lista de asuntos al ganar el foco, ya sea con clic o tabulador
     asuntoInput.addEventListener('focus', function () {
         selectedAsuntoIndex = -1;
-        filterAsuntos(asuntoInput.value); // Filtra y muestra la lista basada en el valor actual del input
+        filterAsuntos(asuntoInput.value);
+        clienteList.style.display = 'none';
+        tipoList.style.display = 'none';
     });
 
     // Filtrar asuntos en tiempo real mientras se escribe
@@ -436,19 +459,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // Cerrar la lista si se hace clic fuera
-    document.addEventListener('click', function (e) {
-        if (!e.target.closest('.autocomplete') && e.target !== asuntoInput) {
-            asuntoList.style.display = 'none';
-        }
-    });
-
-    // Cerrar la lista al perder el foco del campo
-    asuntoInput.addEventListener('blur', function () {
-        setTimeout(() => {
-            asuntoList.style.display = 'none';
-        }, 100); // Pequeño retraso para permitir la selección con click
-    });
 
 
 
@@ -460,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const tipoList = document.getElementById('tipo-list');
     let selectedTipoIndex = -1; // Inicializar correctamente
 
-    // Función para mostrar la lista filtrada de asuntos
+    // Función para mostrar la lista filtrada de tipos
     function filterTipos(query) {
         const filtered = tiposData.filter(tipo =>
             tipo.nombre.toLowerCase().includes(query.toLowerCase())
@@ -490,17 +500,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // Función para seleccionar un asunto y autocompletar el input
+    // Función para seleccionar un tipo y autocompletar el input
     function selectTipo(tipo) {
         tipoInput.value = tipo.nombre;
         tipoIdInput.value = tipo.id;
         tipoList.style.display = 'none';  // Ocultar la lista después de la selección
+        selectedTipoIndex = -1; // Reiniciar el índice seleccionado
+
     }
 
     // Mostrar la lista de tipos al ganar el foco, ya sea con clic o tabulador
     tipoInput.addEventListener('focus', function () {
         selectedTipoIndex = -1;
-        filterTipos(tipoInput.value); // Filtra y muestra la lista basada en el valor actual del input
+        filterTipos(tipoInput.value);
+        clienteList.style.display = 'none';
+        asuntoList.style.display = 'none';
     });
 
     // Filtrar tipos en tiempo real mientras se escribe
@@ -549,20 +563,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // Cerrar la lista si se hace clic fuera
+
+    // Cerrar la lista si se hace clic fuera del campo y de la lista correspondiente
     document.addEventListener('click', function (e) {
-        if (!e.target.closest('.autocomplete') && e.target !== tipoInput) {
+        // Cerrar lista de clientes si el clic no es dentro del input o lista de clientes
+        if (!clienteInput.contains(e.target) && !clienteList.contains(e.target)) {
+            clienteList.style.display = 'none';
+        }
+        // Cerrar lista de asuntos si el clic no es dentro del input o lista de asuntos
+        if (!asuntoInput.contains(e.target) && !asuntoList.contains(e.target)) {
+            asuntoList.style.display = 'none';
+        }
+        // Cerrar lista de tipos si el clic no es dentro del input o lista de tipos
+        if (!tipoInput.contains(e.target) && !tipoList.contains(e.target)) {
             tipoList.style.display = 'none';
         }
     });
-
-    // Cerrar la lista al perder el foco del campo
-    tipoInput.addEventListener('blur', function () {
-        setTimeout(() => {
-            tipoList.style.display = 'none';
-        }, 100); // Pequeño retraso para permitir la selección con click
-    });
-
 
 
 
@@ -598,6 +614,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectedUsersContainer = document.getElementById('selected-users');
     const userIdsInput = document.getElementById('user-ids');
     let selectedUsers = [];
+    let currentFocus = -1;
 
     // Mostrar/ocultar la lista de usuarios al hacer clic o presionar Enter/Espacio
     userSelect.addEventListener('click', toggleUserList);
@@ -612,7 +629,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Función para alternar la visibilidad de la lista desplegable
     function toggleUserList() {
-        userList.style.display = (userList.style.display === 'block') ? 'none' : 'block';
+        if (userList.style.display === 'block') {
+            userList.style.display = 'none';
+        } else {
+            userList.style.display = 'block';
+            currentFocus = -1; // Reiniciar la selección cuando se vuelve a abrir
+            focusNextCheckbox(1); // Foco en el primer checkbox cuando se abre la lista
+        }
     }
 
     // Manejar la selección de usuarios
@@ -629,6 +652,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             updateSelectedUsersDisplay();
             updateUserIdsInput();
+            userList.style.display = 'none'; // Cerrar la lista después de seleccionar un usuario
+            userSelect.focus(); // Devolver el foco al select principal
         });
     });
 
@@ -654,21 +679,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Navegación con teclado dentro de la lista
+    // Función para navegar dentro de la lista con el teclado
     userList.addEventListener('keydown', function (e) {
         const checkboxes = userList.querySelectorAll('input[type="checkbox"]');
-        let currentFocus = Array.from(checkboxes).findIndex(checkbox => checkbox === document.activeElement);
 
         if (e.key === 'ArrowDown') {
-            currentFocus = (currentFocus + 1) % checkboxes.length;
-            checkboxes[currentFocus].focus();
+            e.preventDefault();
+            focusNextCheckbox(1);
         } else if (e.key === 'ArrowUp') {
-            currentFocus = (currentFocus - 1 + checkboxes.length) % checkboxes.length;
-            checkboxes[currentFocus].focus();
+            e.preventDefault();
+            focusNextCheckbox(-1);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentFocus >= 0 && currentFocus < checkboxes.length) {
+                checkboxes[currentFocus].click(); // Simular un click para seleccionar el usuario
+            }
         } else if (e.key === 'Escape') {
             userList.style.display = 'none';
+            userSelect.focus(); // Volver el foco al select principal
         }
     });
+
+    // Función para manejar el enfoque de los checkboxes
+    function focusNextCheckbox(direction) {
+        const checkboxes = userList.querySelectorAll('input[type="checkbox"]');
+        currentFocus = (currentFocus + direction + checkboxes.length) % checkboxes.length; // Calcular el índice
+        checkboxes[currentFocus].focus();
+    }
+
+
 
     // Ordenar la tabla
     const tableBody = document.querySelector('table tbody');
