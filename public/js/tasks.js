@@ -256,7 +256,14 @@ document.addEventListener('DOMContentLoaded', function () {
     window.Echo.channel('tasks')
         .listen('TaskCreated', (e) => {
             console.log('Nueva tarea creada:', e);
-            const currentFilters = getCurrentFilters(); // Obtener los filtros actuales
+
+            // Verificar si los filtros existen y están activos
+            let currentFilters = null;
+            if (document.getElementById('filter-cliente-id-input')) {
+                currentFilters = getCurrentFilters(); // Obtener los filtros actuales solo si están disponibles
+            }
+
+            // Actualizar la tabla con la nueva tarea y los filtros actuales
             updateTaskTable(e.task, true, currentFilters);
         });
 
@@ -374,6 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
             asunto.nombre.toLowerCase().includes(query.toLowerCase())
         );
         renderAsuntoList(filtered);
+        return filtered;  // Devolver los asuntos filtrados para que puedan ser utilizados
     }
 
     // Función para renderizar la lista de asuntos
@@ -417,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Filtrar asuntos en tiempo real mientras se escribe
     asuntoInput.addEventListener('input', function () {
         this.value = this.value.toUpperCase();  // Convertir el texto a mayúsculas
-        filterAsuntos(this.value);
+        const filteredAsuntos = filterAsuntos(this.value);  // Obtener los asuntos filtrados
         selectedAsuntoIndex = -1; // Reiniciar el índice seleccionado
 
         // Si no hay coincidencias, se permite crear un nuevo asunto
@@ -477,6 +485,7 @@ document.addEventListener('DOMContentLoaded', function () {
             tipo.nombre.toLowerCase().includes(query.toLowerCase())
         );
         renderTipoList(filtered);
+        return filtered; // Devolver los tipos filtrados para que puedan ser utilizados
     }
 
     // Función para renderizar la lista de tipos
@@ -521,8 +530,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Filtrar tipos en tiempo real mientras se escribe
     tipoInput.addEventListener('input', function () {
         this.value = this.value.toUpperCase();  // Convertir el texto a mayúsculas
-        selectedTipoIndex = -1;
-        filterTipos(this.value);
+        const filteredTipos = filterTipos(this.value);  // Obtener los tipos filtrados
+        selectedTipoIndex = -1; // Reiniciar el índice seleccionado
 
         // Si no hay coincidencias, se permite crear un nuevo tipo
         if (filteredTipos.length === 0) {
@@ -764,8 +773,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 });
+
+// Función para manejar la paginación de Laravel
+function setupPaginationListeners() {
+    const paginationLinks = document.querySelectorAll('.pagination-container a'); // Obtener los enlaces de paginación
+    paginationLinks.forEach(link => {
+        link.addEventListener('click', handlePaginationClick);
+    });
+}
+
 // Función para actualizar la tabla con la nueva tarea
-function updateTaskTable(tasks, isSingleTask = false, currentFilters = null) {
+function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pagination = null) {
     const tableBody = document.querySelector('table tbody');
 
     // Si no es una tarea única (por ejemplo, en filtrado), limpiamos la tabla
@@ -815,7 +833,10 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null) {
             tableBody.appendChild(row);
         }
     });
+
+    
 }
+
 
 
 // Función para verificar si una tarea coincide con los filtros actuales
@@ -855,25 +876,26 @@ function taskMatchesFilters(task, filters) {
 
 function getCurrentFilters() {
     return {
-        cliente: document.getElementById('filter-cliente-input').value || '',
-        asunto: document.getElementById('filter-asunto-input').value || '',
-        tipo: document.getElementById('filter-tipo-input').value || '',
-        subtipo: document.getElementById('filter-subtipo').value || '',
-        estado: document.getElementById('filter-estado').value || '',
-        usuario: document.getElementById('filter-user-input').value || '',
-        archivo: document.getElementById('filter-archivo').value || '',
-        facturable: document.getElementById('filter-facturable').value || '',
-        facturado: document.getElementById('filter-facturado').value || '',
-        precio: document.getElementById('filter-precio').value || '',
-        suplido: document.getElementById('filter-suplido').value || '',
-        coste: document.getElementById('filter-coste').value || '',
-        fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
-        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
-        fecha_imputacion: document.getElementById('filter-fecha-imputacion').value || '',
-        tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
-        tiempo_real: document.getElementById('filter-tiempo-real').value || ''
+        cliente: document.getElementById('filter-cliente-input') ? document.getElementById('filter-cliente-input').value : '',
+        asunto: document.getElementById('filter-asunto-input') ? document.getElementById('filter-asunto-input').value : '',
+        tipo: document.getElementById('filter-tipo-input') ? document.getElementById('filter-tipo-input').value : '',
+        subtipo: document.getElementById('filter-subtipo') ? document.getElementById('filter-subtipo').value : '',
+        estado: document.getElementById('filter-estado') ? document.getElementById('filter-estado').value : '',
+        usuario: document.getElementById('filter-user-input') ? document.getElementById('filter-user-input').value : '',
+        archivo: document.getElementById('filter-archivo') ? document.getElementById('filter-archivo').value : '',
+        facturable: document.getElementById('filter-facturable') ? document.getElementById('filter-facturable').value : '',
+        facturado: document.getElementById('filter-facturado') ? document.getElementById('filter-facturado').value : '',
+        precio: document.getElementById('filter-precio') ? document.getElementById('filter-precio').value : '',
+        suplido: document.getElementById('filter-suplido') ? document.getElementById('filter-suplido').value : '',
+        coste: document.getElementById('filter-coste') ? document.getElementById('filter-coste').value : '',
+        fecha_inicio: document.getElementById('filter-fecha-inicio') ? document.getElementById('filter-fecha-inicio').value : '',
+        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento') ? document.getElementById('filter-fecha-vencimiento').value : '',
+        fecha_imputacion: document.getElementById('filter-fecha-imputacion') ? document.getElementById('filter-fecha-imputacion').value : '',
+        tiempo_previsto: document.getElementById('filter-tiempo-previsto') ? document.getElementById('filter-tiempo-previsto').value : '',
+        tiempo_real: document.getElementById('filter-tiempo-real') ? document.getElementById('filter-tiempo-real').value : ''
     };
 }
+
 
 
 

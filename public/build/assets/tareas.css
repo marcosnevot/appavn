@@ -24,6 +24,57 @@
     /* Espacio entre el select y el botón */
 }
 
+
+/* Contenedor de los filtros aplicados para alinear el label encima del panel */
+.filter-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start; /* Cambiado de 'left' a 'flex-start' */
+    width: 350px; /* Alinearlo con el select de ordenar */
+    flex-grow: 1; /* Permitir que ocupe espacio disponible */
+    flex-shrink: 0; /* Asegurar que no se reduzca */
+    position: relative; /* Mantener la relación con el label */
+
+}
+
+/* Estilos del panel de filtros aplicados */
+.filter-info-panel {
+    display: flex;
+    height: 50px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    color: #333;
+    width: 350px; /* Alinearlo con el select de ordenar */
+    flex-grow: 1; /* Permitir que ocupe espacio disponible */
+    flex-shrink: 0; /* Asegurar que no se reduzca */
+    position: relative; /* Mantener la relación con el label */
+}
+
+/* Estilo del label de filtros aplicado */
+.filter-info-label {
+    position: absolute;
+    top:-18px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+/* Estilo del contenido del panel */
+.filter-info-content p {
+    margin: 5px 0;
+    font-size: 13px;
+}
+
+/* Ocultar el panel cuando no hay filtros */
+.hide {
+    display: none;
+}
+
 /* Contenedor para el label y el select, ambos dentro de un bloque */
 .sort-container {
     display: flex;
@@ -624,3 +675,4 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+

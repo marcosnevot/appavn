@@ -3,7 +3,16 @@
 @section('content')
 <div class="header-tareas">
     <h2 class="title">Tareas</h2>
+
     <div class="actions">
+        <!-- Panel informativo de los filtros aplicados -->
+        <div id="filter-info-panel" class="filter-info-panel hide">
+            <div id="filter-info-content" class="filter-info-content">
+                <!-- Aquí se mostrarán los filtros aplicados -->
+            </div>
+        </div>
+
+
         <!-- Desplegable de Ordenar por -->
         <div class="sort-container">
             <label for="sort-select" class="sort-label">Ordenar por:</label>

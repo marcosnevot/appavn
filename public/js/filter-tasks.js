@@ -59,6 +59,20 @@ document.addEventListener('DOMContentLoaded', function () {
         // Usar el método reset() para limpiar todos los campos del formulario
         filterTaskFormContent.reset();
 
+        // Limpiar los usuarios seleccionados
+        resetSelectedUsers();
+
+        // Limpiar los campos ocultos que almacenan los IDs
+        document.getElementById('filter-cliente-id-input').value = '';
+        document.getElementById('filter-asunto-id-input').value = '';
+        document.getElementById('filter-tipo-id-input').value = '';
+        document.getElementById('filter-user-ids').value = '';
+
+        // Limpiar las visualizaciones de autocompletar
+        document.getElementById('filter-cliente-input').value = '';
+        document.getElementById('filter-asunto-input').value = '';
+        document.getElementById('filter-tipo-input').value = '';
+
         // Si las listas de autocompletar están visibles, ocultarlas
         document.getElementById('filter-cliente-list').style.display = 'none';
         document.getElementById('filter-asunto-list').style.display = 'none';
@@ -93,6 +107,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         console.log('Datos de filtro:', filterData);
 
+        // Actualizar el panel con los filtros actuales
+        updateFilterInfoPanel(filterData);
+
         // Realizar la solicitud al servidor para filtrar las tareas
         fetch('/tareas/filtrar', {
             method: 'POST',
@@ -115,13 +132,81 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error en la solicitud:', error.message);
             });
     });
+    let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
+
+    // Función para actualizar el panel de filtros
+    function updateFilterInfoPanel(filters) {
+        const filterInfoContent = document.getElementById('filter-info-content');
+        const filterInfoPanel = document.getElementById('filter-info-panel');
+
+        filterInfoContent.innerHTML = ''; // Limpiar contenido anterior
+
+        // Filtrar las entradas con valores no vacíos
+        const filterEntries = Object.entries(filters).filter(([key, value]) => value !== '');
+
+        if (filterEntries.length === 0) {
+            // Ocultar el panel cuando no hay filtros aplicados
+            filterInfoPanel.classList.add('hide');
+        } else {
+            filterEntries.forEach(([key, value]) => {
+                const p = document.createElement('p');
+
+                // Manejo especial para mostrar el nombre del cliente en lugar del ID
+                if (key === 'cliente') {
+                    const cliente = clientesData.find(cliente => cliente.id === parseInt(value));
+                    p.textContent = `Cliente: ${cliente ? cliente.nombre_fiscal : 'Desconocido'}`;
+                }
+                // Manejo especial para mostrar el nombre del usuario en lugar del ID
+                else if (key === 'usuario') {
+                    const usuario = usersData.find(usuario => usuario.id === parseInt(value));
+                    p.textContent = `Usuario Asignado: ${usuario ? usuario.name : 'Desconocido'}`;
+                }
+                else {
+                    p.textContent = `${capitalizeFirstLetter(key)}: ${value}`;
+                }
+
+                filterInfoContent.appendChild(p);
+            });
+
+            // Mostrar el panel si hay filtros
+            filterInfoPanel.classList.remove('hide');
+        }
+    }
+
+    // Función para capitalizar la primera letra
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1).replace('_', ' ');
+    }
+
+    // Función para limpiar los usuarios seleccionados
+    function resetSelectedUsers() {
+        // Limpiar el contenedor de usuarios seleccionados
+        const selectedUsersContainer = document.getElementById('filter-selected-users');
+        selectedUsersContainer.innerHTML = '';  // Limpiar el contenido visual
+
+        // Limpiar el campo oculto que contiene los IDs de los usuarios seleccionados
+        const filterUserIdsInput = document.getElementById('filter-user-ids');
+        filterUserIdsInput.value = '';  // Restablecer el valor oculto
+
+        // Desmarcar todos los checkboxes de la lista de usuarios
+        const userCheckboxes = document.querySelectorAll('#filter-user-list input[type="checkbox"]');
+        userCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;  // Desmarcar el checkbox
+        });
+    }
+
 
 
     // Autocompletar para cliente, asunto, tipo (igual que en add-task)
     // Autocompletar para Cliente
-    setupAutocomplete('filter-cliente-input', 'filter-cliente-id-input', 'filter-cliente-list', clientesData,
-        item => `${item.nombre_fiscal} (${item.nif})`,
-        item => item.nombre_fiscal
+    setupAutocomplete(
+        'filter-cliente-input',
+        'filter-cliente-id-input',
+        'filter-cliente-list',
+        clientesData,
+        item => `${item.nombre_fiscal} (${item.nif})`,  // Mostrar nombre y NIF
+        item => item.nombre_fiscal,  // Comparar con el nombre
+        item => item.nif  // Comparar también con el NIF
     );
 
     // Autocompletar para Asunto
@@ -145,16 +230,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // Reutilizamos las funciones de autocompletar aquí
-    function setupAutocomplete(inputId, hiddenInputId, listId, dataList, displayFormatter, itemSelector) {
+    function setupAutocomplete(inputId, hiddenInputId, listId, dataList, displayFormatter, itemSelector, extraMatchSelector = null) {
         const input = document.getElementById(inputId);
         const hiddenInput = document.getElementById(hiddenInputId);
         const list = document.getElementById(listId);
         let selectedIndex = -1;
 
         function filterItems(query) {
-            const filtered = dataList.filter(item =>
-                itemSelector(item).toLowerCase().includes(query.toLowerCase())
-            );
+            const filtered = dataList.filter(item => {
+                const mainMatch = itemSelector(item).toLowerCase().includes(query.toLowerCase());
+                const extraMatch = extraMatchSelector ? extraMatchSelector(item).toLowerCase().includes(query.toLowerCase()) : false;
+                return mainMatch || extraMatch;
+            });
             renderList(filtered);
         }
 

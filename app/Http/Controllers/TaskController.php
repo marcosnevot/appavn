@@ -143,7 +143,7 @@ class TaskController extends Controller
             }
 
             // Emitir el evento para otros usuarios
-            broadcast(new TaskCreated($task))->toOthers();
+            broadcast(new TaskCreated($task));
 
             // Confirma la transacción
             DB::commit();
