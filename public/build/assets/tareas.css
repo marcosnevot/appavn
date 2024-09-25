@@ -676,3 +676,66 @@
     text-overflow: ellipsis;
 }
 
+
+
+/* Contenedor general para la paginación */
+.pagination-container {
+    display: flex;
+    justify-content: center;  /* Centrar los controles en el medio */
+    margin: 12px 0;  /* Espaciado superior e inferior */
+}
+
+/* Lista de elementos de la paginación */
+.pagination {
+    list-style: none;  /* Eliminar los puntos de las listas */
+    padding: 0;
+    margin: 0;
+    display: flex;  /* Colocar los elementos en línea */
+    gap: 10px;  /* Espacio entre los botones de paginación */
+}
+
+/* Estilos generales de los botones de paginación */
+.pagination li {
+    display: inline-block;
+}
+
+.pagination li button {
+    border: none;
+    padding: 10px 15px;  /* Espaciado dentro del botón */
+    border-radius: 8px;  /* Bordes redondeados */
+    background-color: #f7f7f7;  /* Fondo suave */
+    color: #333;  /* Texto oscuro */
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Sombra suave */
+    transition: background-color 0.3s, box-shadow 0.3s;  /* Animaciones suaves */
+}
+
+/* Botones de paginación activos */
+.pagination li.active button {
+    background-color: #4A90E2;  /* Color azul activo */
+    color: white;  /* Texto blanco */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Sombra más profunda */
+}
+
+/* Efecto hover en los botones */
+.pagination li button:hover {
+    background-color: #e6e6e6;  /* Fondo más oscuro en hover */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);  /* Sombra más pronunciada en hover */
+}
+
+/* Botones deshabilitados (como "Anterior" cuando estás en la primera página) */
+.pagination li.disabled button {
+    background-color: #ccc;  /* Fondo gris */
+    color: #999;  /* Texto gris */
+    cursor: not-allowed;  /* Cursor deshabilitado */
+    box-shadow: none;  /* Sin sombra */
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .pagination li button {
+        padding: 8px 12px;  /* Ajuste de tamaño de los botones */
+        font-size: 13px;
+    }
+}

@@ -81,9 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    // Capturar todos los campos del formulario
-    applyFilterButton.addEventListener('click', function (e) {
-        e.preventDefault();
+    function loadFilteredTasks(page = 1) {
 
         const filterData = {
             cliente: document.getElementById('filter-cliente-id-input').value || '', // Usar el ID del cliente
@@ -111,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateFilterInfoPanel(filterData);
 
         // Realizar la solicitud al servidor para filtrar las tareas
-        fetch('/tareas/filtrar', {
+        fetch(`/tareas/filtrar?page=${page}`, {  // <-- Asegúrate de pasar el número de página
             method: 'POST',
             body: JSON.stringify(filterData),
             headers: {
@@ -123,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.success) {
                     updateTaskTable(data.filteredTasks);
+                    updatePagination(data.pagination, loadFilteredTasks);  // Pasa loadFilteredTasks como argumento
                     closeFilterTaskForm();
                 } else {
                     console.error('Error al filtrar tareas:', data.message);
@@ -131,7 +130,14 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => {
                 console.error('Error en la solicitud:', error.message);
             });
+    }
+
+    applyFilterButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        loadFilteredTasks();
     });
+
+
     let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
     // Función para actualizar el panel de filtros

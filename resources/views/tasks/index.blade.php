@@ -60,8 +60,11 @@
 
 @section('scripts')
 
-<script src="{{ asset('js/tasks.js') }}"></script>
+<script src="{{ asset('js/common.js') }}"></script>
+<script src="{{ asset('js/add-tasks.js') }}"></script>
 <script src="{{ asset('js/filter-tasks.js') }}"></script>
+<script src="{{ asset('js/tasks.js') }}"></script>
+
 
 
 @endsection

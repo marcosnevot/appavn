@@ -41,6 +41,30 @@ class TaskController extends Controller
         return view('tasks.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
     }
 
+    public function getTasks(Request $request)
+    {
+        // Obtener todas las tareas con las relaciones necesarias, ordenadas por la más reciente
+        $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(50); // Ajustar el número de tareas por página
+
+        // Devolver las tareas en formato JSON, junto con enlaces de paginación
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks->items(), // Las tareas actuales
+            'pagination' => [
+                'total' => $tasks->total(),
+                'current_page' => $tasks->currentPage(),
+                'last_page' => $tasks->lastPage(),
+                'per_page' => $tasks->perPage(),
+                'next_page_url' => $tasks->nextPageUrl(),
+                'prev_page_url' => $tasks->previousPageUrl()
+            ]
+        ]);
+    }
+
+
+
 
 
     public function store(Request $request)
@@ -259,12 +283,19 @@ class TaskController extends Controller
             $query->orderBy('created_at', 'desc');
 
             // Ejecutar la consulta y obtener las tareas filtradas
-            $filteredTasks = $query->get();
+            $filteredTasks = $query->paginate(50);
 
             // Devolver las tareas filtradas como respuesta JSON
             return response()->json([
                 'success' => true,
-                'filteredTasks' => $filteredTasks
+                'filteredTasks' => $filteredTasks->items(), // Tareas filtradas
+                'pagination' => [
+                    'current_page' => $filteredTasks->currentPage(),
+                    'last_page' => $filteredTasks->lastPage(),
+                    'next_page_url' => $filteredTasks->nextPageUrl(),
+                    'prev_page_url' => $filteredTasks->previousPageUrl(),
+                    'total' => $filteredTasks->total(),
+                ]
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -272,18 +303,5 @@ class TaskController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
-    }
-
-
-
-    public function update(Request $request, $id)
-    {
-        $task = Tarea::findOrFail($id);
-        $task->update($request->all());
-
-        // Emitir el evento para los clientes conectados
-        broadcast(new TaskUpdated($task))->toOthers();
-
-        return response()->json(['message' => 'Tarea actualizada.']);
     }
 }
