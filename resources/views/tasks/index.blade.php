@@ -32,14 +32,15 @@
     </div>
 </div>
 
-<!-- Contenedor de la notificación de éxito -->
-<div id="success-notification" class="notification">
+<!-- Contenedor de la notificación unificada -->
+<div id="notification" class="notification">
     <div class="notification-content">
-        <span class="notification-icon">✔️</span>
-        <span class="notification-message">Tarea creada exitosamente</span>
+        <span class="notification-icon">✔️</span> <!-- Cambia el icono según el tipo -->
+        <span class="notification-message">Mensaje de la notificación</span>
     </div>
     <div class="notification-timer"></div> <!-- Barra de tiempo -->
 </div>
+
 
 <!-- Contenedor de la tabla de tareas -->
 @include('tasks.partials.task-table')
@@ -64,7 +65,7 @@
 <script src="{{ asset('js/add-tasks.js') }}"></script>
 <script src="{{ asset('js/filter-tasks.js') }}"></script>
 <script src="{{ asset('js/tasks.js') }}"></script>
-
+<script src="{{ asset('js/task-modal.js') }}"></script>
 
 
 @endsection

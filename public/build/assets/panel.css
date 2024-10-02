@@ -143,6 +143,7 @@ html, body {
     border-bottom: 1px solid #dddddd;
     /* Línea de separación entre filas */
     transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
 }
 
 /* Filas alternas para mayor claridad */

@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Variables globales para la paginación
     let currentPage = 1;
+    let globalTasksArray = []; // Definir una variable global para las tareas
 
     // Cargar tareas inicialmente
     loadTasks();
@@ -36,11 +37,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Función para cargar y actualizar la tabla de tareas inicialmente
     function loadInitialTasks(tasks) {
+        globalTasksArray = tasks;  // Almacenar las tareas cargadas globalmente
+
         const tableBody = document.querySelector('table tbody');
         tableBody.innerHTML = ''; // Limpiar la tabla existente
 
         tasks.forEach(task => {
             const row = document.createElement('tr');
+            row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
             row.innerHTML = `
             <td>${task.id}</td>
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
@@ -65,9 +69,13 @@ document.addEventListener('DOMContentLoaded', function () {
             <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
         `;
             tableBody.appendChild(row);
+
+            // Añadir el evento de doble clic a las filas de la tabla
+            addDoubleClickEventToRows();
         });
     }
-    
+
+
 
 
 

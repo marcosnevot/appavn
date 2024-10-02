@@ -155,70 +155,74 @@
 .notification {
     position: absolute;
     top: -100px;
-    /* Fuera de la vista al cargar */
     left: 50%;
     transform: translateX(-50%);
-    background-color: #28a745;
-    /* Verde de éxito */
-    color: white;
     padding: 15px 25px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     font-size: 16px;
     font-weight: 500;
     z-index: 1000;
-    opacity: 0;
-    /* Inicialmente invisible */
-    transition: all 0.5s ease;
-    /* Suave transición */
+    opacity: 0; /* Inicialmente invisible */
+    visibility: hidden; /* Oculta visualmente pero permite transiciones */
+    transition: top 0.7s ease, opacity 0.7s ease; /* Transición de entrada y opacidad */
+    color: white;
 }
 
-/* Estilo del contenido de la notificación */
-.notification-content {
+.notification .notification-content {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Icono de éxito */
-.notification-icon {
+.notification .notification-icon {
     margin-right: 10px;
     font-size: 18px;
 }
 
-.notification-message {
+.notification .notification-message {
     font-weight: bold;
-    /* Aplica negrita */
 }
 
-/* Barra de progreso */
-.notification-timer {
+.notification .notification-timer {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
     height: 4px;
     background-color: rgba(255, 255, 255, 0.5);
-    /* Blanco semitransparente */
     transition: width 3s linear;
-    /* Reducción en 3 segundos */
 }
 
-/* Estilo al mostrar la notificación */
 .notification.show {
-    top: 20px;
-    /* Visible a 20px del top */
+    top: 20px; /* Aparece deslizándose desde arriba */
     opacity: 1;
-    /* Totalmente visible */
+    visibility: visible; /* Se vuelve visible */
 }
 
-/* Estilo al ocultar la notificación */
 .notification.hide {
-    top: -100px;
-    /* Vuelve a ocultarse */
-    opacity: 0;
+    top: 20px; /* Mantener la posición al desaparecer */
+    opacity: 0; /* Solo se desvanece */
+    visibility: hidden; /* Oculta después de la transición */
+    transition: opacity 0.7s ease; /* Solo opacidad cambia en la salida */
 }
 
+/* Tipos de notificación con diferentes colores */
+.notification.success {
+    background-color: #28a745;
+}
+
+.notification.error {
+    background-color: #dc3545;
+}
+
+.notification.info {
+    background-color: #17a2b8;
+}
+
+.notification.warning {
+    background-color: #ffc107;
+}
 
 
 

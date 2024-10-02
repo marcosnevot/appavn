@@ -14,6 +14,11 @@
     "src": "resources/css/tareas.css",
     "isEntry": true
   },
+  "resources/css/detailed-task.css": {
+    "file": "assets/detailed-task.css",
+    "src": "resources/css/detailed-task.css",
+    "isEntry": true
+  },
   "resources/js/app.js": {
     "file": "assets/app-NjygHGYW.js",
     "name": "app",

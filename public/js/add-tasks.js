@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         tiposData.push(data.task.tipo); // Añadir el nuevo tipo a la lista de tipos
                     }
 
-                    showSuccessNotification();
+                    showNotification("Tarea creada exitosamente", "success");
                     // Limpiar los usuarios seleccionados
                     resetSelectedUsers();
                     document.getElementById('add-task-form').reset(); // Resetear el formulario
@@ -779,6 +779,7 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
         }
 
         const row = document.createElement('tr');
+        row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
         row.innerHTML = `
             <td>${task.id}</td>
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
@@ -809,9 +810,13 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
         } else {
             tableBody.appendChild(row);
         }
+
+
+        // Añadir el evento de doble clic a las filas de la tabla
+        addDoubleClickEventToRows();
     });
 
-    
+
 }
 
 

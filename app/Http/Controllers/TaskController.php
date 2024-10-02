@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\TareaActualizada;
 use App\Events\TaskCreated;
+use App\Events\TaskDeleted;
 use App\Events\TaskUpdated;
 use App\Models\Asunto;
 use App\Models\Cliente;
@@ -62,6 +63,24 @@ class TaskController extends Controller
             ]
         ]);
     }
+
+    public function show($id)
+    {
+        try {
+            // Encuentra la tarea por su ID o lanza un error si no se encuentra
+            $task = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])->findOrFail($id);
+
+            // Renderizar la vista modal con los detalles de la tarea
+            $html = view('tasks.partials.task-detail-modal', compact('task'))->render();
+
+            // Devolver el HTML dentro de una respuesta JSON
+            return response()->json(['html' => $html]);
+        } catch (\Exception $e) {
+            // Devuelve una respuesta JSON de error con el mensaje específico
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 
 
 
@@ -301,6 +320,34 @@ class TaskController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            // Buscar la tarea por su ID
+            $task = Tarea::findOrFail($id);
+
+            // Emitir el evento para que otros usuarios sepan que esta tarea ha sido eliminada
+            broadcast(new TaskDeleted($task->id));  // Solo enviamos la ID de la tarea
+
+
+            // Eliminar relaciones en la tabla pivot 'tarea_user'
+            $task->users()->detach();  // Eliminar todas las relaciones con usuarios
+
+            // Eliminar la tarea
+            $task->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tarea eliminada correctamente.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la tarea: ' . $e->getMessage()
             ], 500);
         }
     }
