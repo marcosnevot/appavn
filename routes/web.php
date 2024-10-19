@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/tareas/{id}', [TaskController::class, 'show'])->name('tareas.show');
     Route::delete('/tareas/{id}', [TaskController::class, 'destroy'])->name('tareas.destroy');
+    Route::get('/tareas/{id}/edit', [TaskController::class, 'edit'])->name('tareas.edit');
+    Route::put('/tareas/{id}', [TaskController::class, 'update'])->name('tareas.update');
+
 
    
    

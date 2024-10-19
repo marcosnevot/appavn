@@ -83,7 +83,7 @@
     padding: 10px 20px;
     margin-top: 15px;
     /* Separación respecto al contenido */
-    background-color: #f44336;
+    background-color: #1e1e1e;
     color: white;
     border: none;
     border-radius: 5px;
@@ -91,7 +91,7 @@
 }
 
 .btn-close-task-detail-modal:hover {
-    background-color: #d32f2f;
+    background-color: rgb(66, 66, 66)
 }
 
 
@@ -110,18 +110,86 @@
     overflow: hidden;
 }
 
-/* Título del modal con el asunto y cliente */
-.task-detail-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333333;
-    margin-bottom: 20px;
+/* Estilo para el header del modal */
+.task-detail-modal-header {
+    padding: 20px;
+    background-color: #f3f4f6;  /* Fondo claro */
+    border-bottom: 2px solid #e0e0e0; /* Separador suave */
+    text-align: center; /* Centrar el contenido */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05); /* Sombra ligera */
+    border-radius: 8px 8px 0 0; /* Redondear los bordes superiores */
 }
+
+/* Estilo general para el título */
+.task-detail-title {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Estilo para el Asunto */
+.task-title {
+    display: block;
+    font-size: 24px;
+    color: #2c3e50; /* Azul oscuro */
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+}
+
+/* Estilo para el Cliente */
+.task-client {
+    display: block;
+    font-size: 18px;
+    color: #7f8c8d; /* Gris oscuro para diferenciarlo del Asunto */
+    margin-top: 5px; /* Separación del asunto */
+    text-transform: capitalize;
+}
+
+/* Estilo de hover (opcional) */
+.task-title:hover, .task-client:hover {
+    color: #2980b9; /* Un azul más vibrante */
+}
+
+/* Descripción integrada dentro del header */
+.task-description {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #555; /* Color gris moderado */
+    font-style: italic; /* Itálico para dar énfasis pero mantener un look limpio */
+    line-height: 1.5;
+    padding: 0 10px;
+    border-top: 1px solid #e0e0e0; /* Línea sutil de separación */
+    padding-top: 10px;
+}
+
+/* Estilo del texto de la descripción */
+.task-detail-description p {
+    margin: 0;
+    line-height: 1.6;
+    font-style: italic;  /* Añadir estilo itálico para resaltar la descripción */
+}
+
+
+/* Ajustes para pantallas más pequeñas */
+@media (max-width: 768px) {
+    .task-title {
+        font-size: 20px;
+    }
+    .task-client {
+        font-size: 16px;
+    }
+    .task-description {
+        font-size: 14px;
+    }
+}
+
+
 
 /* Estilos para la sección de botones */
 .task-detail-actions {
     display: flex;
     justify-content: center;
+    margin-top: 20px;
     margin-bottom: 20px;
     gap: 20px;
 }
@@ -131,7 +199,7 @@
     padding: 10px 20px;
     font-size: 16px;
     font-weight: 600;
-    background-color: #1E1E1E;
+    background-color: #38444d;
     color: white;
     border: none;
     border-radius: 5px;

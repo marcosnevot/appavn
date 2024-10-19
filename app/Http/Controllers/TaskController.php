@@ -70,8 +70,11 @@ class TaskController extends Controller
             // Encuentra la tarea por su ID o lanza un error si no se encuentra
             $task = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])->findOrFail($id);
 
-            // Renderizar la vista modal con los detalles de la tarea
-            $html = view('tasks.partials.task-detail-modal', compact('task'))->render();
+            // Obtén la lista de todos los usuarios
+            $usuarios = User::all();
+
+            // Renderizar la vista modal con los detalles de la tarea y la lista de usuarios
+            $html = view('tasks.partials.task-detail-modal', compact('task', 'usuarios'))->render();
 
             // Devolver el HTML dentro de una respuesta JSON
             return response()->json(['html' => $html]);
@@ -80,6 +83,7 @@ class TaskController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 
 
 
@@ -349,6 +353,102 @@ class TaskController extends Controller
                 'success' => false,
                 'message' => 'Error al eliminar la tarea: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function edit($id)
+    {
+        try {
+            // Buscar la tarea por su ID con relaciones (users, cliente, etc.)
+            $task = Tarea::with(['users', 'cliente', 'asunto', 'tipo'])->findOrFail($id);
+
+            // Devolver la tarea en formato JSON para ser usada en el formulario
+            return response()->json($task);
+        } catch (\Exception $e) {
+            // Manejar cualquier error que ocurra durante la búsqueda de la tarea
+            return response()->json(['error' => 'Error al cargar la tarea: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+    public function update(Request $request, $id)
+    {
+        try {
+
+
+            // Iniciar una transacción para asegurar la integridad de los datos
+            DB::beginTransaction();
+
+            // Validar los datos de la solicitud
+            $validated = $request->validate([
+                'subtipoEdit' => 'nullable|string', // Validar subtipo
+                'estadoEdit' => 'nullable|string',  // Validar estado
+                'archivoEdit' => 'nullable|string',  // Validar archivo
+                'descripcionEdit' => 'nullable|string',  // Validar descripción
+                'observacionesEdit' => 'nullable|string',  // Validar observaciones
+                'facturableEdit' => 'nullable|boolean',  // Validar facturable (checkbox)
+                'facturadoEdit' => 'nullable|string',  // Validar facturado
+                'precioEdit' => 'nullable|numeric',  // Validar precio
+                'suplidoEdit' => 'nullable|numeric',  // Validar suplido
+                'costeEdit' => 'nullable|numeric',  // Validar coste
+                'fecha_inicioEdit' => 'nullable|date',  // Validar fecha de inicio
+                'fecha_vencimientoEdit' => 'nullable|date',  // Validar fecha de vencimiento
+                'fecha_imputacionEdit' => 'nullable|date',  // Validar fecha de imputación
+                'tiempo_previstoEdit' => 'nullable|numeric',  // Validar tiempo previsto
+                'tiempo_realEdit' => 'nullable|numeric',  // Validar tiempo real
+                'usersEdit' => 'nullable|array',  // Validar usuarios asignados
+                'usersEdit.*' => 'exists:users,id',  // Cada usuario debe existir en la tabla de usuarios
+            ]);
+
+            // Buscar la tarea por ID
+            $task = Tarea::findOrFail($id);
+
+            // Actualizar la tarea con los datos validados
+            $task->update([
+                'subtipo' => $validated['subtipoEdit'],  // No usar coalescencia nula
+                'estado' => $validated['estadoEdit'],
+                'archivo' => $validated['archivoEdit'],
+                'descripcion' => $validated['descripcionEdit'],  // Permitir que se guarde como vacío
+                'observaciones' => $validated['observacionesEdit'],  // Permitir vacío
+                'facturable' => $validated['facturableEdit'] ?? false,  // Checkbox
+                'facturado' => $validated['facturadoEdit'],
+                'precio' => $validated['precioEdit'],
+                'suplido' => $validated['suplidoEdit'],
+                'coste' => $validated['costeEdit'],
+                'fecha_inicio' => $validated['fecha_inicioEdit'],
+                'fecha_vencimiento' => $validated['fecha_vencimientoEdit'],
+                'fecha_imputacion' => $validated['fecha_imputacionEdit'],
+                'tiempo_previsto' => $validated['tiempo_previstoEdit'],
+                'tiempo_real' => $validated['tiempo_realEdit'],
+            ]);
+
+
+            // Asociar los usuarios a la tarea (si se han seleccionado)
+            if (!empty($validated['usersEdit'])) {
+                $task->users()->sync($validated['usersEdit']); // Asocia los usuarios a la tarea
+            }
+
+
+            Log::debug('Emitiendo evento TaskUpdated para la tarea con ID: ' . $task->id);
+
+
+            // Emitir el evento para que otros usuarios sean notificados de la actualización
+            broadcast(new TaskUpdated($task));
+
+            // Confirmar la transacción
+            DB::commit();
+
+            // Devolver la tarea actualizada
+            return response()->json([
+                'success' => true,
+                'task' => $task->load(['cliente', 'asunto', 'tipo', 'users']),
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack(); // Deshacer la transacción en caso de error de validación
+            return response()->json(['success' => false, 'errors' => $e->errors()], 400);
+        } catch (\Exception $e) {
+            DB::rollBack(); // Deshacer la transacción en caso de error general
+            return response()->json(['success' => false, 'message' => 'Error al actualizar la tarea: ' . $e->getMessage()], 500);
         }
     }
 }

@@ -57,6 +57,9 @@
 <!-- Incluir el formulario de filtrar tareas -->
 @include('tasks.partials.filter-task-form')
 
+<!-- Formulario de edición de la tarea -->
+@include('tasks.partials.edit-task-form')
+
 @endsection
 
 @section('scripts')

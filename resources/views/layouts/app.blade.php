@@ -36,7 +36,7 @@
         @endif
 
         <!-- Page Content -->
-        <main class="flex-1 py-6 panel">
+        <main class="flex-1 py-6 panel" style="height: 100vh;">
             <div class="w-full mx-auto px-4">
                 @yield('content')
             </div>
