@@ -54,7 +54,7 @@ class Cliente extends Model
     }
 
     // Relación con los responsables (usuarios)
-    public function responsables()
+    public function users()
     {
         return $this->belongsToMany(User::class, 'cliente_user', 'cliente_id', 'user_id');
     }

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('El script tasks.js ha sido cargado correctamente.');
+    // console.log('El script tasks.js ha sido cargado correctamente.');
 
     // Variables globales para la paginación
     let currentPage = 1;

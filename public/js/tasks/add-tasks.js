@@ -1,6 +1,6 @@
 // Añadir el event listener para manejar el envío del formulario
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('El script de add-tasks ha sido cargado correctamente.');
+    // console.log('El script de add-tasks ha sido cargado correctamente.');
 
     const taskForm = document.getElementById('task-form');
     const addTaskForm = document.getElementById('add-task-form'); // El propio formulario

@@ -45,7 +45,15 @@ Route::middleware('auth')->group(function () {
 
    
    
-    Route::get('/clientes', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('/clientes', [ClientController::class, 'index'])->name('client.index');
+    Route::post('/clientes', [ClientController::class, 'store'])->name('client.store');
+    Route::post('/clientes/filtrar', [ClientController::class, 'filter'])->name('clients.filtrar');
+    Route::get('/clientes/getCustomers', [ClientController::class, 'getCustomers'])->name('clients.get');
+
+    Route::get('/clientes/{id}', [ClientController::class, 'show'])->name('clients.show');
+    Route::delete('/clientes/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');
+    Route::get('/clientes/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+    Route::put('/clientes/{id}', [ClientController::class, 'update'])->name('clients.update');
 });
 
 require __DIR__ . '/auth.php';

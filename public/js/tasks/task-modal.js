@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .listenForWhisper('TaskUpdated', (data) => {
             console.log('Tarea actualizada (capturada por whisper):', data);
         })
-        .listen('.TaskDeleted', (data) => {
+        .listen('TaskDeleted', (data) => {
             console.log('Tarea eliminada (capturada por listen):', data);
             deleteTaskRow(data.taskId);
         })
