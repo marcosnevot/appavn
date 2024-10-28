@@ -17,12 +17,12 @@
             </div>
 
             <div class="form-group narrow">
-                <label for="movil">Teléfono Móvil:</label>
+                <label for="movil">Móvil:</label>
                 <input type="text" name="movil" id="movil" autocomplete="off" placeholder="Teléfono Móvil">
             </div>
 
             <div class="form-group narrow">
-                <label for="fijo">Teléfono Fijo:</label>
+                <label for="fijo">Fijo:</label>
                 <input type="text" name="fijo" id="fijo" autocomplete="off" placeholder="Teléfono Fijo">
             </div>
 

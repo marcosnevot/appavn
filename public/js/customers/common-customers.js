@@ -59,12 +59,12 @@ function handleError(message) {
 }
 
 
-// Función para abrir el modal con los detalles de la tarea
-function openTaskModal(taskId) {
-    console.log("Abriendo modal para la tarea:", taskId); // Log para verificar cuándo se abre el modal
+// Función para abrir el modal con los detalles del cliente
+function openCustomerModal(customerId) {
+    console.log("Abriendo modal para el cliente:", customerId); // Log para verificar cuándo se abre el modal
 
-    // Realizar una solicitud AJAX para obtener los detalles de la tarea
-    fetch(`/tareas/${taskId}`, {
+    // Realizar una solicitud AJAX para obtener los detalles del cliente
+    fetch(`/clientes/${customerId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -75,12 +75,12 @@ function openTaskModal(taskId) {
         .then(data => {
             if (data.html) {
                 // Insertar el HTML de la vista en el modal
-                const modalContent = document.getElementById('task-detail-modal-content');
+                const modalContent = document.getElementById('customer-detail-modal-content');
                 modalContent.innerHTML = data.html;
 
                 // Mostrar el modal
-                const modal = document.getElementById('task-detail-modal');
-                modal.setAttribute('data-task-id', taskId); // Guardar el taskId en el modal
+                const modal = document.getElementById('customer-detail-modal');
+                modal.setAttribute('data-customer-id', customerId); // Guardar el customerId en el modal
 
                 // Reiniciar las clases de animación
                 modal.classList.remove('hide', 'show');
@@ -96,18 +96,18 @@ function openTaskModal(taskId) {
                 }, 10); // Un pequeño retraso para que el DOM se actualice antes de iniciar la animación
 
             } else {
-                console.error('Error al cargar los detalles de la tarea:', data.error);
+                console.error('Error al cargar los detalles del customer:', data.error);
             }
         })
         .catch(error => {
-            console.error('Error al cargar los detalles de la tarea:', error);
+            console.error('Error al cargar los detalles del customer:', error);
         });
 }
 
 // Función para cerrar el modal
-function closeTaskModal() {
-    const modal = document.getElementById('task-detail-modal');
-    const modalContent = document.getElementById('task-detail-modal-content');
+function closeCustomersModal() {
+    const modal = document.getElementById('customer-detail-modal');
+    const modalContent = document.getElementById('customer-detail-modal-content');
 
     // Iniciar la animación de salida
     modal.classList.add('hide');
@@ -123,9 +123,9 @@ function closeTaskModal() {
 
 // Añadir el evento de cierre solo una vez
 document.addEventListener('DOMContentLoaded', () => {
-    const closeModalButton = document.getElementById('close-task-detail-modal');
+    const closeModalButton = document.getElementById('close-customer-detail-modal');
     if (closeModalButton) {
-        closeModalButton.addEventListener('click', closeTaskModal); // Añadir el evento de cierre
+        closeModalButton.addEventListener('click', closeCustomersModal); // Añadir el evento de cierre
     }
 });
 
@@ -136,8 +136,8 @@ function addDoubleClickEventToRows() {
     rows.forEach(row => {
         if (!row.dataset.hasDblClick) { // Asegurarse de que no tiene el evento agregado previamente
             row.addEventListener('dblclick', function () {
-                const taskId = this.getAttribute('data-task-id');
-                openTaskModal(taskId);
+                const customerId = this.getAttribute('data-customer-id');
+                openCustomerModal(customerId);
             });
             row.dataset.hasDblClick = true; // Marcar que el evento ya fue agregado
         }

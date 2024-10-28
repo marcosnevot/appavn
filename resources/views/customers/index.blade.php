@@ -50,15 +50,20 @@
 <div id="tributaciones-data" data-tributaciones='@json($tributaciones)'></div>
 <div id="usuarios-data" data-usuarios='@json($usuarios)'></div>
 
-<!-- Incluir el formulario de nueva tarea -->
+<!-- Incluir el formulario de nuevo cliente -->
 @include('customers.partials.customer-form')
 
+<!-- Incluir el formulario de filtrar clientes -->
+@include('customers.partials.filter-customer-form')
+
+<!-- Formulario de edición de la tarea -->
+@include('customers.partials.edit-customer-form')
 
 @endsection
 
 @section('scripts')
 
-<script src="{{ asset('js/customers/common.js') }}"></script>
+<script src="{{ asset('js/customers/common-customers.js') }}"></script>
 <script src="{{ asset('js/customers/add-customers.js') }}"></script>
 <script src="{{ asset('js/customers/filter-customers.js') }}"></script>
 <script src="{{ asset('js/customers/customers.js') }}"></script>

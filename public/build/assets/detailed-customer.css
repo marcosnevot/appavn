@@ -1,0 +1,200 @@
+/* Estilos para el modal de tareas detalladas */
+.customer-detail-modal {
+    display: none;
+    /* Oculto por defecto */
+    position: fixed;
+    z-index: 900;
+    left: 50%;
+    /* Centrado horizontalmente */
+    top: 50%;
+    /* Centrado verticalmente */
+    transform: translate(-50%, -50%);
+    /* Centrar tanto vertical como horizontalmente */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Fondo oscuro semitransparente */
+    width: 100vw;
+    /* Ancho completo de la pantalla */
+    height: 100vh;
+    /* Alto completo de la pantalla */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+    /* Suave transición en opacidad */
+
+}
+
+
+/* Contenido del modal */
+.customer-detail-modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 800px;
+    /* Ancho máximo del modal */
+    width: 100%;
+    text-align: left;
+    /* Alinear el texto a la izquierda */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    transform: translateY(20px);
+    /* Desplazamiento inicial hacia abajo */
+    opacity: 0;
+    /* Inicialmente invisible */
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    /* Suave transición para desvanecerse y moverse */
+}
+
+/* Estado visible del modal */
+.customer-detail-modal.show {
+    opacity: 1;
+    /* Hacer el fondo visible */
+}
+
+.customer-detail-modal-content.show {
+    transform: translateY(0);
+    /* Mover hacia su posición normal */
+    opacity: 1;
+    /* Hacer visible */
+}
+
+/* Estado oculto */
+.customer-detail-modal.hide {
+    opacity: 0;
+    /* Volver a invisible */
+}
+
+.customer-detail-modal-content.hide {
+    transform: translateY(20px);
+    /* Mover hacia abajo al cerrar */
+    opacity: 0;
+    /* Volver a invisible */
+}
+
+/* Estilo del botón de cerrar debajo del modal */
+.btn-close-customer-detail-modal {
+    display: block;
+    /* Asegura que sea un bloque */
+    width: 10%;
+    /* Botón ocupa todo el ancho */
+    text-align: center;
+    /* Centrar el texto */
+    padding: 10px 20px;
+    margin-top: 15px;
+    /* Separación respecto al contenido */
+    background-color: #1e1e1e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-close-customer-detail-modal:hover {
+    background-color: rgb(66, 66, 66)
+}
+
+
+
+
+/* General modal styles */
+.customer-detail-modal-content {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 700px;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Estilo para el header del modal */
+.customer-detail-modal-header {
+    padding: 20px;
+    background-color: #f3f4f6;  /* Fondo claro */
+    border-bottom: 2px solid #e0e0e0; /* Separador suave */
+    text-align: center; /* Centrar el contenido */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05); /* Sombra ligera */
+    border-radius: 8px 8px 0 0; /* Redondear los bordes superiores */
+}
+
+/* Estilo general para el título */
+.customer-detail-title {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Estilo para el Nombre Fiscal */
+.customer-name {
+    display: block;
+    font-size: 24px;
+    color: #2c3e50; /* Azul oscuro */
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+}
+
+/* Estilo para el NIF */
+.customer-nif {
+    display: block;
+    font-size: 18px;
+    color: #7f8c8d; /* Gris oscuro para diferenciarlo del Asunto */
+    margin-top: 5px; /* Separación del asunto */
+    text-transform: capitalize;
+}
+
+/* Estilo de hover (opcional) */
+.customer-name:hover, .customer-nif:hover {
+    color: #2980b9; /* Un azul más vibrante */
+}
+
+
+
+
+/* Ajustes para pantallas más pequeñas */
+@media (max-width: 768px) {
+    .task-name {
+        font-size: 20px;
+    }
+    .task-nif {
+        font-size: 16px;
+    }
+   
+}
+
+
+
+/* Estilos para la sección de botones */
+.customer-detail-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+/* Botones de acción (Editar, Borrar) */
+.btn-customer-action {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    background-color: #38444d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#delete-customer-button {
+    background-color: #f44336;
+    /* Rojo para borrar */
+}
+
+.btn-customer-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+

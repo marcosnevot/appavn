@@ -1037,7 +1037,7 @@ function updateSingleCustomerRow(customer) {
             <td>${customer.subclase || 'Sin subclase'}</td>
             <td>${customer.puntaje || 'N/A'}</td>
             <td>${customer.codigo_sage || 'N/A'}</td>
-            <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
+            <td style="display: none;">${customer.created_at || 'Sin fecha'}</td>
         `;
     } else {
         console.error(`No se encontró una fila con el ID del cliente: ${customer.id}`);

@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
         function filterItems(query) {
             const filtered = dataList.filter(item => {
                 const mainMatch = itemSelector(item).toLowerCase().includes(query.toLowerCase());
-                const extraMatch = extraMatchSelector ? extraMatchSelector(item).toLowerCase().includes(query.toLowerCase()) : false;
+                const extraMatch = extraMatchSelector ? extraMatchSelector(item)?.toLowerCase().includes(query.toLowerCase()) : false; // Verifica que extraMatchSelector(item) no sea null
                 return mainMatch || extraMatch;
             });
             renderList(filtered);

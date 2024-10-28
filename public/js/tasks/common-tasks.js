@@ -60,7 +60,7 @@ function handleError(message) {
 
 
 // Función para abrir el modal con los detalles de la tarea
-function openTaskModal(taskId) {
+function openTasksModal(taskId) {
     console.log("Abriendo modal para la tarea:", taskId); // Log para verificar cuándo se abre el modal
 
     // Realizar una solicitud AJAX para obtener los detalles de la tarea
@@ -105,7 +105,7 @@ function openTaskModal(taskId) {
 }
 
 // Función para cerrar el modal
-function closeTaskModal() {
+function closeTasksModal() {
     const modal = document.getElementById('task-detail-modal');
     const modalContent = document.getElementById('task-detail-modal-content');
 
@@ -125,7 +125,7 @@ function closeTaskModal() {
 document.addEventListener('DOMContentLoaded', () => {
     const closeModalButton = document.getElementById('close-task-detail-modal');
     if (closeModalButton) {
-        closeModalButton.addEventListener('click', closeTaskModal); // Añadir el evento de cierre
+        closeModalButton.addEventListener('click', closeTasksModal); // Añadir el evento de cierre
     }
 });
 
@@ -137,7 +137,7 @@ function addDoubleClickEventToRows() {
         if (!row.dataset.hasDblClick) { // Asegurarse de que no tiene el evento agregado previamente
             row.addEventListener('dblclick', function () {
                 const taskId = this.getAttribute('data-task-id');
-                openTaskModal(taskId);
+                openTasksModal(taskId);
             });
             row.dataset.hasDblClick = true; // Marcar que el evento ya fue agregado
         }

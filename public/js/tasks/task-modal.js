@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const confirmDelete = confirm('¿Estás seguro de que quieres borrar esta tarea?');
 
                 if (confirmDelete) {
-                    deleteTask(taskId);
+                    deleteCustomer(taskId);
                 }
             });
         }
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Asignar evento al botón de cerrar el formulario de edición
         if (closeEditButton && editTaskFormContainer) {
             closeEditButton.addEventListener('click', () => {
-                closeEditTaskForm(editTaskFormContainer);
+                closeEditCustomerForm(editTaskFormContainer);
             });
         }
     });
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     // Si la tarea se edita con éxito, cerrar el modal y mostrar un mensaje
                     showNotification('Tarea actualizada correctamente', 'info');
-                    closeEditTaskForm(editTaskFormContainer); // Cerrar el formulario de edición
+                    closeEditCustomerForm(editTaskFormContainer); // Cerrar el formulario de edición
 
                     // Actualizar solo la fila de la tarea editada
                     updateSingleTaskRow(data.task);
@@ -353,6 +353,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
                     <td>${task.tiempo_previsto || 'N/A'}</td>
                     <td>${task.tiempo_real || 'N/A'}</td>
+                     <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
                 `;
         } else {
             console.warn('No se encontró la fila correspondiente a la tarea actualizada');
@@ -373,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Función para borrar la tarea
-function deleteTask(taskId) {
+function deleteCustomer(taskId) {
     console.log("Intentando borrar la tarea con ID:", taskId);
 
     fetch(`/tareas/${taskId}`, {
@@ -388,7 +389,7 @@ function deleteTask(taskId) {
             if (data.success) {
                 console.log("Tarea eliminada correctamente.");
                 showNotification("Tarea eliminada correctamente", "error");
-                closeTaskModal();
+                closeCustomerModal();
 
                 const rowToDelete = document.querySelector(`tr[data-task-id="${taskId}"]`);
                 if (rowToDelete) {
@@ -406,7 +407,7 @@ function deleteTask(taskId) {
 }
 
 // Función para cerrar el formulario de edición
-function closeEditTaskForm(editTaskFormContainer) {
+function closeEditCustomerForm(editTaskFormContainer) {
     if (editTaskFormContainer) {
         editTaskFormContainer.classList.remove('show');
         editTaskFormContainer.classList.add('hide');
@@ -417,7 +418,7 @@ function closeEditTaskForm(editTaskFormContainer) {
 }
 
 // Función para cerrar el modal de detalles de la tarea
-function closeTaskModal() {
+function closeCustomerModal() {
     const modal = document.getElementById('task-detail-modal');
     const editTaskFormContainer = document.getElementById('edit-task-form-container');
 
@@ -425,7 +426,7 @@ function closeTaskModal() {
 
     // También cerrar el formulario de edición si está abierto
     if (editTaskFormContainer.classList.contains('show')) {
-        closeEditTaskForm(editTaskFormContainer);
+        closeEditCustomerForm(editTaskFormContainer);
     }
 }
 

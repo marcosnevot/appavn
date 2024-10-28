@@ -19,6 +19,11 @@
     "src": "resources/css/detailed-task.css",
     "isEntry": true
   },
+  "resources/css/detailed-customer.css": {
+    "file": "assets/detailed-customer.css",
+    "src": "resources/css/detailed-customer.css",
+    "isEntry": true
+  },
   "resources/css/customers.css": {
     "file": "assets/customers.css",
     "src": "resources/css/customers.css",

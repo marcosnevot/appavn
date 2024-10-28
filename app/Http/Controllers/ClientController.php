@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Events\CustomerCreated;
+use App\Events\CustomerDeleted;
+use App\Events\CustomerUpdated;
 use App\Models\Cliente;
 use App\Models\TipoCliente;
 use App\Models\Clasificacion;
@@ -44,7 +46,7 @@ class ClientController extends Controller
         // Obtener todas las tareas con las relaciones necesarias, ordenadas por la más reciente
         $clientes = Cliente::with(['tipoCliente', 'clasificacion', 'tributacion', 'situacion', 'users'])
             ->orderBy('created_at', 'desc')
-            ->paginate(50); // Ajustar el número de tareas por página
+            ->paginate(50); // Ajustar el número de clientes por página
 
         // Devolver las tareas en formato JSON, junto con enlaces de paginación
         return response()->json([
@@ -59,6 +61,26 @@ class ClientController extends Controller
                 'prev_page_url' => $clientes->previousPageUrl()
             ]
         ]);
+    }
+
+    public function show($id)
+    {
+        try {
+            // Encuentra el customer por su ID o lanza un error si no se encuentra
+            $customer = Cliente::with(['tipoCliente', 'clasificacion', 'tributacion', 'situacion', 'users'])->findOrFail($id);
+
+            // Obtén la lista de todos los usuarios
+            $usuarios = User::all();
+
+            // Renderizar la vista modal con los detalles del customer y la lista de usuarios
+            $html = view('customers.partials.customer-detail-modal', compact('customer', 'usuarios'))->render();
+
+            // Devolver el HTML dentro de una respuesta JSON
+            return response()->json(['html' => $html]);
+        } catch (\Exception $e) {
+            // Devuelve una respuesta JSON de error con el mensaje específico
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
 
@@ -190,6 +212,255 @@ class ClientController extends Controller
             DB::rollBack(); // Deshacer la transacción en caso de otro error
             Log::error($e); // Capturar el error detallado
             return response()->json(['success' => false, 'message' => 'Error al crear el cliente'], 500);
+        }
+    }
+
+
+    public function filter(Request $request)
+    {
+        try {
+            // Obtener los filtros enviados desde el frontend
+            $filters = $request->all();
+
+            // Crear una consulta base para filtrar los clientes
+            $query = Cliente::with(['clasificacion', 'tipoCliente', 'tributacion', 'situacion', 'users']); // Asegurarse de cargar las relaciones necesarias
+
+            // Filtrar por nombre fiscal del cliente
+            if (!empty($filters['nombre_fiscal'])) {
+                $query->where('nombre_fiscal', 'like', '%' . $filters['nombre_fiscal'] . '%');
+            }
+
+            // Filtrar por NIF
+            if (!empty($filters['nif'])) {
+                $query->where('nif', 'like', '%' . $filters['nif'] . '%');
+            }
+
+            // Filtrar por tipo de cliente
+            if (!empty($filters['tipo_cliente'])) {
+                $tipoCliente = TipoCliente::where('nombre', 'like', '%' . $filters['tipo_cliente'] . '%')->first();
+                if ($tipoCliente) {
+                    $query->where('tipo_cliente_id', $tipoCliente->id);
+                }
+            }
+
+            // Filtrar por clasificación
+            if (!empty($filters['clasificacion'])) {
+                $clasificacion = Clasificacion::where('nombre', 'like', '%' . $filters['clasificacion'] . '%')->first();
+                if ($clasificacion) {
+                    $query->where('clasificacion_id', $clasificacion->id);
+                }
+            }
+
+            // Filtrar por tributación
+            if (!empty($filters['tributacion'])) {
+                $tributacion = Tributacion::where('nombre', 'like', '%' . $filters['tributacion'] . '%')->first();
+                if ($tributacion) {
+                    $query->where('tributacion_id', $tributacion->id);
+                }
+            }
+
+            // Filtrar por situación
+            if (!empty($filters['situacion'])) {
+                $situacion = Situacion::where('nombre', 'like', '%' . $filters['situacion'] . '%')->first();
+                if ($situacion) {
+                    $query->where('situacion_id', $situacion->id);
+                }
+            }
+
+            // Filtrar por dirección
+            if (!empty($filters['direccion'])) {
+                $query->where('direccion', 'like', '%' . $filters['direccion'] . '%');
+            }
+
+            // Filtrar por código postal
+            if (!empty($filters['codigo_postal'])) {
+                $query->where('codigo_postal', 'like', '%' . $filters['codigo_postal'] . '%');
+            }
+
+            // Filtrar por usuario responsable asignado
+            if (!empty($filters['usuario'])) {
+                $userIds = explode(',', $filters['usuario']);
+                $query->whereHas('users', function ($q) use ($userIds) {
+                    $q->whereIn('users.id', $userIds);
+                });
+            }
+
+            // Filtrar por datos bancarios
+            if (!empty($filters['datos_bancarios'])) {
+                $query->where('datos_bancarios', 'like', '%' . $filters['datos_bancarios'] . '%');
+            }
+
+            // Filtrar por subclase
+            if (!empty($filters['subclase'])) {
+                $query->where('subclase', 'like', '%' . $filters['subclase'] . '%');
+            }
+
+            // Filtrar por puntaje
+            if (!empty($filters['puntaje'])) {
+                $query->where('puntaje', '=', $filters['puntaje']);
+            }
+
+            // Filtrar por código SAGE
+            if (!empty($filters['codigo_sage'])) {
+                $query->where('codigo_sage', 'like', '%' . $filters['codigo_sage'] . '%');
+            }
+
+            // Añadir el orden por fecha de creación, de más reciente a más antigua
+            $query->orderBy('created_at', 'desc');
+
+            // Ejecutar la consulta y obtener los clientes filtrados
+            $filteredCustomers = $query->paginate(50);
+
+            // Devolver los clientes filtrados como respuesta JSON
+            return response()->json([
+                'success' => true,
+                'filteredCustomers' => $filteredCustomers->items(),
+                'pagination' => [
+                    'current_page' => $filteredCustomers->currentPage(),
+                    'last_page' => $filteredCustomers->lastPage(),
+                    'next_page_url' => $filteredCustomers->nextPageUrl(),
+                    'prev_page_url' => $filteredCustomers->previousPageUrl(),
+                    'total' => $filteredCustomers->total(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            // Buscar la customer por su ID
+            $customer = Cliente::findOrFail($id);
+
+            // Emitir el evento para que otros usuarios sepan que esta tarea ha sido eliminada
+            broadcast(new CustomerDeleted($customer->id));  // Solo enviamos la ID de la tarea
+
+
+            // Eliminar relaciones en la tabla pivot 'cliente_user'
+            $customer->users()->detach();  // Eliminar todas las relaciones con usuarios
+
+            // Eliminar la customer
+            $customer->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cliente eliminado correctamente.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el cliente: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function edit($id)
+    {
+        try {
+            // Buscar el cliente por su ID con relaciones (users, tipoCliente, clasificacion, tributacion, situacion)
+            $customer = Cliente::with(['tipoCliente', 'clasificacion', 'tributacion', 'situacion', 'users'])->findOrFail($id);
+
+            // Obtener todos los datos necesarios para los select del formulario
+            $tipoCliente = TipoCliente::all();
+            $clasificaciones = Clasificacion::all();
+            $tributaciones = Tributacion::all();
+            $situaciones = Situacion::all();
+
+            // Devolver los datos en formato JSON para el formulario de edición
+            return response()->json([
+                'customer' => $customer,
+                'tipoCliente' => $tipoCliente,
+                'clasificaciones' => $clasificaciones,
+                'tributaciones' => $tributaciones,
+                'situaciones' => $situaciones
+            ]);
+        } catch (\Exception $e) {
+            // Manejar cualquier error que ocurra durante la búsqueda del cliente
+            return response()->json(['error' => 'Error al cargar el cliente: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+    public function update(Request $request, $id)
+    {
+        try {
+            // Iniciar una transacción para asegurar la integridad de los datos
+            DB::beginTransaction();
+
+            // Validar los datos de la solicitud
+            $validated = $request->validate([
+                'nombre_fiscalEdit' => 'required|string|max:255', // Validar nombre fiscal
+                'nifEdit' => 'nullable|string|max:255',  // Validar NIF
+                'movilEdit' => 'nullable|string|max:255',  // Validar móvil
+                'fijoEdit' => 'nullable|string|max:255',  // Validar fijo
+                'emailEdit' => 'nullable|email|max:255',  // Validar email
+                'direccionEdit' => 'nullable|string|max:255',  // Validar dirección
+                'codigo_postalEdit' => 'nullable|string|max:255',  // Validar código postal
+                'poblacionEdit' => 'nullable|string|max:255',  // Validar población
+                'datos_bancariosEdit' => 'nullable|string',  // Validar datos bancarios
+                'tipo_clienteEdit' => 'nullable|exists:tipo_clientes,id',  // Validar tipo cliente
+                'clasificacionEdit' => 'nullable|exists:clasificaciones,id',  // Validar clasificación
+                'tributacionEdit' => 'nullable|exists:tributaciones,id',  // Validar tributación
+                'situacionEdit' => 'nullable|exists:situaciones,id',  // Validar situación
+                'subclaseEdit' => 'nullable|string|max:255',  // Validar subclase
+                'puntajeEdit' => 'nullable|integer',  // Validar puntaje
+                'codigo_sageEdit' => 'nullable|integer',  // Validar código sage
+                'usersEdit' => 'nullable|array',  // Validar usuarios asignados
+                'usersEdit.*' => 'exists:users,id',  // Cada usuario debe existir en la tabla de usuarios
+            ]);
+
+            // Buscar el cliente por ID
+            $customer = Cliente::findOrFail($id);
+
+            // Actualizar el cliente con los datos validados
+            $customer->update([
+                'nombre_fiscal' => $validated['nombre_fiscalEdit'],
+                'nif' => $validated['nifEdit'],
+                'movil' => $validated['movilEdit'],
+                'fijo' => $validated['fijoEdit'],
+                'email' => $validated['emailEdit'],
+                'direccion' => $validated['direccionEdit'],
+                'codigo_postal' => $validated['codigo_postalEdit'],
+                'poblacion' => $validated['poblacionEdit'],
+                'datos_bancarios' => $validated['datos_bancariosEdit'],
+                'tipo_cliente_id' => $validated['tipo_clienteEdit'],
+                'clasificacion_id' => $validated['clasificacionEdit'],
+                'tributacion_id' => $validated['tributacionEdit'],
+                'situacion_id' => $validated['situacionEdit'],
+                'subclase' => $validated['subclaseEdit'],
+                'puntaje' => $validated['puntajeEdit'],
+                'codigo_sage' => $validated['codigo_sageEdit'],
+            ]);
+
+            // Asociar los usuarios al cliente (si se han seleccionado)
+            if (!empty($validated['usersEdit'])) {
+                $customer->users()->sync($validated['usersEdit']); // Asocia los usuarios al cliente
+            }
+
+            Log::debug('Emitiendo evento CustomerUpdated para el cliente con ID: ' . $customer->id);
+
+            // Emitir el evento para que otros usuarios sean notificados de la actualización
+            broadcast(new CustomerUpdated($customer));
+
+            // Confirmar la transacción
+            DB::commit();
+
+            // Devolver el cliente actualizado
+            return response()->json([
+                'success' => true,
+                'customer' => $customer->load(['tipoCliente', 'clasificacion', 'tributacion', 'situacion', 'users']),
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack(); // Deshacer la transacción en caso de error de validación
+            return response()->json(['success' => false, 'errors' => $e->errors()], 400);
+        } catch (\Exception $e) {
+            DB::rollBack(); // Deshacer la transacción en caso de error general
+            return response()->json(['success' => false, 'message' => 'Error al actualizar el cliente: ' . $e->getMessage()], 500);
         }
     }
 }
