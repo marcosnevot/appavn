@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const taskForm = document.getElementById('task-form');
     const addTaskForm = document.getElementById('add-task-form'); // El propio formulario
 
+    let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
 
     let asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
 
@@ -17,6 +18,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalMessage = document.getElementById('modal-message');
     const modalAsuntoMessage = document.getElementById('modal-asunto-message');
     const modalTipoMessage = document.getElementById('modal-tipo-message');
+    const modalClienteMessage = document.getElementById('modal-cliente-message');
+
+    let nuevoCliente = null;
     let nuevoAsunto = null;
     let nuevoTipo = null;
 
@@ -65,6 +69,20 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectedUsers = Array.from(document.querySelectorAll('#user-list input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.value); // Obtener los IDs de los usuarios seleccionados
 
+        // Verificar si el cliente ingresado manualmente ya existe
+        const clienteInputValue = clienteInput.value.trim().toUpperCase();
+        let clienteExistente = clientesData.find(cliente => cliente.nombre_fiscal.toUpperCase() === clienteInputValue);
+
+        // Si el cliente no existe, marcarlo como nuevo
+        if (!clienteExistente) {
+            nuevoCliente = clienteInputValue;
+            clienteIdInput.value = ''; // Si es nuevo, dejar vacío el ID
+        } else {
+            // Si el cliente ya existe, asegurarse de que el ID esté asignado
+            clienteIdInput.value = clienteExistente.id;
+            nuevoCliente = null; // No es necesario crear un nuevo cliente
+        }
+
         // Verificar si el asunto ingresado manualmente ya existe
         const asuntoInputValue = asuntoInput.value.trim().toUpperCase();
         let asuntoExistente = asuntosData.find(asunto => asunto.nombre.toUpperCase() === asuntoInputValue);
@@ -94,7 +112,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const formData = {
-            cliente_id: document.querySelector('input[name="cliente_id"]').value,
+            cliente_id: clienteIdInput.value, // Si el asunto es nuevo, esto estará vacío
+            cliente_nombre: nuevoCliente || '',
             asunto_id: asuntoIdInput.value, // Si el asunto es nuevo, esto estará vacío
             asunto_nombre: nuevoAsunto || '',
             tipo_id: tipoIdInput.value, // Si el tipo es nuevo, esto estará vacío
@@ -106,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
             descripcion: document.querySelector('textarea[name="descripcion"]').value,
             observaciones: document.querySelector('textarea[name="observaciones"]').value,
             facturable: document.querySelector('input[name="facturable"]').checked ? 1 : 0,
-            facturado: document.querySelector('input[name="facturado"]').value,
+            facturado: document.querySelector('select[name="facturado"]').value,
             precio: document.querySelector('input[name="precio"]').value,
             suplido: document.querySelector('input[name="suplido"]').value,
             coste: document.querySelector('input[name="coste"]').value,
@@ -140,6 +159,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Si hay un nuevo asunto en la respuesta, lo añadimos a la lista de asuntos
                     if (data.task.asunto && !asuntosData.some(a => a.id === data.task.asunto.id)) {
                         asuntosData.push(data.task.asunto); // Añadir el nuevo asunto a la lista de asuntos
+                    }
+
+                    // Si hay un nuevo cliente en la respuesta, lo añadimos a la lista de clientes
+                    if (data.task.cliente && !clientesData.some(c => c.id === data.task.cliente.id)) {
+                        clientesData.push(data.task.cliente); // Añadir el nuevo asunto a la lista de clientes
                     }
 
                     // Si hay un nuevo tipo en la respuesta, lo añadimos a la lista de tipos
@@ -185,17 +209,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         nuevoAsunto = null; // Limpiar variables de nuevos valores
         nuevoTipo = null;
+        nuevoCliente = null;
 
-        // Validar si el cliente seleccionado está en la lista
-        const clienteInputValue = document.getElementById('cliente-input').value;
-        const clienteIdValue = document.getElementById('cliente-id-input').value;
-        const clienteValido = clientes.some(cliente =>
-            `${cliente.nombre_fiscal} (${cliente.nif})` === clienteInputValue && cliente.id == clienteIdValue
+
+        // Validar si el cliente existe o si es nuevo
+        const clienteInputValue = clienteInput.value.trim();
+        const clienteValido = clientesData.some(cliente =>
+            cliente.nombre_fiscal.toUpperCase() === clienteInputValue.toUpperCase()
         );
 
         if (!clienteValido) {
-            alert("Por favor, selecciona un cliente válido de la lista.");
-            return;
+            nuevoCliente = clienteInputValue; // Almacenar el nuevo cliente si no existe
         }
 
         // Validar si el asunto existe o si es nuevo
@@ -218,8 +242,8 @@ document.addEventListener('DOMContentLoaded', function () {
             nuevoTipo = tipoInputValue; // Almacenar el nuevo tipo si no existe
         }
 
-        // Si hay un nuevo asunto o un nuevo tipo, mostrar el modal
-        if (nuevoAsunto || nuevoTipo) {
+        // Si hay un nuevo asunto, cliente o un nuevo tipo, mostrar el modal
+        if (nuevoAsunto || nuevoTipo || nuevoCliente) {
             showModalConfirm();
         } else {
             // Confirmar antes de enviar
@@ -247,8 +271,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Buscador de clientes
 
     // Obtener los datos de clientes desde el atributo data-clientes
-    const clientesData = document.getElementById('clientes-data');
-    const clientes = JSON.parse(clientesData.getAttribute('data-clientes'));
 
     const clienteInput = document.getElementById('cliente-input');
     const clienteIdInput = document.getElementById('cliente-id-input'); // Campo oculto para el ID del cliente
@@ -257,12 +279,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Función para mostrar la lista filtrada
     function filterClientes(query) {
-        const filtered = clientes.filter(cliente =>
-            cliente.nombre_fiscal.toLowerCase().includes(query.toLowerCase()) ||
-            cliente.nif.toLowerCase().includes(query.toLowerCase()) // Comparar con NIF
-        );
+        const filtered = clientesData.filter(cliente => {
+            const nombreFiscal = cliente.nombre_fiscal ? cliente.nombre_fiscal.toLowerCase() : '';
+            const nif = cliente.nif ? cliente.nif.toLowerCase() : ''; // Verificar si NIF no es null
+
+            return nombreFiscal.includes(query.toLowerCase()) || nif.includes(query.toLowerCase());
+        });
         renderList(filtered);
     }
+
+
 
     // Función para renderizar la lista
     function renderList(filtered) {
@@ -287,8 +313,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Función para seleccionar un cliente y autocompletar el input
     function selectCliente(cliente) {
-        clienteInput.value = `${cliente.nombre_fiscal} (${cliente.nif})`; // Mostrar tanto el nombre como el NIF
-        clienteIdInput.value = cliente.id; // Almacena el id en el campo oculto
+        clienteInput.value = cliente.nombre_fiscal; // Asignar solo el nombre al campo de entrada
+        clienteIdInput.value = cliente.id; // Almacenar el ID en el campo oculto
         clienteList.style.display = 'none';
         selectedClienteIndex = -1; // Reiniciar el índice seleccionado
     }
@@ -324,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (e.key === 'Enter') {
                 e.preventDefault(); // Prevenir el comportamiento por defecto de 'Enter'
                 if (selectedClienteIndex >= 0 && selectedClienteIndex < items.length) {
-                    const selectedCliente = clientes.find(cliente =>
+                    const selectedCliente = clientesData.find(cliente =>
                         `${cliente.nombre_fiscal} (${cliente.nif})` === items[selectedClienteIndex].textContent
                     );
                     selectCliente(selectedCliente); // Seleccionar el cliente
@@ -571,6 +597,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Mostrar el modal de confirmación
     function showModalConfirm() {
+        if (modalClienteMessage) {
+            modalClienteMessage.textContent = nuevoCliente
+                ? `El cliente "${nuevoCliente}" no existe. ¿Deseas crearlo?`
+                : '';
+        }
+
         if (modalAsuntoMessage) {
             modalAsuntoMessage.textContent = nuevoAsunto
                 ? `El asunto "${nuevoAsunto}" no existe. ¿Deseas crearlo?`
@@ -600,8 +632,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const userList = document.getElementById('user-list');
     const selectedUsersContainer = document.getElementById('selected-users');
     const userIdsInput = document.getElementById('user-ids');
+    const sessionUserId = document.querySelector('meta[name="user-id"]').getAttribute('content');
+
     let selectedUsers = [];
     let currentFocus = -1;
+
+    // Preseleccionar el usuario de sesión al abrir el formulario
+    const sessionUserCheckbox = document.querySelector(`#user-${sessionUserId}`);
+    if (sessionUserCheckbox) {
+        sessionUserCheckbox.checked = true;
+
+        const userName = sessionUserCheckbox.nextElementSibling.textContent;
+        selectedUsers.push({ id: sessionUserId, name: userName });
+
+        updateSelectedUsersDisplay();
+        updateUserIdsInput();
+    }
 
     // Mostrar/ocultar la lista de usuarios al hacer clic o presionar Enter/Espacio
     userSelect.addEventListener('click', toggleUserList);
@@ -785,22 +831,22 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            <td>${task.subtipo || ''}</td>
-            <td>${task.estado}</td>
-            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
-            <td>${task.archivo || 'No disponible'}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
-            <td>${task.facturado || 'No facturado'}</td>
-            <td>${task.precio || 'N/A'}</td>
-            <td>${task.suplido || 'N/A'}</td>
-            <td>${task.coste || 'N/A'}</td>
+            <td>${task.facturado || 'No'}</td>
+            <td>${task.subtipo || ''}</td>
+            <td>${task.estado}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>
+            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+            <td style="display: none;>${task.archivo || 'No disponible'}</td>
+            <td style="display: none;>${task.precio || 'N/A'}</td>
+            <td style="display: none;>${task.suplido || 'N/A'}</td>
+            <td style="display: none;>${task.coste || 'N/A'}</td>
             <td style="display: none;">${task.created_at || 'Sin fecha'}</td> <!-- Campo oculto para created_at -->
         `;
 
@@ -831,22 +877,22 @@ function updateSingleTaskRow(task) {
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            <td>${task.subtipo || ''}</td>
-            <td>${task.estado}</td>
-            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
-            <td>${task.archivo || 'No disponible'}</td>
+            <td style="display: none;">${task.archivo || 'No disponible'}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
-            <td>${task.facturado || 'No facturado'}</td>
-            <td>${task.precio || 'N/A'}</td>
-            <td>${task.suplido || 'N/A'}</td>
-            <td>${task.coste || 'N/A'}</td>
+            <td>${task.facturado || 'No'}</td>
+            <td>${task.subtipo || ''}</td>
+            <td>${task.estado}</td>
+            <td style="display: none;">${task.precio || 'N/A'}</td>
+            <td style="display: none;">${task.suplido || 'N/A'}</td>
+            <td style="display: none;">${task.coste || 'N/A'}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>
+            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
         `;
     } else {

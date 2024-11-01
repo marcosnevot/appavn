@@ -44,10 +44,22 @@ class TaskController extends Controller
 
     public function getTasks(Request $request)
     {
-        // Obtener todas las tareas con las relaciones necesarias, ordenadas por la más reciente
-        $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(50); // Ajustar el número de tareas por página
+        // Obtener el ID de usuario de la solicitud (si existe)
+        $userId = $request->query('user_id');
+
+        // Crear la consulta base para las tareas con relaciones necesarias
+        $query = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
+            ->orderBy('created_at', 'desc');
+
+        // Si se pasa un user_id, filtrar las tareas asignadas a ese usuario
+        if ($userId) {
+            $query->whereHas('users', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            });
+        }
+
+        // Ejecutar la consulta con paginación
+        $tasks = $query->paginate(50);
 
         // Devolver las tareas en formato JSON, junto con enlaces de paginación
         return response()->json([
@@ -86,10 +98,6 @@ class TaskController extends Controller
 
 
 
-
-
-
-
     public function store(Request $request)
     {
 
@@ -99,7 +107,8 @@ class TaskController extends Controller
 
             // Validar la solicitud
             $validated = $request->validate([
-                'cliente_id' => 'required|exists:clientes,id',
+                'cliente_id' => 'nullable',
+                'cliente_nombre' => 'nullable|string|max:255', // Permitir nulo o string
                 'asunto_id' => 'nullable',
                 'asunto_nombre' => 'nullable|string|max:255', // Permitir nulo o string
                 'tipo_id' => 'nullable',
@@ -124,6 +133,21 @@ class TaskController extends Controller
             ]);
             Log::debug('Datos validados:', $validated);
 
+
+            /// Verificar si se debe crear un nuevo cliente
+            if (!$validated['cliente_id'] && !empty($validated['cliente_nombre'])) {
+                // Buscar si el cliente ya existe antes de crear uno nuevo
+                $clienteExistente = Cliente::where('nombre_fiscal', strtoupper($validated['cliente_nombre']))->first();
+
+                if ($clienteExistente) {
+                    // Si ya existe, asignar el ID del cliente existente
+                    $validated['cliente_id'] = $clienteExistente->id;
+                } else {
+                    // Si no existe, crear un nuevo cliente
+                    $cliente = Cliente::create(['nombre_fiscal' => strtoupper($validated['cliente_nombre'])]);
+                    $validated['cliente_id'] = $cliente->id;
+                }
+            }
 
             // Verificar si se debe crear un nuevo asunto
             if (!$validated['asunto_id'] && !empty($validated['asunto_nombre'])) {
@@ -154,7 +178,9 @@ class TaskController extends Controller
                     $validated['tipo_id'] = $tipo->id;
                 }
             }
-            Log::debug('Tipo Nombre: ' . $validated['tipo_nombre']);
+
+
+            Log::debug('Cliente Nombre: ' . $validated['cliente_nombre']);
 
             // Crear la tarea
             $task = Tarea::create([
@@ -167,7 +193,7 @@ class TaskController extends Controller
                 'descripcion' => $validated['descripcion'] ?? null,
                 'observaciones' => $validated['observaciones'] ?? null,
                 'facturable' => $validated['facturable'] ?? false,
-                'facturado' => $validated['facturado'] ?? null, // Crear el campo facturado
+                'facturado' => $validated['facturado'] ?? 'No', // Crear el campo facturado
                 'precio' => $validated['precio'] ?? null, // Crear el campo precio
                 'suplido' => $validated['suplido'] ?? null, // Crear el campo suplido
                 'coste' => $validated['coste'] ?? null, // Crear el campo coste
@@ -451,4 +477,6 @@ class TaskController extends Controller
             return response()->json(['success' => false, 'message' => 'Error al actualizar la tarea: ' . $e->getMessage()], 500);
         }
     }
+
+    
 }

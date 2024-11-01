@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentPage = 1;
     let globalTasksArray = []; // Definir una variable global para las tareas
 
+
+    const sessionUserId = document.getElementById('user-session-id').value;
+
+
     // Cargar tareas inicialmente
     loadTasks();
 
@@ -13,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const tableBody = document.querySelector('table tbody');
         tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
 
-        fetch(`/tareas/getTasks?page=${page}`, {
+        fetch(`/tareas/getTasks?page=${page}&user_id=${sessionUserId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -50,22 +54,23 @@ document.addEventListener('DOMContentLoaded', function () {
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            <td>${task.subtipo || ''}</td>
-            <td>${task.estado}</td>
-            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+            
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
-            <td>${task.archivo || 'No disponible'}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
             <td>${task.facturado || 'No facturado'}</td>
-            <td>${task.precio || 'N/A'}</td>
-            <td>${task.suplido || 'N/A'}</td>
-            <td>${task.coste || 'N/A'}</td>
+            <td>${task.subtipo || ''}</td>
+            <td>${task.estado}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>
+            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+            <td style="display: none;">${task.archivo || 'No disponible'}</td>
+            <td style="display: none;">${task.precio || 'N/A'}</td>
+            <td style="display: none;">${task.suplido || 'N/A'}</td>
+            <td style="display: none;">${task.coste || 'N/A'}</td>
             <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
         `;
             tableBody.appendChild(row);
@@ -74,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
             addDoubleClickEventToRows();
         });
     }
+
 
 
 

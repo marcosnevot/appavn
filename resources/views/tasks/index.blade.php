@@ -14,7 +14,7 @@
 
 
         <!-- Desplegable de Ordenar por -->
-        <div class="sort-container">
+        <div class="sort-container" style="display: none;">
             <label for="sort-select" class="sort-label">Ordenar por:</label>
             <select id="sort-select" class="sort-select">
                 <option value="fecha_creacion" selected>Fecha de Creación</option>
@@ -29,6 +29,8 @@
 
         <!-- Botón de Nueva Tarea -->
         <button id="new-task-button" class="btn-new-task">Nueva Tarea</button>
+
+       
     </div>
 </div>
 

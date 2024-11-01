@@ -30,11 +30,16 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start; /* Cambiado de 'left' a 'flex-start' */
-    width: 350px; /* Alinearlo con el select de ordenar */
-    flex-grow: 1; /* Permitir que ocupe espacio disponible */
-    flex-shrink: 0; /* Asegurar que no se reduzca */
-    position: relative; /* Mantener la relación con el label */
+    align-items: flex-start;
+    /* Cambiado de 'left' a 'flex-start' */
+    width: 350px;
+    /* Alinearlo con el select de ordenar */
+    flex-grow: 1;
+    /* Permitir que ocupe espacio disponible */
+    flex-shrink: 0;
+    /* Asegurar que no se reduzca */
+    position: relative;
+    /* Mantener la relación con el label */
 
 }
 
@@ -42,22 +47,28 @@
 .filter-info-panel {
     display: flex;
     height: 50px;
+
     overflow-y: auto;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 14px;
     background-color: #f9f9f9;
     color: #333;
-    width: 350px; /* Alinearlo con el select de ordenar */
-    flex-grow: 1; /* Permitir que ocupe espacio disponible */
-    flex-shrink: 0; /* Asegurar que no se reduzca */
-    position: relative; /* Mantener la relación con el label */
+    width: 350px;
+    margin-bottom: 20px;
+    /* Alinearlo con el select de ordenar */
+    flex-grow: 1;
+    /* Permitir que ocupe espacio disponible */
+    flex-shrink: 0;
+    /* Asegurar que no se reduzca */
+    position: relative;
+    /* Mantener la relación con el label */
 }
 
 /* Estilo del label de filtros aplicado */
 .filter-info-label {
     position: absolute;
-    top:-18px;
+    top: -18px;
     font-size: 12px;
     font-weight: bold;
     margin-bottom: 0;
@@ -129,6 +140,7 @@
     transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     /* Suavizamos las transiciones */
     cursor: pointer;
+    margin-bottom: 20px;
 
 }
 
@@ -163,9 +175,12 @@
     font-size: 16px;
     font-weight: 500;
     z-index: 1003;
-    opacity: 0; /* Inicialmente invisible */
-    visibility: hidden; /* Oculta visualmente pero permite transiciones */
-    transition: top 0.7s ease, opacity 0.7s ease; /* Transición de entrada y opacidad */
+    opacity: 0;
+    /* Inicialmente invisible */
+    visibility: hidden;
+    /* Oculta visualmente pero permite transiciones */
+    transition: top 0.7s ease, opacity 0.7s ease;
+    /* Transición de entrada y opacidad */
     color: white;
 }
 
@@ -195,16 +210,22 @@
 }
 
 .notification.show {
-    top: 20px; /* Aparece deslizándose desde arriba */
+    top: 20px;
+    /* Aparece deslizándose desde arriba */
     opacity: 1;
-    visibility: visible; /* Se vuelve visible */
+    visibility: visible;
+    /* Se vuelve visible */
 }
 
 .notification.hide {
-    top: 20px; /* Mantener la posición al desaparecer */
-    opacity: 0; /* Solo se desvanece */
-    visibility: hidden; /* Oculta después de la transición */
-    transition: opacity 0.7s ease; /* Solo opacidad cambia en la salida */
+    top: 20px;
+    /* Mantener la posición al desaparecer */
+    opacity: 0;
+    /* Solo se desvanece */
+    visibility: hidden;
+    /* Oculta después de la transición */
+    transition: opacity 0.7s ease;
+    /* Solo opacidad cambia en la salida */
 }
 
 /* Tipos de notificación con diferentes colores */
@@ -225,6 +246,13 @@
 }
 
 
+/* Establece ancho específico para la columna de Cliente */
+.col-cliente {
+    width: 20%; /* Ajusta el porcentaje según el espacio necesario */
+    max-width: 200px;
+    min-width: 180px; /* Controla el ancho mínimo */
+    word-wrap: break-word; /* Permite ajuste de texto dentro de la celda */
+}
 
 /* Estilos del formulario de tarea */
 .task-form {
@@ -274,7 +302,6 @@
 
 /* Ajuste general de los campos */
 .form-group {
-    margin-bottom: 10px;
     display: flex;
     flex-direction: column;
 }
@@ -300,7 +327,7 @@
 }
 
 .form-group textarea {
-    height: 40px;
+    height: 60px;
     resize: none;
 }
 
@@ -521,7 +548,7 @@
     display: none;
     /* Oculto por defecto */
     position: fixed;
-    z-index: 2000;
+    z-index: 3000;
     left: 0;
     top: 0;
     width: 100%;
@@ -685,17 +712,22 @@
 /* Contenedor general para la paginación */
 .pagination-container {
     display: flex;
-    justify-content: center;  /* Centrar los controles en el medio */
-    margin: 12px 0;  /* Espaciado superior e inferior */
+    justify-content: center;
+    /* Centrar los controles en el medio */
+    margin: 12px 0;
+    /* Espaciado superior e inferior */
 }
 
 /* Lista de elementos de la paginación */
 .pagination {
-    list-style: none;  /* Eliminar los puntos de las listas */
+    list-style: none;
+    /* Eliminar los puntos de las listas */
     padding: 0;
     margin: 0;
-    display: flex;  /* Colocar los elementos en línea */
-    gap: 10px;  /* Espacio entre los botones de paginación */
+    display: flex;
+    /* Colocar los elementos en línea */
+    gap: 10px;
+    /* Espacio entre los botones de paginación */
 }
 
 /* Estilos generales de los botones de paginación */
@@ -705,43 +737,57 @@
 
 .pagination li button {
     border: none;
-    padding: 10px 15px;  /* Espaciado dentro del botón */
-    border-radius: 8px;  /* Bordes redondeados */
-    background-color: #f7f7f7;  /* Fondo suave */
-    color: #333;  /* Texto oscuro */
+    padding: 10px 15px;
+    /* Espaciado dentro del botón */
+    border-radius: 8px;
+    /* Bordes redondeados */
+    background-color: #f7f7f7;
+    /* Fondo suave */
+    color: #333;
+    /* Texto oscuro */
     font-size: 14px;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Sombra suave */
-    transition: background-color 0.3s, box-shadow 0.3s;  /* Animaciones suaves */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Sombra suave */
+    transition: background-color 0.3s, box-shadow 0.3s;
+    /* Animaciones suaves */
 }
 
 /* Botones de paginación activos */
 .pagination li.active button {
-    background-color: #4A90E2;  /* Color azul activo */
-    color: white;  /* Texto blanco */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Sombra más profunda */
+    background-color: #4A90E2;
+    /* Color azul activo */
+    color: white;
+    /* Texto blanco */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Sombra más profunda */
 }
 
 /* Efecto hover en los botones */
 .pagination li button:hover {
-    background-color: #e6e6e6;  /* Fondo más oscuro en hover */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);  /* Sombra más pronunciada en hover */
+    background-color: #e6e6e6;
+    /* Fondo más oscuro en hover */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    /* Sombra más pronunciada en hover */
 }
 
 /* Botones deshabilitados (como "Anterior" cuando estás en la primera página) */
 .pagination li.disabled button {
-    background-color: #ccc;  /* Fondo gris */
-    color: #999;  /* Texto gris */
-    cursor: not-allowed;  /* Cursor deshabilitado */
-    box-shadow: none;  /* Sin sombra */
+    background-color: #ccc;
+    /* Fondo gris */
+    color: #999;
+    /* Texto gris */
+    cursor: not-allowed;
+    /* Cursor deshabilitado */
+    box-shadow: none;
+    /* Sin sombra */
 }
 
 /* Ajustes para pantallas pequeñas */
 @media (max-width: 768px) {
     .pagination li button {
-        padding: 8px 12px;  /* Ajuste de tamaño de los botones */
+        padding: 8px 12px;
+        /* Ajuste de tamaño de los botones */
         font-size: 13px;
     }
 }
-
-

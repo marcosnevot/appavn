@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
             codigo_sage: document.querySelector('input[name="codigo_sage"]').value,
             users: selectedUsers // Lista de IDs de los usuarios seleccionados (responsables)
         };
-        
+
 
         console.log('Datos del formulario:', formData);
 
@@ -921,6 +921,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Utilizar created_at (última columna oculta)
                     valA = new Date(a.children[a.children.length - 1].textContent); // Última columna
                     valB = new Date(b.children[b.children.length - 1].textContent);
+
+                    // Ordenar por fecha primero y luego por ID en caso de igualdad
+                    if (valA.getTime() === valB.getTime()) {
+                        const idA = parseInt(a.children[0].textContent); // Supuesto ID en la primera columna
+                        const idB = parseInt(b.children[0].textContent);
+                        return idA - idB; // Orden ascendente por ID
+                    }
+
                     return valB - valA; // Orden descendente por fecha de creación
             }
 
@@ -941,6 +949,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Ordenar inicialmente por fecha de creación (ID)
     sortTableBy('fecha_creacion');
+
 
 
 });

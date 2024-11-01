@@ -28,6 +28,7 @@ class ClientController extends Controller
         // Obtener todos los clientes de la base de datos, ordenados por las más recientes
         $clientes = Cliente::with(['tipoCliente', 'clasificacion', 'tributacion', 'situacion', 'users'])
             ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'asc') // Orden secundario por ID
             ->get();
 
         // Obtener datos adicionales necesarios para el formulario
@@ -46,6 +47,7 @@ class ClientController extends Controller
         // Obtener todas las tareas con las relaciones necesarias, ordenadas por la más reciente
         $clientes = Cliente::with(['tipoCliente', 'clasificacion', 'tributacion', 'situacion', 'users'])
             ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc') // Orden secundario por ID
             ->paginate(50); // Ajustar el número de clientes por página
 
         // Devolver las tareas en formato JSON, junto con enlaces de paginación

@@ -4,6 +4,13 @@
         <span class="task-title">{{ $task->asunto->nombre ?? 'Sin Asunto' }}</span>
         <span class="task-client">{{ $task->cliente->nombre_fiscal ?? 'Sin Cliente' }}</span>
     </h2>
+
+    <!-- Teléfono y Email del Cliente -->
+    <div class="task-client-contact">
+        <div class="task-client-contact-item task-client-email">✉️ <a href="mailto:{{ $task->cliente->email ?? '#' }}">{{ $task->cliente->email ?? 'Sin email' }}</a></div>
+        <div class="task-client-contact-item task-client-phone">📞 {{ $task->cliente->movil ?? 'Sin teléfono' }}</div>
+    </div>
+
     <!-- Descripción integrada debajo del cliente -->
     <p class="task-description">{{ $task->descripcion ?? 'No hay descripción disponible para esta tarea.' }}</p>
 </div>

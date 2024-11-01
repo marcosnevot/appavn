@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const cancelFilterButton = document.getElementById('cancel-filter-button');
     const clearFilterButton = document.getElementById('clear-filter-button');
 
+
+
     // Mostrar el formulario de filtrar tareas
     filterTaskButton.addEventListener('click', function () {
         filterTaskForm.style.display = 'block';
@@ -162,11 +164,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     const cliente = clientesData.find(cliente => cliente.id === parseInt(value));
                     p.textContent = `Cliente: ${cliente ? cliente.nombre_fiscal : 'Desconocido'}`;
                 }
-                // Manejo especial para mostrar el nombre del usuario en lugar del ID
                 else if (key === 'usuario') {
                     const usuario = usersData.find(usuario => usuario.id === parseInt(value));
-                    p.textContent = `Usuario Asignado: ${usuario ? usuario.name : 'Desconocido'}`;
-                }
+                    p.textContent = `Mostrando Tareas De: ${usuario ? usuario.name : 'Desconocido'}`;
+                }// Manejo especial para mostrar el nombre del usuario en lugar del ID
+
                 else {
                     p.textContent = `${capitalizeFirstLetter(key)}: ${value}`;
                 }
@@ -345,6 +347,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterUserIdsInput = document.getElementById('filter-user-ids');
     let filterSelectedUsers = [];
     let filterCurrentFocus = -1;
+
+
+
+
+    // Obtener el ID del usuario en sesión y agregarlo como seleccionado
+    const sessionUserId = document.getElementById('user-session-id').value;
+    const sessionUserCheckbox = document.getElementById(`filter-user-${sessionUserId}`);
+
+    if (sessionUserCheckbox) {
+        sessionUserCheckbox.checked = true;
+        const sessionUserName = sessionUserCheckbox.nextElementSibling.textContent;
+
+        // Añadir el usuario en sesión a la lista de seleccionados al cargar la página
+        filterSelectedUsers.push({ id: sessionUserId, name: sessionUserName });
+        updateFilterSelectedUsersDisplay();
+        updateFilterUserIdsInput();
+    }
+
+    // Actualiza el panel de información del filtro para mostrar el filtro del usuario en sesión
+    updateFilterInfoPanel({
+        usuario: sessionUserId  // Define el usuario en sesión como filtro activo
+    });
+
+    // Mostrar el panel de información de filtros
+    document.getElementById('filter-info-panel').classList.remove('hide');
+
 
     // Mostrar/ocultar la lista de usuarios al hacer clic o presionar Enter/Espacio
     filterUserSelect.addEventListener('click', toggleFilterUserList);

@@ -3,7 +3,7 @@
     display: none;
     /* Oculto por defecto */
     position: fixed;
-    z-index: 1000;
+    z-index: 2000;
     left: 50%;
     /* Centrado horizontalmente */
     top: 50%;
@@ -169,6 +169,42 @@
     font-style: italic;  /* Añadir estilo itálico para resaltar la descripción */
 }
 
+/* Contenedor para la información de contacto, manteniendo ambos elementos centrados */
+.task-client-contact {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 40px; /* Espacio uniforme entre el teléfono y el email */
+    margin-top: 10px;
+    font-size: 16px;
+    color: #34495e;
+}
+
+/* Ajustes individuales para teléfono y email dentro de un contenedor de ancho mínimo */
+.task-client-contact-item {
+    min-width: 100px; /* Ajuste mínimo para uniformidad de espacio */
+    text-align: center;
+}
+
+/* Estilo para el teléfono */
+.task-client-phone {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+/* Estilo para el email */
+.task-client-email {
+    font-weight: 400;
+    color: #7f8c8d;
+    text-decoration: none;
+}
+
+/* Efecto hover para el email */
+.task-client-email:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
 
 /* Ajustes para pantallas más pequeñas */
 @media (max-width: 768px) {
@@ -179,6 +215,9 @@
         font-size: 16px;
     }
     .task-description {
+        font-size: 14px;
+    }
+    .task-client-contact {
         font-size: 14px;
     }
 }

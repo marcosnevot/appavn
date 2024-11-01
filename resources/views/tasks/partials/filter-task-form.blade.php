@@ -1,3 +1,5 @@
+<input type="hidden" id="user-session-id" value="{{ auth()->user()->id }}">
+
 <!-- Formulario para filtrar tareas -->
 <div id="filter-task-form" class="task-form hide">
     <h3 class="form-title">Filtrar Tareas</h3>
@@ -33,24 +35,7 @@
                 </div>
             </div>
 
-            <div class="form-group medium">
-                <label for="filter-subtipo">Subtipo:</label>
-                <select name="filter_subtipo" id="filter-subtipo">
-                    <option value="">Cualquiera</option>
-                    <option value="ORDINARIA">Ordinaria</option>
-                    <option value="EXTRAORDINARIA">Extraordinaria</option>
-                </select>
-            </div>
 
-            <div class="form-group narrow">
-                <label for="filter-estado">Estado:</label>
-                <select name="filter_estado" id="filter-estado">
-                    <option value="">Cualquiera</option>
-                    <option value="PENDIENTE">Pendiente</option>
-                    <option value="ENPROGRESO">En Progreso</option>
-                    <option value="COMPLETADA">Completada</option>
-                </select>
-            </div>
         </div>
 
         <!-- Fila 2: Asignado a, Archivo, Facturable, Facturado -->
@@ -77,7 +62,7 @@
             </div>
 
 
-            <div class="form-group narrow">
+            <div class="form-group narrow" style="display: none;">
                 <label for="filter-archivo">Archivo:</label>
                 <input type="text" name="filter_archivo" id="filter-archivo">
             </div>
@@ -91,32 +76,57 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group medium">
                 <label for="filter-facturado">Facturado:</label>
-                <input type="text" name="filter_facturado" id="filter-facturado">
+                <select name="filter_facturado" id="filter-facturado">
+                    <option value="">Cualquiera</option>
+                    <option value="NO">No</option>
+                    <option value="SI">Sí</option>
+                    <option value="NUNCA">Nunca</option>
+                </select>
+            </div>
+
+
+            <div class="form-group medium">
+                <label for="filter-subtipo">Subtipo:</label>
+                <select name="filter_subtipo" id="filter-subtipo">
+                    <option value="">Cualquiera</option>
+                    <option value="ORDINARIA">Ordinaria</option>
+                    <option value="EXTRAORDINARIA">Extraordinaria</option>
+                </select>
+            </div>
+
+            <div class="form-group narrow">
+                <label for="filter-estado">Estado:</label>
+                <select name="filter_estado" id="filter-estado">
+                    <option value="">Cualquiera</option>
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="ENPROGRESO">En Espera</option>
+                    <option value="COMPLETADA">Completada</option>
+                </select>
             </div>
         </div>
 
         <!-- Fila 3: Precio, Suplido, Coste -->
         <div class="form-row">
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label for="filter-precio">Precio (€):</label>
                 <input type="number" step="0.01" name="filter_precio" id="filter-precio">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label for="filter-suplido">Suplido (€):</label>
                 <input type="number" step="0.01" name="filter_suplido" id="filter-suplido">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label for="filter-coste">Coste (€):</label>
                 <input type="number" step="0.01" name="filter_coste" id="filter-coste">
             </div>
         </div>
 
         <!-- Fila 4: Fechas, Tiempo Previsto, Tiempo Real -->
-        <div class="form-row">
+        <div class="form-row" style="margin-bottom:30px">
             <div class="form-group">
                 <label for="filter-fecha-inicio">Fecha de Inicio:</label>
                 <input type="date" name="filter_fecha_inicio" id="filter-fecha-inicio">

@@ -1,3 +1,5 @@
+<meta name="user-id" content="{{ auth()->user()->id }}">
+
 <!-- Formulario de nueva tarea en un menú desplegable -->
 <div id="task-form" class="task-form hide">
     <h3 class="form-title">Nueva Tarea</h3>
@@ -9,7 +11,7 @@
             <div class="form-group wide">
                 <label for="cliente_id">Cliente:</label>
                 <div class="autocomplete">
-                    <input type="text" id="cliente-input" class="autocomplete-input" placeholder="Buscar cliente..." autocomplete="off" required>
+                    <input type="text" id="cliente-input" class="autocomplete-input" placeholder="Buscar o crear cliente..." autocomplete="off" required>
                     <input type="hidden" name="cliente_id" id="cliente-id-input"> <!-- Campo oculto para el id del cliente -->
                     <ul id="cliente-list" class="autocomplete-list"></ul>
                 </div>
@@ -18,7 +20,7 @@
             <div class="form-group wide">
                 <label for="asunto_id">Asunto:</label>
                 <div class="autocomplete">
-                    <input type="text" id="asunto-input" class="autocomplete-input" placeholder="Buscar o crear asunto..." autocomplete="off" required>
+                    <input type="text" id="asunto-input" class="autocomplete-input" placeholder="Buscar o crear asunto..." autocomplete="off" >
                     <input type="hidden" name="asunto_id" id="asunto-id-input"> <!-- Campo oculto para el id del asunto -->
                     <ul id="asunto-list" class="autocomplete-list"></ul>
                 </div>
@@ -27,11 +29,31 @@
             <div class="form-group medium">
                 <label for="tipo_id">Tipo de Tarea:</label>
                 <div class="autocomplete">
-                    <input type="text" id="tipo-input" class="autocomplete-input" placeholder="Buscar o crear tipo..." autocomplete="off" required>
+                    <input type="text" id="tipo-input" class="autocomplete-input" placeholder="Buscar o crear tipo..." autocomplete="off" >
                     <input type="hidden" name="tipo_id" id="tipo-id-input"> <!-- Campo oculto para el id del tipo -->
                     <ul id="tipo-list" class="autocomplete-list"></ul>
                 </div>
             </div>
+
+
+        </div>
+
+        <!-- Fila 2: Asignado a, Archivo, Facturable, Facturado  -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="facturable">Facturable:</label>
+                <input type="checkbox" name="facturable" id="facturable" value="1">
+            </div>
+
+            <div class="form-group">
+                <label for="facturado">Facturado:</label>
+                <select name="facturado" id="facturado">
+                    <option value="NO">No</option>
+                    <option value="SI">Sí</option>
+                    <option value="NUNCA">Nunca</option>
+                </select>
+            </div>
+
 
             <div class="form-group medium">
                 <label for="subtipo">Subtipo:</label>
@@ -45,14 +67,11 @@
                 <label for="estado">Estado:</label>
                 <select name="estado" id="estado">
                     <option value="PENDIENTE">Pendiente</option>
-                    <option value="ENPROGRESO">En Progreso</option>
+                    <option value="ENPROGRESO">En Espera</option>
                     <option value="COMPLETADA">Completada</option>
                 </select>
             </div>
-        </div>
 
-        <!-- Fila 2: Asignado a, Archivo, Descripción, Observaciones -->
-        <div class="form-row">
             <div class="form-group narrow">
                 <label for="user-select">Asignado a:</label>
                 <div class="custom-select" name="user-select" tabindex="0" id="user-select">
@@ -73,53 +92,45 @@
                 <input type="hidden" name="users" id="user-ids"> <!-- Campo oculto para los IDs de usuarios seleccionados -->
             </div>
 
-
-            <div class="form-group narrow">
+            <div class="form-group narrow" style="display:none">
                 <label for="archivo">Archivo:</label>
                 <input type="text" name="archivo" id="archivo">
             </div>
 
+
+        </div>
+
+        <!-- Fila 3: Descripción, Observaciones Precio, Suplido, Coste -->
+        <div class="form-row">
+
             <div class="form-group wide">
                 <label for="descripcion">Descripción:</label>
-                <textarea name="descripcion" id="descripcion" rows="2"></textarea>
+                <textarea name="descripcion" id="descripcion" rows="2" s></textarea>
             </div>
 
             <div class="form-group wide">
                 <label for="observaciones">Observaciones:</label>
                 <textarea name="observaciones" id="observaciones" rows="2"></textarea>
             </div>
-        </div>
 
-        <!-- Fila 3: Facturable, Facturado, Precio, Suplido, Coste -->
-        <div class="form-row">
-            <div class="form-group">
-                <label for="facturable">Facturable:</label>
-                <input type="checkbox" name="facturable" id="facturable" value="1">
-            </div>
-
-            <div class="form-group">
-                <label for="facturado">Facturado:</label>
-                <input type="text" name="facturado" id="facturado">
-            </div>
-
-            <div class="form-group">
-                <label for="precio" >Precio (€):</label>
+            <div class="form-group" style="display:none">
+                <label for="precio">Precio (€):</label>
                 <input type="number" step="0.01" name="precio" id="precio">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="display:none">
                 <label for="suplido">Suplido (€):</label>
                 <input type="number" step="0.01" name="suplido" id="suplido">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="display:none">
                 <label for="coste">Coste (€):</label>
                 <input type="number" step="0.01" name="coste" id="coste">
             </div>
         </div>
 
         <!-- Fila 4: Fecha Inicio, Vencimiento, Imputación, Tiempo Previsto, Tiempo Real -->
-        <div class="form-row">
+        <div class="form-row" style="margin-bottom:30px">
             <div class="form-group">
                 <label for="fecha_inicio">Fecha de Inicio:</label>
                 <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ now()->format('Y-m-d') }}">
@@ -159,6 +170,7 @@
     <div class="modal-content">
         <!-- Mensajes de confirmación para asunto y tipo -->
         <p id="modal-message" class="modal-message">
+            <span id="modal-cliente-message"></span><br>
             <span id="modal-asunto-message"></span><br>
             <span id="modal-tipo-message"></span>
         </p>

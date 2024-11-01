@@ -1,7 +1,7 @@
 <!-- Formulario de edición de tarea -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<div id="edit-task-form-container" class="task-form hide">
+<div id="edit-task-form-container" class="task-form hide" style="z-index: 3001;">
     <h3 class="form-title">Editar Tarea</h3>
 
     <!-- Formulario para editar la tarea -->
@@ -13,6 +13,20 @@
 
         <!-- Fila 1: Subtipo, Estado -->
         <div class="form-row">
+            <div class="form-group">
+                <label for="facturable">Facturable:</label>
+                <input type="checkbox" name="facturableEdit" id="facturable" value="1">
+            </div>
+
+            <div class="form-group">
+                <label for="facturado">Facturado:</label>
+                <select name="facturadoEdit" id="facturado">
+                    <option value="No">No</option>
+                    <option value="Sí">Sí</option>
+                    <option value="Nunca">Nunca</option>
+                </select>
+            </div>
+
             <div class="form-group medium">
                 <label for="subtipo">Subtipo:</label>
                 <select name="subtipoEdit" id="subtipo">
@@ -29,10 +43,7 @@
                     <option value="COMPLETADA">Completada</option>
                 </select>
             </div>
-        </div>
 
-        <!-- Fila 2: Asignado a, Archivo, Descripción, Observaciones -->
-        <div class="form-row">
             <div class="form-group narrow">
                 <label for="user-select-edit">Asignado a:</label>
                 <div class="custom-select" name="user-select-edit" tabindex="0" id="user-select-edit">
@@ -43,8 +54,8 @@
                         <ul>
                             @foreach($usuarios as $user)
                             <li>
-                            <input class="user-checkbox" type="checkbox" id="user-edit-{{ $user->id }}" name="usersEdit[]" value="{{ $user->id }}">
-                            <label for="user-edit-{{ $user->id }}">{{ $user->name }}</label>
+                                <input class="user-checkbox" type="checkbox" id="user-edit-{{ $user->id }}" name="usersEdit[]" value="{{ $user->id }}">
+                                <label for="user-edit-{{ $user->id }}">{{ $user->name }}</label>
                             </li>
                             @endforeach
                         </ul>
@@ -52,9 +63,14 @@
                 </div>
                 <input type="hidden" name="usersEdit" id="user-ids-edit">
             </div>
+        </div>
+
+        <!-- Fila 2: Asignado a, Archivo, Descripción, Observaciones -->
+        <div class="form-row">
 
 
-            <div class="form-group narrow">
+
+            <div class="form-group narrow" style="display: none;">
                 <label for="archivo">Archivo:</label>
                 <input type="text" name="archivoEdit" id="archivo">
             </div>
@@ -72,15 +88,7 @@
 
         <!-- Fila 3: Facturable, Facturado, Precio, Suplido, Coste -->
         <div class="form-row">
-            <div class="form-group">
-                <label for="facturable">Facturable:</label>
-                <input type="checkbox" name="facturableEdit" id="facturable" value="1">
-            </div>
 
-            <div class="form-group">
-                <label for="facturado">Facturado:</label>
-                <input type="text" name="facturadoEdit" id="facturado">
-            </div>
 
             <div class="form-group">
                 <label for="precio">Precio (€):</label>
