@@ -2,7 +2,9 @@
     <!-- Título central con el Asunto y Cliente -->
     <h2 class="task-detail-title">
         <span class="task-title">{{ $task->asunto->nombre ?? 'Sin Asunto' }}</span>
-        <span class="task-client">{{ $task->cliente->nombre_fiscal ?? 'Sin Cliente' }}</span>
+        <span class="task-client" data-nif="{{ $task->cliente->nif ?? 'No disponible' }}"
+            data-direccion="{{ $task->cliente->direccion ?? 'No disponible' }}"
+            data-poblacion="{{ $task->cliente->poblacion ?? 'No disponible' }}">{{ $task->cliente->nombre_fiscal ?? 'Sin Cliente' }}</span>
     </h2>
 
     <!-- Teléfono y Email del Cliente -->

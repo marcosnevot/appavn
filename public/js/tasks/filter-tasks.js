@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     updateTaskTable(data.filteredTasks);
                     updatePagination(data.pagination, loadFilteredTasks);  // Pasa loadFilteredTasks como argumento
+                    resetFiltroRapidoPlanificacion();
                     closeFilterTaskForm();
                 } else {
                     console.error('Error al filtrar tareas:', data.message);
@@ -138,6 +139,18 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         loadFilteredTasks();
     });
+
+    // Función para restablecer el filtro rápido de planificación
+    function resetFiltroRapidoPlanificacion() {
+        // Remover la clase 'active' de todos los botones
+        document.querySelectorAll('.btn-filter-planificacion').forEach(btn => btn.classList.remove('active'));
+
+        // Marcar el botón de "Todas" como activo
+        const botonTodas = document.querySelector('.btn-filter-planificacion[data-fecha=""]');
+        if (botonTodas) {
+            botonTodas.classList.add('active');
+        }
+    }
 
 
     let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
@@ -464,6 +477,126 @@ document.addEventListener('DOMContentLoaded', function () {
         filterCurrentFocus = (filterCurrentFocus + direction + checkboxes.length) % checkboxes.length; // Calcular el índice
         checkboxes[filterCurrentFocus].focus();
     }
+
+
+    // Filtro según la planificación
+    const planificacionFilterContainer = document.getElementById('planificacion-filter-buttons');
+
+    // Función para obtener los días de la semana a partir de hoy
+    function obtenerDiasFiltrado() {
+        const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+        const hoy = new Date();
+        const hoyIndex = hoy.getDay();
+        const diasRestantes = [];
+
+        diasRestantes.push({ nombre: "Todas", fecha: "" }); // Opción para ver todas las tareas
+
+        for (let i = 0; i < 7 - hoyIndex; i++) {
+            const nuevoDia = new Date(hoy);
+            nuevoDia.setDate(hoy.getDate() + i);
+            const diaSemana = nuevoDia.getDay();
+
+            // Excluir sábado y domingo
+            if (diaSemana === 0 || diaSemana === 6) continue;
+
+            const nombreDia = i === 0 ? "Hoy" : i === 1 ? "Mañana" : diasSemana[diaSemana - 1];
+            diasRestantes.push({
+                nombre: nombreDia,
+                fecha: nuevoDia.toISOString().split('T')[0]
+            });
+        }
+
+        return diasRestantes;
+    }
+
+    // Función para generar los botones de filtro de planificación
+    function generarBotonesFiltroPlanificacion() {
+        planificacionFilterContainer.innerHTML = ""; // Limpiar botones previos
+        const diasRestantes = obtenerDiasFiltrado();
+
+        diasRestantes.forEach(dia => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.classList.add('btn-filter-planificacion');
+            button.textContent = dia.nombre;
+            button.setAttribute('data-fecha', dia.fecha);
+            button.onclick = () => filtrarTareasPorPlanificacion(dia.fecha);
+            planificacionFilterContainer.appendChild(button);
+
+            // Marcar "Todas" como activa al inicio
+            if (dia.nombre === "Todas") {
+                button.classList.add('active');
+            }
+        });
+    }
+
+    // Función para gestionar el filtrado de tareas
+    function filtrarTareasPorPlanificacion(fecha) {
+        // Actualizar la interfaz de botones
+        document.querySelectorAll('.btn-filter-planificacion').forEach(btn => btn.classList.remove('active'));
+        const selectedButton = document.querySelector(`.btn-filter-planificacion[data-fecha="${fecha}"]`);
+        if (selectedButton) {
+            selectedButton.classList.add('active');
+        }
+
+        // Preparar los datos de filtro, combinando los filtros rápidos con los filtros del formulario principal
+        const filterData = {
+            cliente: document.getElementById('filter-cliente-id-input')?.value || '', // Usar el ID del cliente
+            asunto: document.getElementById('filter-asunto-input')?.value || '',
+            tipo: document.getElementById('filter-tipo-input')?.value || '',
+            subtipo: document.getElementById('filter-subtipo')?.value || '',
+            estado: document.getElementById('filter-estado')?.value || '',
+            usuario: document.getElementById('filter-user-ids')?.value || '',
+            archivo: document.getElementById('filter-archivo')?.value || '',
+            facturable: document.getElementById('filter-facturable')?.value || '',
+            facturado: document.getElementById('filter-facturado')?.value || '',
+            precio: document.getElementById('filter-precio')?.value || '',
+            suplido: document.getElementById('filter-suplido')?.value || '',
+            coste: document.getElementById('filter-coste')?.value || '',
+            fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
+            fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
+            fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
+            fecha_planificacion: fecha, // Este valor viene del filtro rápido de planificación
+            tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
+            tiempo_real: document.getElementById('filter-tiempo-real')?.value || ''
+        };
+
+        console.log('Datos de filtro:', filterData);
+
+        // Actualizar el panel con los filtros actuales
+        updateFilterInfoPanel(filterData);
+
+        // Realizar la solicitud al servidor para filtrar las tareas
+        fetch(`/tareas/filtrar`, {
+            method: 'POST',
+            body: JSON.stringify(filterData),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("Tareas filtradas recibidas:", data.filteredTasks);
+
+                    updateTaskTable(data.filteredTasks); // Actualizar la tabla con las tareas filtradas
+                    updatePagination(data.pagination, loadFilteredTasks);  // Pasar loadFilteredTasks para paginación si es necesario
+                } else {
+                    console.error('Error al filtrar tareas:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud:', error.message);
+            });
+    }
+
+
+
+
+
+    // Generar los botones de filtro de planificación al cargar la página
+    generarBotonesFiltroPlanificacion();
 
 
 });

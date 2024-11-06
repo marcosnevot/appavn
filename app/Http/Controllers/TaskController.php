@@ -128,6 +128,7 @@ class TaskController extends Controller
                 'fecha_imputacion' => 'nullable|date',
                 'tiempo_previsto' => 'nullable|numeric',
                 'tiempo_real' => 'nullable|numeric',
+                'planificacion' => 'nullable|date',
                 'users' => 'nullable|array', // Validar que sea un array de usuarios
                 'users.*' => 'exists:users,id' // Validar que cada usuario exista en la tabla 'users'
             ]);
@@ -205,6 +206,9 @@ class TaskController extends Controller
                     : null,
                 'fecha_imputacion' => isset($validated['fecha_imputacion'])
                     ? Carbon::parse($validated['fecha_imputacion'])->format('Y-m-d')
+                    : null,
+                'fecha_planificacion' => isset($validated['planificacion'])
+                    ? Carbon::parse($validated['planificacion'])->format('Y-m-d')
                     : null,
                 'tiempo_previsto' => $validated['tiempo_previsto'] ?? null,
                 'tiempo_real' => $validated['tiempo_real'] ?? null,
@@ -328,6 +332,11 @@ class TaskController extends Controller
                 $query->where('tiempo_real', '=', $filters['tiempo_real']);
             }
 
+            // Filtrar por fecha de planificación
+            if (!empty($filters['fecha_planificacion'])) {
+                $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+            }
+
             // Añadir el orden por fecha de creación, de más reciente a más antigua
             $query->orderBy('created_at', 'desc');
 
@@ -353,6 +362,8 @@ class TaskController extends Controller
             ], 500);
         }
     }
+
+
 
     public function destroy($id)
     {
@@ -477,6 +488,4 @@ class TaskController extends Controller
             return response()->json(['success' => false, 'message' => 'Error al actualizar la tarea: ' . $e->getMessage()], 500);
         }
     }
-
-    
 }

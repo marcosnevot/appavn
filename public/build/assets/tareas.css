@@ -8,6 +8,7 @@
 
 .header-tareas h2 {
     margin: 0;
+    padding: 0px 10px;
     /* Asegura que no haya margen extra en el h2 */
 }
 
@@ -57,7 +58,6 @@
     width: 350px;
     margin-bottom: 20px;
     /* Alinearlo con el select de ordenar */
-    flex-grow: 1;
     /* Permitir que ocupe espacio disponible */
     flex-shrink: 0;
     /* Asegurar que no se reduzca */
@@ -65,15 +65,7 @@
     /* Mantener la relación con el label */
 }
 
-/* Estilo del label de filtros aplicado */
-.filter-info-label {
-    position: absolute;
-    top: -18px;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 0;
-    margin-top: 0;
-}
+
 
 /* Estilo del contenido del panel */
 .filter-info-content p {
@@ -248,10 +240,13 @@
 
 /* Establece ancho específico para la columna de Cliente */
 .col-cliente {
-    width: 20%; /* Ajusta el porcentaje según el espacio necesario */
+    width: 20%;
+    /* Ajusta el porcentaje según el espacio necesario */
     max-width: 200px;
-    min-width: 180px; /* Controla el ancho mínimo */
-    word-wrap: break-word; /* Permite ajuste de texto dentro de la celda */
+    min-width: 180px;
+    /* Controla el ancho mínimo */
+    word-wrap: break-word;
+    /* Permite ajuste de texto dentro de la celda */
 }
 
 /* Estilos del formulario de tarea */
@@ -783,11 +778,300 @@
     /* Sin sombra */
 }
 
+
+/* Planificación Input */
+
+.planificacion-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 30px;
+    backdrop-filter: blur(8px);
+    transition: background-color 0.3s ease;
+}
+
+
+#planificacion-buttons {
+    display: flex;
+    gap: 1px;
+    overflow: hidden;
+    border-radius: 30px;
+}
+
+.btn-planificacion {
+    padding: 10px 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    background: rgba(240, 240, 240, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-left: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.2);
+}
+
+#planificacion-buttons .btn-planificacion:first-child {
+    border-radius: 30px 0 0 30px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+#planificacion-buttons .btn-planificacion:last-child {
+    border-radius: 0 30px 30px 0;
+}
+
+
+.btn-planificacion:hover {
+    background: rgba(80, 100, 220, 0.1);
+    color: #3a6abf;
+    box-shadow: inset 0 3px 6px rgba(80, 100, 220, 0.3);
+}
+
+.btn-planificacion.active {
+    background: linear-gradient(135deg, #4f80e2, #3a6abf);
+    color: #ffffff;
+    box-shadow: inset 0 4px 10px rgba(40, 80, 160, 0.4);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+#planificacion {
+    width: 20%;
+}
+
+/* Ajuste para el campo de fecha para que coincida con los botones */
+input[type="date"].planificacion-date-picker {
+    padding: 10px 15px;
+    border: 1px solid #d1d9e0;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    background-color: #e1e8ed;
+    color: #333333;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    appearance: none;
+    margin-left: 8px;
+    height: 42px;
+
+}
+
+input[type="date"].planificacion-date-picker:focus {
+    outline: none;
+    border-color: #4a90e2;
+    background-color: #c9d6e1;
+}
+
+
+
+/* Contenedor de los botones de planificación */
+
+/* Contenedor de Filtro Rápido */
+.quick-filter-planificacion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 30px;
+    backdrop-filter: blur(8px);
+    transition: background-color 0.3s ease;
+}
+
+/* Contenedor de botones - estilo de grupo */
+.planificacion-buttons-container {
+    display: flex;
+    gap: 1px;
+    overflow: hidden;
+    border-radius: 30px;
+}
+
+/* Botones de Filtro - Profesional */
+.btn-filter-planificacion {
+    padding: 10px 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    background: rgba(240, 240, 240, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-left: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.2);
+}
+
+/* Botones de bordes redondeados */
+.planificacion-buttons-container .btn-filter-planificacion:first-child {
+    border-radius: 30px 0 0 30px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.planificacion-buttons-container .btn-filter-planificacion:last-child {
+    border-radius: 0 30px 30px 0;
+}
+
+/* Estados de Hover y Active */
+.btn-filter-planificacion:hover {
+    background: rgba(80, 100, 220, 0.1);
+    color: #3a6abf;
+    box-shadow: inset 0 3px 6px rgba(80, 100, 220, 0.3);
+}
+
+.btn-filter-planificacion.active {
+    background: linear-gradient(135deg, #4f80e2, #3a6abf);
+    color: #ffffff;
+    box-shadow: inset 0 4px 10px rgba(40, 80, 160, 0.4);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+
+
+/* Ajustes generales para dispositivos grandes */
+@media (max-width: 1200px) {
+    .header-tareas h2 {
+        font-size: 1.5rem;
+    }
+
+    .btn-new-task {
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+
+    .filter-info-panel {
+        width: 300px;
+    }
+
+    /* Oculta el contenedor de ordenar */
+    .sort-container {
+        display: none;
+    }
+}
+
+/* Ajustes para pantallas medianas */
+@media (max-width: 992px) {
+    .actions {
+        flex-direction: row;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .filter-info-panel {
+        width: 270px;
+    }
+
+    .quick-filter-planificacion {
+        margin-bottom: 10px;
+        order: 1;
+    }
+
+    .btn-filter-planificacion {
+        padding: 8px 18px;
+        font-size: 0.85rem;
+    }
+
+    /* Ocultar botones menos importantes de planificación */
+    .planificacion-buttons-container .btn-filter-planificacion:nth-child(5),
+    .planificacion-buttons-container .btn-filter-planificacion:nth-child(6) {
+        display: none;
+    }
+
+    /* Ocultar el panel de información de filtros */
+    #filter-info-panel {
+        display: none;
+    }
+}
+
 /* Ajustes para pantallas pequeñas */
 @media (max-width: 768px) {
-    .pagination li button {
-        padding: 8px 12px;
-        /* Ajuste de tamaño de los botones */
+    .actions {
+        gap: 5px;
+        justify-content: flex-end;
+    }
+
+    .filter-info-panel {
+       display: none;
+    }
+
+    .btn-new-task,
+    #filter-task-button {
+        width: auto;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    /* Ocultar más botones de planificación */
+    .planificacion-buttons-container .btn-filter-planificacion:nth-child(4),
+    .planificacion-buttons-container .btn-filter-planificacion:nth-child(5) {
+        display: none;
+    }
+
+    .pagination-container {
+        padding: 10px;
+    }
+}
+
+/* Ajustes para pantallas extra pequeñas */
+@media (max-width: 576px) {
+    .header-tareas {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .quick-filter-planificacion {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+
+    .quick-filter-planificacion {
+        display: none;
+    }
+
+    .btn-filter-planificacion {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .btn-submit,
+    .btn-clear,
+    .btn-close {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Ajustes específicos para móviles muy pequeños */
+@media (max-width: 480px) {
+
+
+    .form-container {
+        padding: 15px;
+    }
+
+    .filter-info-panel {
+        width: 100%;
+        margin-bottom: 10px;
         font-size: 13px;
+    }
+
+    .quick-filter-planificacion {
+        display: none;
+    }
+
+    .actions {
+        justify-content: center;
+    }
+
+    /* Mantener los botones principales visibles en el centro */
+    .btn-new-task,
+    #filter-task-button {
+        width: auto;
+        margin: 5px 0;
+        font-size: 0.8rem;
     }
 }

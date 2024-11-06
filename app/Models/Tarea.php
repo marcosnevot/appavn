@@ -28,6 +28,7 @@ class Tarea extends Model
         'fecha_inicio',
         'fecha_vencimiento',
         'fecha_imputacion',
+        'fecha_planificacion',
         'tiempo_previsto',
         'tiempo_real'
     ];

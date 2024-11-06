@@ -23,6 +23,7 @@
                 <th>Fecha Imputación</th>
                 <th>Tiempo Previsto</th>
                 <th>Tiempo Real</th>
+                <th>Planificación</th>
                 <th>Asignado a</th>
                 <th style="display: none;">Archivo</th>
                 <th style="display: none;">Precio</th>

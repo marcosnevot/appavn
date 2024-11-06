@@ -133,7 +133,8 @@ document.addEventListener('DOMContentLoaded', function () {
             fecha_vencimiento: document.querySelector('input[name="fecha_vencimiento"]').value,
             fecha_imputacion: document.querySelector('input[name="fecha_imputacion"]').value,
             tiempo_previsto: document.querySelector('input[name="tiempo_previsto"]').value,
-            tiempo_real: document.querySelector('input[name="tiempo_real"]').value
+            tiempo_real: document.querySelector('input[name="tiempo_real"]').value,
+            planificacion: document.querySelector('input[name="planificacion"]').value
         };
 
         console.log('Datos del formulario:', formData);
@@ -172,8 +173,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     showNotification("Tarea creada exitosamente", "success");
-                    // Limpiar los usuarios seleccionados
+                    // Resetear determinados campos
                     resetSelectedUsers();
+                    generarBotonesPlanificacion();
                     document.getElementById('add-task-form').reset(); // Resetear el formulario
                 } else {
                     console.error('Errores de validación:', data.errors);
@@ -794,6 +796,81 @@ document.addEventListener('DOMContentLoaded', function () {
     // Ordenar inicialmente por fecha de creación (ID)
     sortTableBy('fecha_creacion');
 
+    // Definir referencias globales a los elementos de la planificación
+    const planificacionContainer = document.getElementById('planificacion-buttons');
+    const planificacionInput = document.getElementById('planificacion');
+
+    function obtenerDiasSemana() {
+        const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+        const hoy = new Date();
+        const hoyIndex = hoy.getDay();
+        const diasRestantes = [];
+
+        for (let i = 0; i < 7 - hoyIndex; i++) {
+            const nuevoDia = new Date(hoy);
+            nuevoDia.setDate(hoy.getDate() + i);
+            const diaSemana = nuevoDia.getDay();
+
+            // Excluir sábado y domingo
+            if (diaSemana === 0 || diaSemana === 6) continue;
+
+            const nombreDia = i === 0 ? "Hoy" : i === 1 ? "Mañana" : diasSemana[diaSemana - 1];
+            diasRestantes.push({
+                nombre: nombreDia,
+                fecha: nuevoDia.toISOString().split('T')[0]
+            });
+        }
+
+        return diasRestantes;
+    }
+
+    // Configuración inicial al cargar la página
+    function generarBotonesPlanificacion() {
+        planificacionContainer.innerHTML = ""; // Limpiar botones previos
+        const diasRestantes = obtenerDiasSemana();
+
+        diasRestantes.forEach(dia => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.classList.add('btn-planificacion');
+            button.textContent = dia.nombre;
+            button.setAttribute('data-fecha', dia.fecha);
+            button.onclick = () => setPlanificacion(dia.fecha);
+            planificacionContainer.appendChild(button);
+
+            // Seleccionar "Hoy" por defecto
+            if (dia.nombre === "Hoy") {
+                setPlanificacion(dia.fecha);
+                button.classList.add('active');
+            }
+        });
+    }
+
+    function setPlanificacion(fecha, isManual = false) {
+        planificacionInput.value = fecha; // Actualizar el input oculto con la fecha seleccionada
+
+        // Remover todas las clases `active` de los botones rápidos
+        document.querySelectorAll('.btn-planificacion').forEach(btn => btn.classList.remove('active'));
+
+        // Verificar si la fecha coincide con alguna de las opciones de botones rápidos
+        const selectedButton = Array.from(document.querySelectorAll('.btn-planificacion')).find(btn => btn.getAttribute('data-fecha') === fecha);
+        if (selectedButton) {
+            selectedButton.classList.add('active');
+        } else if (isManual) {
+            // Si es una fecha manual que no coincide con los botones rápidos, desmarcar todos
+            document.querySelectorAll('.btn-planificacion').forEach(btn => btn.classList.remove('active'));
+        }
+    }
+
+    // Escuchar cambios en el input `date` existente para desmarcar botones si la fecha es manual
+    planificacionInput.addEventListener('change', () => setPlanificacion(planificacionInput.value, true));
+
+    // Generar los botones de planificación al cargar la página
+    generarBotonesPlanificacion();
+
+
+
+    
 
 });
 
@@ -842,6 +919,7 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>
+            <td>${task.fecha_planificacion ? new Date(task.fecha_planificacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td style="display: none;>${task.archivo || 'No disponible'}</td>
             <td style="display: none;>${task.precio || 'N/A'}</td>
@@ -892,6 +970,7 @@ function updateSingleTaskRow(task) {
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>
+            <td>${task.fecha_planificacion ? new Date(task.fecha_planificacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
         `;

@@ -371,6 +371,76 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+    let tooltip = null;
+    let tooltipTimeout;
+
+    // Crear tooltip solo una vez y agregar al body
+    function createTooltip() {
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'client-tooltip';
+            tooltip.classList.add('client-tooltip');
+            tooltip.style.display = 'none';
+            document.body.appendChild(tooltip);
+
+            tooltip.addEventListener('mouseenter', () => clearTimeout(tooltipTimeout));
+            tooltip.addEventListener('mouseleave', hideTooltip);
+        }
+    }
+
+    // Función para mostrar el tooltip
+    function showTooltip(e, clientData) {
+        tooltip.innerHTML = `
+            <p><strong>NIF:</strong> ${clientData.nif || 'No disponible'}</p>
+            <p><strong>Dirección:</strong> ${clientData.direccion || 'No disponible'}</p>
+            <p><strong>Población:</strong> ${clientData.poblacion || 'No disponible'}</p>
+        `;
+        tooltip.style.top = `${e.pageY + 5}px`;
+        tooltip.style.left = `${e.pageX + 5}px`;
+        tooltip.style.display = 'block';
+        tooltip.classList.add('show');
+    }
+
+    // Función para ocultar el tooltip
+    // Función para ocultar el tooltip
+    function hideTooltip() {
+        if (tooltip) {
+            // Remover clase `show` para que la transición de ocultar funcione
+            tooltip.classList.remove('show');
+        }
+    }
+
+    // Función para agregar eventos al cliente
+    function addTooltipEvents(clientElement) {
+        const clientData = {
+            nif: clientElement.getAttribute('data-nif'),
+            direccion: clientElement.getAttribute('data-direccion'),
+            poblacion: clientElement.getAttribute('data-poblacion')
+        };
+
+        clientElement.addEventListener('mouseenter', (e) => {
+            tooltipTimeout = setTimeout(() => showTooltip(e, clientData), 500);
+        });
+        clientElement.addEventListener('mouseleave', () => {
+            clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(hideTooltip, 300);
+        });
+    }
+
+    // Observador para añadir el tooltip a los elementos cliente al abrir el modal
+    const observer2 = new MutationObserver(() => {
+        const clientElement = document.querySelector('.task-client');
+        if (clientElement) {
+            addTooltipEvents(clientElement);
+        }
+    });
+
+    // Configurar el observador para observar cambios en el modal
+    observer2.observe(modalContent, { childList: true, subtree: true });
+
+    // Crear el tooltip al cargar la página
+    createTooltip();
+
 });
 
 // Función para borrar la tarea

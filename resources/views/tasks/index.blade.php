@@ -5,6 +5,15 @@
     <h2 class="title">Tareas</h2>
 
     <div class="actions">
+
+        <!-- Contenedor de Filtro Rápido de Planificación -->
+        <div class="quick-filter-planificacion">
+            <div id="planificacion-filter-buttons" class="planificacion-buttons-container">
+                <!-- Aquí aparecerán los botones de planificación dinámica -->
+            </div>
+        </div>
+
+
         <!-- Panel informativo de los filtros aplicados -->
         <div id="filter-info-panel" class="filter-info-panel hide">
             <div id="filter-info-content" class="filter-info-content">
@@ -30,7 +39,7 @@
         <!-- Botón de Nueva Tarea -->
         <button id="new-task-button" class="btn-new-task">Nueva Tarea</button>
 
-       
+
     </div>
 </div>
 

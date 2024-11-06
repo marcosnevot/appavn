@@ -6,6 +6,20 @@
     <!-- Formulario para añadir tareas -->
     <form method="POST" id="add-task-form" enctype="multipart/form-data">
         @csrf
+        <div class="form-row">
+            <div class="form-group">
+                <div class="planificacion-container">
+                    <div id="planificacion-buttons" class="planificacion-buttons-container">
+                        <!-- Botones de planificación dinámicos aparecerán aquí -->
+                    </div>
+                    <!-- Campo oculto para almacenar la fecha seleccionada -->
+                    <input type="date" id="planificacion" name="planificacion" class="planificacion-date-picker">
+
+                </div>
+            </div>
+
+        </div>
+
         <!-- Fila 1: Cliente, Asunto, Tipo, Subtipo, Estado -->
         <div class="form-row">
             <div class="form-group wide">
@@ -20,7 +34,7 @@
             <div class="form-group wide">
                 <label for="asunto_id">Asunto:</label>
                 <div class="autocomplete">
-                    <input type="text" id="asunto-input" class="autocomplete-input" placeholder="Buscar o crear asunto..." autocomplete="off" >
+                    <input type="text" id="asunto-input" class="autocomplete-input" placeholder="Buscar o crear asunto..." autocomplete="off">
                     <input type="hidden" name="asunto_id" id="asunto-id-input"> <!-- Campo oculto para el id del asunto -->
                     <ul id="asunto-list" class="autocomplete-list"></ul>
                 </div>
@@ -29,7 +43,7 @@
             <div class="form-group medium">
                 <label for="tipo_id">Tipo de Tarea:</label>
                 <div class="autocomplete">
-                    <input type="text" id="tipo-input" class="autocomplete-input" placeholder="Buscar o crear tipo..." autocomplete="off" >
+                    <input type="text" id="tipo-input" class="autocomplete-input" placeholder="Buscar o crear tipo..." autocomplete="off">
                     <input type="hidden" name="tipo_id" id="tipo-id-input"> <!-- Campo oculto para el id del tipo -->
                     <ul id="tipo-list" class="autocomplete-list"></ul>
                 </div>
@@ -131,6 +145,7 @@
 
         <!-- Fila 4: Fecha Inicio, Vencimiento, Imputación, Tiempo Previsto, Tiempo Real -->
         <div class="form-row" style="margin-bottom:30px">
+
             <div class="form-group">
                 <label for="fecha_inicio">Fecha de Inicio:</label>
                 <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ now()->format('Y-m-d') }}">

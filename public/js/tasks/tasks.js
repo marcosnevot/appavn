@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>
+            <td>${task.fecha_planificacion ? new Date(task.fecha_planificacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td style="display: none;">${task.archivo || 'No disponible'}</td>
             <td style="display: none;">${task.precio || 'N/A'}</td>
@@ -81,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+ 
 
 
 
