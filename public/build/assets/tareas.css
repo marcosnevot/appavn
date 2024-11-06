@@ -166,7 +166,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     font-size: 16px;
     font-weight: 500;
-    z-index: 1003;
+    z-index: 7003;
     opacity: 0;
     /* Inicialmente invisible */
     visibility: hidden;
@@ -346,6 +346,24 @@
     flex: 1 1 auto;
     /* Deja que el ancho sea automático si no hay un `flex-basis` definido */
 }
+
+.form-group.grow {
+    flex-grow: 1;
+    min-width: 200px; /* Ajuste mínimo si es necesario */
+}
+
+.form-group.narrow {
+    flex: 0 0 auto;
+    display: flex;
+}
+.form-group.time {
+    width: 5%; /* Ajusta el valor según el ancho deseado */
+    display: inline-block; /* Para mantenerlos en una línea, si lo deseas */
+    box-sizing: border-box;
+}
+
+
+
 
 /* Asignación de porcentaje de ancho uniforme a los campos por fila */
 /* Fila 1: Cliente, Asunto, Tipo, Subtipo, Estado */
@@ -543,7 +561,7 @@
     display: none;
     /* Oculto por defecto */
     position: fixed;
-    z-index: 3000;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;

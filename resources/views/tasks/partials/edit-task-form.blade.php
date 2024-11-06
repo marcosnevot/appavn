@@ -12,13 +12,13 @@
         <input type="hidden" name="_method" value="PUT"> <!-- Asegúrate de incluir este campo -->
 
         <!-- Fila 1: Subtipo, Estado -->
-        <div class="form-row">
-            <div class="form-group">
+        <div class="form-row ">
+            <div class="form-group narrow">
                 <label for="facturable">Facturable:</label>
                 <input type="checkbox" name="facturableEdit" id="facturable" value="1">
             </div>
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="facturado">Facturado:</label>
                 <select name="facturadoEdit" id="facturado">
                     <option value="No">No</option>
@@ -27,7 +27,7 @@
                 </select>
             </div>
 
-            <div class="form-group medium">
+            <div class="form-group grow">
                 <label for="subtipo">Subtipo:</label>
                 <select name="subtipoEdit" id="subtipo">
                     <option value="ORDINARIA">Ordinaria</option>
@@ -35,7 +35,7 @@
                 </select>
             </div>
 
-            <div class="form-group narrow">
+            <div class="form-group grow">
                 <label for="estado">Estado:</label>
                 <select name="estadoEdit" id="estado">
                     <option value="PENDIENTE">Pendiente</option>
@@ -44,7 +44,12 @@
                 </select>
             </div>
 
-            <div class="form-group narrow">
+            <div class="form-group narrow" id="duplicar-container">
+                <label for="duplicar">Duplicar:</label>
+                <input type="checkbox" name="duplicar" id="duplicar" value="1">
+            </div>
+
+            <div class="form-group grow">
                 <label for="user-select-edit">Asignado a:</label>
                 <div class="custom-select" name="user-select-edit" tabindex="0" id="user-select-edit">
                     <div id="selected-users-edit" class="selected-users">
@@ -63,6 +68,8 @@
                 </div>
                 <input type="hidden" name="usersEdit" id="user-ids-edit">
             </div>
+
+
         </div>
 
         <!-- Fila 2: Asignado a, Archivo, Descripción, Observaciones -->
@@ -87,49 +94,58 @@
         </div>
 
         <!-- Fila 3: Facturable, Facturado, Precio, Suplido, Coste -->
-        <div class="form-row">
+        <div class="form-row" style="display: none;">
 
 
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label for="precio">Precio (€):</label>
                 <input type="number" step="0.01" name="precioEdit" id="precio">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label for="suplido">Suplido (€):</label>
                 <input type="number" step="0.01" name="suplidoEdit" id="suplido">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label for="coste">Coste (€):</label>
                 <input type="number" step="0.01" name="costeEdit" id="coste">
             </div>
+
+
+
+
         </div>
 
         <!-- Fila 4: Fecha Inicio, Vencimiento, Imputación, Tiempo Previsto, Tiempo Real -->
         <div class="form-row">
-            <div class="form-group">
+            <div class="form-group grow">
+                <label for="fecha_planificacion">Planificación:</label>
+                <input type="date" name="fecha_planificacionEdit" id="fecha_planificacion">
+            </div>
+
+            <div class="form-group grow">
                 <label for="fecha_inicio">Fecha de Inicio:</label>
                 <input type="date" name="fecha_inicioEdit" id="fecha_inicio">
             </div>
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="fecha_vencimiento">Fecha de Vencimiento:</label>
                 <input type="date" name="fecha_vencimientoEdit" id="fecha_vencimiento">
             </div>
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="fecha_imputacionEdit">Fecha de Imputación:</label>
                 <input type="date" name="fecha_imputacionEdit" id="fecha_imputacion">
             </div>
 
-            <div class="form-group">
-                <label for="tiempo_previsto">Tiempo Previsto (Horas):</label>
+            <div class="form-group time">
+                <label for="tiempo_previsto">Horas previstas:</label>
                 <input type="number" step="0.25" name="tiempo_previstoEdit" id="tiempo_previsto">
             </div>
 
-            <div class="form-group">
-                <label for="tiempo_real">Tiempo Real (Horas):</label>
+            <div class="form-group time">
+                <label for="tiempo_real">Horas reales:</label>
                 <input type="number" step="0.25" name="tiempo_realEdit" id="tiempo_real">
             </div>
         </div>

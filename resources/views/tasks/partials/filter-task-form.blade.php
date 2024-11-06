@@ -40,7 +40,7 @@
 
         <!-- Fila 2: Asignado a, Archivo, Facturable, Facturado -->
         <div class="form-row">
-            <div class="form-group narrow">
+            <div class="form-group grow">
                 <label for="filter-user-select">Asignado a:</label>
                 <div class="custom-select" name="filter-user-select" tabindex="0" id="filter-user-select">
                     <div id="filter-selected-users" class="selected-users">
@@ -67,7 +67,7 @@
                 <input type="text" name="filter_archivo" id="filter-archivo">
             </div>
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="filter-facturable">Facturable:</label>
                 <select name="filter_facturable" id="filter-facturable">
                     <option value="">Cualquiera</option>
@@ -76,7 +76,7 @@
                 </select>
             </div>
 
-            <div class="form-group medium">
+            <div class="form-group grow">
                 <label for="filter-facturado">Facturado:</label>
                 <select name="filter_facturado" id="filter-facturado">
                     <option value="">Cualquiera</option>
@@ -87,7 +87,7 @@
             </div>
 
 
-            <div class="form-group medium">
+            <div class="form-group grow">
                 <label for="filter-subtipo">Subtipo:</label>
                 <select name="filter_subtipo" id="filter-subtipo">
                     <option value="">Cualquiera</option>
@@ -96,7 +96,7 @@
                 </select>
             </div>
 
-            <div class="form-group narrow">
+            <div class="form-group grow">
                 <label for="filter-estado">Estado:</label>
                 <select name="filter_estado" id="filter-estado">
                     <option value="">Cualquiera</option>
@@ -127,28 +127,28 @@
 
         <!-- Fila 4: Fechas, Tiempo Previsto, Tiempo Real -->
         <div class="form-row" style="margin-bottom:30px">
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="filter-fecha-inicio">Fecha de Inicio:</label>
                 <input type="date" name="filter_fecha_inicio" id="filter-fecha-inicio">
             </div>
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="filter-fecha-vencimiento">Fecha de Vencimiento:</label>
                 <input type="date" name="filter_fecha_vencimiento" id="filter-fecha-vencimiento">
             </div>
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="filter-fecha-imputacion">Fecha de Imputación:</label>
                 <input type="date" name="filter_fecha_imputacion" id="filter-fecha-imputacion">
             </div>
 
-            <div class="form-group">
-                <label for="filter-tiempo-previsto">Tiempo Previsto (Horas):</label>
+            <div class="form-group time">
+                <label for="filter-tiempo-previsto">Horas Previstas:</label>
                 <input type="number" step="0.25" name="filter_tiempo_previsto" id="filter-tiempo-previsto">
             </div>
 
-            <div class="form-group">
-                <label for="filter-tiempo-real">Tiempo Real (Horas):</label>
+            <div class="form-group time">
+                <label for="filter-tiempo-real">Horas Reales:</label>
                 <input type="number" step="0.25" name="filter_tiempo_real" id="filter-tiempo-real">
             </div>
         </div>

@@ -428,6 +428,7 @@ class TaskController extends Controller
                 'precioEdit' => 'nullable|numeric',  // Validar precio
                 'suplidoEdit' => 'nullable|numeric',  // Validar suplido
                 'costeEdit' => 'nullable|numeric',  // Validar coste
+                'fecha_planificacionEdit' => 'nullable|date',  // Validar fecha de planificación
                 'fecha_inicioEdit' => 'nullable|date',  // Validar fecha de inicio
                 'fecha_vencimientoEdit' => 'nullable|date',  // Validar fecha de vencimiento
                 'fecha_imputacionEdit' => 'nullable|date',  // Validar fecha de imputación
@@ -435,6 +436,7 @@ class TaskController extends Controller
                 'tiempo_realEdit' => 'nullable|numeric',  // Validar tiempo real
                 'usersEdit' => 'nullable|array',  // Validar usuarios asignados
                 'usersEdit.*' => 'exists:users,id',  // Cada usuario debe existir en la tabla de usuarios
+                'duplicar' => 'nullable|boolean', // Validar el checkbox de duplicación
             ]);
 
             // Buscar la tarea por ID
@@ -452,6 +454,7 @@ class TaskController extends Controller
                 'precio' => $validated['precioEdit'],
                 'suplido' => $validated['suplidoEdit'],
                 'coste' => $validated['costeEdit'],
+                'fecha_planificacion' => $validated['fecha_planificacionEdit'],
                 'fecha_inicio' => $validated['fecha_inicioEdit'],
                 'fecha_vencimiento' => $validated['fecha_vencimientoEdit'],
                 'fecha_imputacion' => $validated['fecha_imputacionEdit'],
@@ -471,6 +474,24 @@ class TaskController extends Controller
 
             // Emitir el evento para que otros usuarios sean notificados de la actualización
             broadcast(new TaskUpdated($task));
+
+            // Si el checkbox de duplicación está marcado, crear una nueva tarea con los mismos datos
+            if ($validated['duplicar'] ?? false) {
+                $duplicatedTask = $task->replicate(); // Clonar la tarea sin el ID ni timestamps
+
+                // Cambiar el estado a "PENDIENTE" para la tarea duplicada
+                $duplicatedTask->estado = 'PENDIENTE';
+
+                // Guardar la nueva tarea duplicada
+                $duplicatedTask->save();
+
+                // Duplicar la asociación de usuarios
+                if (!empty($validated['usersEdit'])) {
+                    $duplicatedTask->users()->sync($validated['usersEdit']);
+                }
+
+                broadcast(new TaskCreated($duplicatedTask));
+            }
 
             // Confirmar la transacción
             DB::commit();

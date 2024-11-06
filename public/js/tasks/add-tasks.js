@@ -870,7 +870,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    
+
 
 });
 
@@ -919,7 +919,9 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>
-            <td>${task.fecha_planificacion ? new Date(task.fecha_planificacion).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>
+            ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+            </td>             
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td style="display: none;>${task.archivo || 'No disponible'}</td>
             <td style="display: none;>${task.precio || 'N/A'}</td>
@@ -970,7 +972,9 @@ function updateSingleTaskRow(task) {
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>
-            <td>${task.fecha_planificacion ? new Date(task.fecha_planificacion).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>
+            ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+            </td>             
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
         `;
@@ -1085,6 +1089,57 @@ function getCurrentFilters() {
 
 
 
+function formatFechaPlanificacion(fecha) {
+    const hoy = new Date();
+    const manana = new Date();
+    manana.setDate(hoy.getDate() + 1);
+    const fechaPlanificacion = new Date(fecha);
+
+    // Array con los nombres de los días de la semana
+    const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+    // Verificar si la fecha es hoy
+    if (
+        fechaPlanificacion.getDate() === hoy.getDate() &&
+        fechaPlanificacion.getMonth() === hoy.getMonth() &&
+        fechaPlanificacion.getFullYear() === hoy.getFullYear()
+    ) {
+        return "HOY";
+    }
+
+    // Verificar si la fecha es mañana
+    if (
+        fechaPlanificacion.getDate() === manana.getDate() &&
+        fechaPlanificacion.getMonth() === manana.getMonth() &&
+        fechaPlanificacion.getFullYear() === manana.getFullYear()
+    ) {
+        return "MAÑANA";
+    }
+
+    // Calcular el último día laborable de esta semana (viernes)
+    const diaHoy = hoy.getDay();
+    const diasHastaViernes = 5 - diaHoy; // 5 es viernes
+    const viernesDeEstaSemana = new Date(hoy);
+    viernesDeEstaSemana.setDate(hoy.getDate() + diasHastaViernes);
+
+    // Excluir sábado y domingo
+    const diaSemanaPlanificacion = fechaPlanificacion.getDay();
+    if (diaSemanaPlanificacion === 0 || diaSemanaPlanificacion === 6) {
+        return fechaPlanificacion.toLocaleDateString();
+    }
+
+    // Verificar si la fecha está en esta semana y es entre lunes y viernes
+    if (fechaPlanificacion <= viernesDeEstaSemana && fechaPlanificacion > hoy) {
+        return diasSemana[diaSemanaPlanificacion];
+    }
+
+    // Mostrar la fecha en formato normal para cualquier otra condición
+    return fechaPlanificacion.toLocaleDateString();
+}
+
+
+
+
 
 // Función para mostrar la notificación de éxito
 function showSuccessNotification(message = "Tarea creada exitosamente") {
@@ -1094,6 +1149,7 @@ function showSuccessNotification(message = "Tarea creada exitosamente") {
 
     notificationMessage.textContent = message;
     notificationTimer.style.width = '100%';
+    notification.style.zIndex = '7000';
 
     // Mostrar la notificación
     notification.classList.add('show');

@@ -54,12 +54,12 @@
 
         <!-- Fila 2: Asignado a, Archivo, Facturable, Facturado  -->
         <div class="form-row">
-            <div class="form-group">
+            <div class="form-group narrow">
                 <label for="facturable">Facturable:</label>
                 <input type="checkbox" name="facturable" id="facturable" value="1">
             </div>
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="facturado">Facturado:</label>
                 <select name="facturado" id="facturado">
                     <option value="NO">No</option>
@@ -69,7 +69,7 @@
             </div>
 
 
-            <div class="form-group medium">
+            <div class="form-group grow">
                 <label for="subtipo">Subtipo:</label>
                 <select name="subtipo" id="subtipo">
                     <option value="ORDINARIA">Ordinaria</option>
@@ -77,7 +77,7 @@
                 </select>
             </div>
 
-            <div class="form-group narrow">
+            <div class="form-group grow">
                 <label for="estado">Estado:</label>
                 <select name="estado" id="estado">
                     <option value="PENDIENTE">Pendiente</option>
@@ -86,7 +86,7 @@
                 </select>
             </div>
 
-            <div class="form-group narrow">
+            <div class="form-group">
                 <label for="user-select">Asignado a:</label>
                 <div class="custom-select" name="user-select" tabindex="0" id="user-select">
                     <div id="selected-users" class="selected-users">
@@ -146,28 +146,28 @@
         <!-- Fila 4: Fecha Inicio, Vencimiento, Imputación, Tiempo Previsto, Tiempo Real -->
         <div class="form-row" style="margin-bottom:30px">
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="fecha_inicio">Fecha de Inicio:</label>
                 <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ now()->format('Y-m-d') }}">
             </div>
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="fecha_vencimiento">Fecha de Vencimiento:</label>
                 <input type="date" name="fecha_vencimiento" id="fecha_vencimiento">
             </div>
 
-            <div class="form-group">
+            <div class="form-group grow">
                 <label for="fecha_imputacion">Fecha de Imputación:</label>
                 <input type="date" name="fecha_imputacion" id="fecha_imputacion">
             </div>
 
-            <div class="form-group">
-                <label for="tiempo_previsto">Tiempo Previsto (Horas):</label>
+            <div class="form-group time">
+                <label for="tiempo_previsto">Horas previstas:</label>
                 <input type="number" step="0.25" name="tiempo_previsto" id="tiempo_previsto">
             </div>
 
-            <div class="form-group">
-                <label for="tiempo_real">Tiempo Real (Horas):</label>
+            <div class="form-group time">
+                <label for="tiempo_real">Horas reales:</label>
                 <input type="number" step="0.25" name="tiempo_real" id="tiempo_real">
             </div>
         </div>

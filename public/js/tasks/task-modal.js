@@ -7,6 +7,59 @@ document.addEventListener('DOMContentLoaded', function () {
     const editTaskForm = document.getElementById('edit-task-form');
 
     const btnEditTaskForm = document.getElementById('btn-edit-task-form');
+    const btnCloseEditForm = document.getElementById('close-edit-task-form');
+
+    // Referencia al campo de "Estado" y al contenedor de "Duplicar" usando el atributo `name`
+    const estadoSelect = document.querySelector('[name="estadoEdit"]');  // Usar `name` para asegurar que se encuentra el campo correcto
+    const duplicarContainer = document.getElementById('duplicar').closest('.form-group'); // Contenedor del checkbox de duplicar
+    const duplicarCheckbox = document.getElementById('duplicar');
+
+    // Función para mostrar u ocultar el campo "Duplicar"
+    function toggleDuplicarVisibility() {
+        if (estadoSelect.value === 'COMPLETADA') {
+            duplicarContainer.style.display = 'flex'; // Mostrar el checkbox
+        } else {
+            duplicarContainer.style.display = 'none'; // Ocultar el checkbox
+            duplicarCheckbox.checked = false; // Desmarcar por seguridad
+        }
+    }
+
+    // Escuchar cambios en el campo de "Estado" y ejecutar la función
+    estadoSelect.addEventListener('change', toggleDuplicarVisibility);
+
+
+
+    // Configurar un MutationObserver para detectar cambios 
+    const observerDuplicar = new MutationObserver(() => {
+        toggleDuplicarVisibility(); // Llamar a la función cuando se detecte un cambio
+
+        // Evitar envío del formulario al presionar "Enter" en campos de entrada
+        Array.from(editTaskForm.elements).forEach(element => {
+            if (['text', 'number', 'date', 'textarea', 'checkbox'].includes(element.type)) {
+                element.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); // Evitar el envío del formulario
+                        if (element.type === 'checkbox') {
+                            element.checked = !element.checked; // Cambia el estado del checkbox
+                        }
+                    }
+                });
+            }
+        });
+
+        // Permitir "Enter" en los botones "Guardar" y "Cerrar"
+        [btnEditTaskForm, btnCloseEditForm].forEach(button => {
+            button.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    button.click(); // Ejecuta el clic del botón
+                }
+            });
+        });
+
+    });
+    if (editTaskFormContainer) {
+        observerDuplicar.observe(editTaskFormContainer, { childList: true, subtree: true });
+    }
 
 
     // Asignar Usuarios a una tarea (formulario de edición)
@@ -30,6 +83,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         const closeEditButton = document.getElementById('close-edit-task-form');
+
+
 
         // Asignar evento al botón de borrar
         if (deleteButton) {
@@ -60,7 +115,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(response => response.json())
                     .then(task => {
                         console.log('Datos recibidos:', task); // Verificar la respuesta
-
                         if (task.error) {
                             console.error('Error al cargar los datos de la tarea:', task.error);
                             return;
@@ -78,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         const suplidoInput = document.querySelector('input[name="suplidoEdit"]');
                         const costeInput = document.querySelector('input[name="costeEdit"]');
                         const fechaInicioInput = document.querySelector('input[name="fecha_inicioEdit"]');
+                        const fechaPlanificacionInput = document.querySelector('input[name="fecha_planificacionEdit"]');
                         const fechaVencimientoInput = document.querySelector('input[name="fecha_vencimientoEdit"]');
                         const fechaImputacionInput = document.querySelector('input[name="fecha_imputacionEdit"]');
                         const tiempoPrevistoInput = document.querySelector('input[name="tiempo_previstoEdit"]');
@@ -100,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (precioInput) precioInput.value = task.precio || '';
                         if (suplidoInput) suplidoInput.value = task.suplido || '';
                         if (costeInput) costeInput.value = task.coste || '';
+                        if (fechaPlanificacionInput) fechaPlanificacionInput.value = task.fecha_planificacion || '';
                         if (fechaInicioInput) fechaInicioInput.value = task.fecha_inicio || '';
                         if (fechaVencimientoInput) fechaVencimientoInput.value = task.fecha_vencimiento || '';
                         if (fechaImputacionInput) fechaImputacionInput.value = task.fecha_imputacion || '';
@@ -254,6 +310,17 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault(); // Prevenir el envío normal del formulario
 
         const taskId = document.getElementById('task_id').value;
+        const duplicarCheckbox = document.getElementById('duplicar'); // Referencia al checkbox de Duplicar
+
+        // Mostrar alerta si Duplicar está marcado
+        if (duplicarCheckbox.checked) {
+            const confirmDuplicar = confirm("Estás a punto de duplicar la tarea. ¿Deseas continuar?");
+
+            // Si el usuario cancela el duplicado, detenemos el proceso de envío
+            if (!confirmDuplicar) {
+                return;
+            }
+        }
 
         // Crear un objeto FormData en lugar de un objeto JSON
         const formData = new FormData(editTaskForm);
@@ -269,6 +336,8 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedUsersEdit.forEach(userId => {
             formData.append('usersEdit[]', userId);
         });
+
+        formData.append('duplicar', duplicarCheckbox.checked ? '1' : '0');
 
         fetch(`/tareas/${taskId}`, {
             method: 'POST',
@@ -433,6 +502,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (clientElement) {
             addTooltipEvents(clientElement);
         }
+
+
     });
 
     // Configurar el observador para observar cambios en el modal
