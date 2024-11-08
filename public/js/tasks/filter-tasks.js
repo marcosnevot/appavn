@@ -506,6 +506,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+
+
         return diasRestantes;
     }
 
@@ -521,22 +523,40 @@ document.addEventListener('DOMContentLoaded', function () {
             button.textContent = dia.nombre;
             button.setAttribute('data-fecha', dia.fecha);
             button.onclick = () => filtrarTareasPorPlanificacion(dia.fecha);
+
             planificacionFilterContainer.appendChild(button);
 
             // Marcar "Todas" como activa al inicio
-            if (dia.nombre === "Todas") {
+            if (dia.nombre === "Hoy") {
                 button.classList.add('active');
+                filtrarTareasPorPlanificacion(dia.fecha);
             }
         });
+        // Crear el botón de "Pasadas"
+        const botonPasadas = document.createElement('button');
+        botonPasadas.type = 'button';
+        botonPasadas.classList.add('btn-filter-planificacion', 'btn-pasadas'); // Añadimos una clase específica
+        botonPasadas.textContent = 'Pasadas';
+        botonPasadas.setAttribute('data-fecha', 'past');
+        botonPasadas.onclick = () => filtrarTareasPorPlanificacion('past');
+        planificacionFilterContainer.appendChild(botonPasadas);
+
     }
 
     // Función para gestionar el filtrado de tareas
     function filtrarTareasPorPlanificacion(fecha) {
         // Actualizar la interfaz de botones
-        document.querySelectorAll('.btn-filter-planificacion').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.btn-filter-planificacion').forEach(btn => {
+            btn.classList.remove('active', 'active-red'); // Limpiar clases activas y rojas
+        });
+
         const selectedButton = document.querySelector(`.btn-filter-planificacion[data-fecha="${fecha}"]`);
         if (selectedButton) {
-            selectedButton.classList.add('active');
+            if (fecha === 'past') {
+                selectedButton.classList.add('active-red'); // Usar una clase especial para "Pasadas"
+            } else {
+                selectedButton.classList.add('active');
+            }
         }
 
         // Preparar los datos de filtro, combinando los filtros rápidos con los filtros del formulario principal
@@ -556,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
             fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
             fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
-            fecha_planificacion: fecha, // Este valor viene del filtro rápido de planificación
+            fecha_planificacion: fecha === "past" ? "past" : fecha, // Este valor viene del filtro rápido de planificación
             tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
             tiempo_real: document.getElementById('filter-tiempo-real')?.value || ''
         };

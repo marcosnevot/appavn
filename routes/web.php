@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/tareas/{id}', [TaskController::class, 'destroy'])->name('tareas.destroy');
     Route::get('/tareas/{id}/edit', [TaskController::class, 'edit'])->name('tareas.edit');
     Route::put('/tareas/{id}', [TaskController::class, 'update'])->name('tareas.update');
+    Route::post('/tareas/export', [TaskController::class, 'exportFilteredTasks'])->name('tareas.export');
 
 
    

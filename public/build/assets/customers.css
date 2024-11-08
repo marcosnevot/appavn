@@ -16,54 +16,6 @@
     /* Alinea el botón a la derecha */
 }
 
-/* Contenedor de las acciones a la derecha */
-.actions {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    /* Espacio entre el select y el botón */
-}
-
-/* Contenedor para los filtros aplicados */
-.filter-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    width: 350px;
-    flex-grow: 1;
-    flex-shrink: 0;
-    position: relative;
-}
-
-/* Panel informativo de los filtros aplicados */
-.filter-info-panel {
-    display: flex;
-    height: 50px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 14px;
-    background-color: #f9f9f9;
-    color: #333;
-    width: 350px;
-    flex-grow: 1;
-    flex-shrink: 0;
-    position: relative;
-}
-
-.filter-info-label {
-    position: absolute;
-    top: -18px;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 0;
-}
-
-.filter-info-content p {
-    margin: 5px 0;
-    font-size: 13px;
-}
 
 .hide {
     display: none;
@@ -71,11 +23,6 @@
 
 
 
-.sort-select:hover,
-.sort-select:focus {
-    border-color: #4A90E2;
-    outline: none;
-}
 
 /* Botón de nuevo cliente */
 .btn-new-customer {
@@ -104,91 +51,6 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Notificación unificada */
-.notification {
-    position: absolute;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
-    font-weight: 500;
-    z-index: 1003;
-    opacity: 0;
-    visibility: hidden;
-    transition: top 0.7s ease, opacity 0.7s ease;
-    color: white;
-}
-
-.notification .notification-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.notification .notification-icon {
-    margin-right: 10px;
-    font-size: 18px;
-}
-
-.notification .notification-message {
-    font-weight: bold;
-}
-
-.notification .notification-timer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background-color: rgba(255, 255, 255, 0.5);
-    transition: width 3s linear;
-}
-
-.notification.show {
-    top: 20px;
-    opacity: 1;
-    visibility: visible;
-}
-
-.notification.hide {
-    top: 20px;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.7s ease;
-}
-
-/* Tipos de notificación */
-.notification.success {
-    background-color: #28a745;
-}
-
-.notification.error {
-    background-color: #dc3545;
-}
-
-.notification.info {
-    background-color: #17a2b8;
-}
-
-.notification.warning {
-    background-color: #ffc107;
-}
-
-/* Estilos para el modal de clientes */
-
-
-.modal-content {
-    background-color: #fff;
-    border-radius: 10px;
-    padding: 20px;
-    width: 400px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    animation: modalFadeIn 0.3s ease-out;
-}
 
 @keyframes modalFadeIn {
     from {

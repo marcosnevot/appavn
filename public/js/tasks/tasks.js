@@ -127,9 +127,73 @@ document.addEventListener('DOMContentLoaded', function () {
             return diasSemana[diaSemanaPlanificacion];
         }
 
+        // Si la fecha es anterior a hoy, formatearla en rojo
+        if (fechaPlanificacion < hoy) {
+            return `<span style="color: red;">${fechaPlanificacion.toLocaleDateString()}</span>`;
+        }
+
         // Mostrar la fecha en formato normal para cualquier otra condición
         return fechaPlanificacion.toLocaleDateString();
     }
+
+
+    document.getElementById('export-tasks-button').addEventListener('click', async function () {
+
+        const fileName = prompt("Ingrese el nombre para el archivo (sin extensión):", "tareas");
+
+        // Verificar si el usuario canceló
+        if (fileName === null) {
+            return;  // Salir de la función sin continuar con la exportación
+        }
+
+        const filterData = {
+            cliente: document.getElementById('filter-cliente-id-input')?.value || '',
+            asunto: document.getElementById('filter-asunto-input')?.value || '',
+            tipo: document.getElementById('filter-tipo-input')?.value || '',
+            subtipo: document.getElementById('filter-subtipo')?.value || '',
+            estado: document.getElementById('filter-estado')?.value || '',
+            usuario: document.getElementById('filter-user-ids')?.value || '',
+            archivo: document.getElementById('filter-archivo')?.value || '',
+            facturable: document.getElementById('filter-facturable')?.value || '',
+            facturado: document.getElementById('filter-facturado')?.value || '',
+            precio: document.getElementById('filter-precio')?.value || '',
+            suplido: document.getElementById('filter-suplido')?.value || '',
+            coste: document.getElementById('filter-coste')?.value || '',
+            fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
+            fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
+            fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
+            tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
+            tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
+            fileName: fileName + '.xlsx'
+        };
+
+        try {
+            const response = await fetch('/tareas/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(filterData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName + '.xlsx';  // Nombre del archivo personalizado
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url); // Liberar el objeto URL
+        } catch (error) {
+            console.error('Error al exportar:', error);
+        }
+    });
 
 
 

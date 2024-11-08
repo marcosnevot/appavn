@@ -6,6 +6,8 @@ use App\Events\TareaActualizada;
 use App\Events\TaskCreated;
 use App\Events\TaskDeleted;
 use App\Events\TaskUpdated;
+use App\Exports\TareasExport;
+use App\Exports\TasksExport;
 use App\Models\Asunto;
 use App\Models\Cliente;
 use App\Models\Tarea;
@@ -16,6 +18,7 @@ use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TaskController extends Controller
 {
@@ -47,6 +50,9 @@ class TaskController extends Controller
         // Obtener el ID de usuario de la solicitud (si existe)
         $userId = $request->query('user_id');
 
+        // Obtener la fecha actual en formato YYYY-MM-DD
+        $fechaHoy = date('Y-m-d');
+
         // Crear la consulta base para las tareas con relaciones necesarias
         $query = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
             ->orderBy('created_at', 'desc');
@@ -56,6 +62,11 @@ class TaskController extends Controller
             $query->whereHas('users', function ($q) use ($userId) {
                 $q->where('users.id', $userId);
             });
+        }
+
+        // Si no hay un filtro específico para fecha de planificación, filtrar por tareas de hoy
+        if (!$request->has('fecha_planificacion') || $request->input('fecha_planificacion') === 'Hoy') {
+            $query->whereDate('fecha_planificacion', $fechaHoy);
         }
 
         // Ejecutar la consulta con paginación
@@ -281,6 +292,12 @@ class TaskController extends Controller
                 $query->where('subtipo', $filters['subtipo']);
             }
 
+
+            // Filtrar por subtipo
+            if (!empty($filters['facturado'])) {
+                $query->where('facturado', $filters['facturado']);
+            }
+
             // Filtrar por estado
             if (!empty($filters['estado'])) {
                 $query->where('estado', $filters['estado']);
@@ -334,7 +351,13 @@ class TaskController extends Controller
 
             // Filtrar por fecha de planificación
             if (!empty($filters['fecha_planificacion'])) {
-                $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+                if ($filters['fecha_planificacion'] === 'past') {
+                    // Filtrar por fechas anteriores a hoy
+                    $query->whereDate('fecha_planificacion', '<', now()->toDateString());
+                } else {
+                    // Filtrar por una fecha específica
+                    $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+                }
             }
 
             // Añadir el orden por fecha de creación, de más reciente a más antigua
@@ -363,6 +386,140 @@ class TaskController extends Controller
         }
     }
 
+    // Método de exportación de tareas filtradas
+    public function exportFilteredTasks(Request $request)
+    {
+        // Obtén los filtros aplicados desde la solicitud
+        $filters = $request->all();
+
+        // Aplica los filtros a la consulta de tareas
+        $query = Tarea::select([
+            'id',
+            'asunto_id',
+            'cliente_id',
+            'tipo_id',
+            'descripcion',
+            'observaciones',
+            'facturable',
+            'facturado',
+            'subtipo',
+            'estado',
+            'fecha_inicio',
+            'fecha_vencimiento',
+            'fecha_imputacion',
+            'tiempo_previsto',
+            'tiempo_real',
+            'fecha_planificacion',
+            'created_at'
+        ])->with(['cliente', 'asunto', 'tipo', 'users']);
+        // Filtrar por cliente
+        if (!empty($filters['cliente'])) {
+            $query->where('cliente_id', $filters['cliente']);
+        }
+
+        // Filtrar por asunto
+        if (!empty($filters['asunto'])) {
+            // Buscar el asunto por nombre
+            $asunto = Asunto::where('nombre', 'like', '%' . $filters['asunto'] . '%')->first();
+            if ($asunto) {
+                $query->where('asunto_id', $asunto->id);
+            }
+        }
+
+        // Filtrar por tipo
+        if (!empty($filters['tipo'])) {
+            // Buscar el tipo por nombre
+            $tipo = Tipo::where('nombre', 'like', '%' . $filters['tipo'] . '%')->first();
+            if ($tipo) {
+                $query->where('tipo_id', $tipo->id);
+            }
+        }
+
+        // Filtrar por subtipo
+        if (!empty($filters['subtipo'])) {
+            $query->where('subtipo', $filters['subtipo']);
+        }
+
+
+        // Filtrar por subtipo
+        if (!empty($filters['facturado'])) {
+            $query->where('facturado', $filters['facturado']);
+        }
+
+        // Filtrar por estado
+        if (!empty($filters['estado'])) {
+            $query->where('estado', $filters['estado']);
+        }
+
+        // Filtrar por usuario asignado
+        if (!empty($filters['usuario'])) {
+            // Convertir los IDs separados por comas en un array
+            $userIds = explode(',', $filters['usuario']);
+
+            // Filtrar las tareas que tienen al menos uno de estos usuarios asignados
+            $query->whereHas('users', function ($q) use ($userIds) {
+                // Asegurarse de especificar que 'id' es de la tabla 'users'
+                $q->whereIn('users.id', $userIds);
+            });
+        }
+
+
+        // Filtrar por archivo
+        if (!empty($filters['archivo'])) {
+            $query->where('archivo', 'like', '%' . $filters['archivo'] . '%');
+        }
+
+        // Filtrar por facturable
+        if (isset($filters['facturable'])) {
+            $query->where('facturable', $filters['facturable']);
+        }
+
+        // Filtrar por fechas
+        if (!empty($filters['fecha_inicio'])) {
+            $query->whereDate('fecha_inicio', '>=', $filters['fecha_inicio']);
+        }
+
+        if (!empty($filters['fecha_vencimiento'])) {
+            $query->whereDate('fecha_vencimiento', '<=', $filters['fecha_vencimiento']);
+        }
+
+        // Filtrar por precio
+        if (!empty($filters['precio'])) {
+            $query->where('precio', '=', $filters['precio']);
+        }
+
+        // Filtrar por tiempo previsto y tiempo real
+        if (!empty($filters['tiempo_previsto'])) {
+            $query->where('tiempo_previsto', '=', $filters['tiempo_previsto']);
+        }
+
+        if (!empty($filters['tiempo_real'])) {
+            $query->where('tiempo_real', '=', $filters['tiempo_real']);
+        }
+
+        // Filtrar por fecha de planificación
+        if (!empty($filters['fecha_planificacion'])) {
+            if ($filters['fecha_planificacion'] === 'past') {
+                // Filtrar por fechas anteriores a hoy
+                $query->whereDate('fecha_planificacion', '<', now()->toDateString());
+            } else {
+                // Filtrar por una fecha específica
+                $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+            }
+        }
+
+        // Añadir el orden por fecha de creación, de más reciente a más antigua
+        $query->orderBy('created_at', 'desc');
+
+
+
+        $filteredTasks = $query->get();
+        $fileName = $filters['fileName'] ?? 'tareas_filtradas.xlsx';
+
+        // Exporta las tareas filtradas
+
+        return Excel::download(new TasksExport($filteredTasks), $fileName);
+    }
 
 
     public function destroy($id)

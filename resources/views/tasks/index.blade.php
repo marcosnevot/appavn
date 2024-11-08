@@ -32,6 +32,7 @@
                 <option value="estado">Estado</option>
             </select>
         </div>
+        <button id="export-tasks-button" class="btn-new-task">Excel</button>
 
         <!-- Botón de Filtrar Tarea -->
         <button id="filter-task-button" class="btn-new-task">Filtrar</button>

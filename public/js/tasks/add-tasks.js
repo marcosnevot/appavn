@@ -923,6 +923,7 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
             </td>             
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+            
             <td style="display: none;>${task.archivo || 'No disponible'}</td>
             <td style="display: none;>${task.precio || 'N/A'}</td>
             <td style="display: none;>${task.suplido || 'N/A'}</td>
@@ -1131,6 +1132,11 @@ function formatFechaPlanificacion(fecha) {
     // Verificar si la fecha está en esta semana y es entre lunes y viernes
     if (fechaPlanificacion <= viernesDeEstaSemana && fechaPlanificacion > hoy) {
         return diasSemana[diaSemanaPlanificacion];
+    }
+
+    // Si la fecha es anterior a hoy, formatearla en rojo
+    if (fechaPlanificacion < hoy) {
+        return `<span style="color: red;">${fechaPlanificacion.toLocaleDateString()}</span>`;
     }
 
     // Mostrar la fecha en formato normal para cualquier otra condición
