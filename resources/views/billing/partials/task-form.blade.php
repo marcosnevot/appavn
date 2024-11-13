@@ -53,15 +53,10 @@
                 </div>
             </div>
 
-
-        </div>
-
-        <!-- Fila 2: Asignado a, Archivo, Facturable, Facturado  -->
-        <div class="form-row">
             <div class="form-group narrow">
                 <label for="facturable">Facturable:</label>
-                <input type="checkbox" name="facturable" id="facturable" value="1">
-            </div>
+                <input type="checkbox" name="facturable" id="facturable" value="1" checked>
+                </div>
 
             <div class="form-group grow">
                 <label for="facturado">Facturado:</label>
@@ -71,6 +66,13 @@
                     <option value="NUNCA">Nunca</option>
                 </select>
             </div>
+
+
+
+        </div>
+
+        <!-- Fila 2: Asignado a, Archivo, Facturable, Facturado  -->
+        <div class="form-row" style="display: none;">
 
 
             <div class="form-group grow">
@@ -113,6 +115,16 @@
             <div class="form-group narrow" style="display:none">
                 <label for="archivo">Archivo:</label>
                 <input type="text" name="archivo" id="archivo">
+            </div>
+
+            <div class="form-group time">
+                <label for="tiempo_previsto">Horas previstas:</label>
+                <input type="number" step="0.25" name="tiempo_previsto" id="tiempo_previsto">
+            </div>
+
+            <div class="form-group time">
+                <label for="tiempo_real">Horas reales:</label>
+                <input type="number" step="0.25" name="tiempo_real" id="tiempo_real">
             </div>
 
 
@@ -165,15 +177,7 @@
                 <input type="date" name="fecha_imputacion" id="fecha_imputacion">
             </div>
 
-            <div class="form-group time">
-                <label for="tiempo_previsto">Horas previstas:</label>
-                <input type="number" step="0.25" name="tiempo_previsto" id="tiempo_previsto">
-            </div>
 
-            <div class="form-group time">
-                <label for="tiempo_real">Horas reales:</label>
-                <input type="number" step="0.25" name="tiempo_real" id="tiempo_real">
-            </div>
         </div>
 
         <!-- Botones del formulario -->

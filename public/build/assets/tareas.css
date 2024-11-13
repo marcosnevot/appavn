@@ -23,39 +23,56 @@
     align-items: center;
     gap: 20px;
     /* Espacio entre el select y el botón */
+    width: 100%;
+    margin-left: 50px;
 }
 
+.actions-space {
+    flex-grow: 1;
+    /* Ocupa todo el espacio disponible entre los elementos */
+}
 
-
-
-/* Estilos del panel de filtros aplicados */
+/* Estilo general del panel informativo de los filtros aplicados */
 .filter-info-panel {
     display: flex;
-    height: 60px;
-
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: #f4f4f9;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    height: 60px; /* Altura fija */
+    overflow-y: auto; /* Scrollbar vertical cuando el contenido exceda la altura */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-family: "Inter", sans-serif;
     font-size: 14px;
-    background-color: #f9f9f9;
-    color: #333;
-    width: 300px;
-    margin-bottom: 20px;
-    /* Alinearlo con el select de ordenar */
-    /* Permitir que ocupe espacio disponible */
-    flex-shrink: 0;
-    /* Asegurar que no se reduzca */
-    position: relative;
-    /* Mantener la relación con el label */
+    color: #374151;
 }
 
+/* Hover para destacar */
+.filter-info-panel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
 
-
-/* Estilo del contenido del panel */
+/* Estilo del contenido dentro del panel */
 .filter-info-content p {
-    margin: 5px 0;
-    font-size: 13px;
+    margin: 4px 0;
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.5;
+    word-break: break-word; /* Asegura que el texto largo no rompa el diseño */
 }
+
+.filter-info-content p strong {
+    color: #111827;
+    font-weight: 600;
+}
+
 
 /* Ocultar el panel cuando no hay filtros */
 .hide {
@@ -101,42 +118,90 @@
 
 /* Estilos del botón de nueva tarea */
 .btn-new-task {
-    padding: 12px 25px;
-    background-color: #1E1E1E;
-    /* Usamos el mismo gris oscuro que el sidebar */
+    padding: 12px 20px;
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    /* Gradiente de grises oscuros */
     color: #FFFFFF;
-    /* Texto blanco para buen contraste */
     font-size: 16px;
     font-weight: 600;
-    border: none;
-    border-radius: 6px;
+    border: 1px solid #151515;
+    /* Borde un poco más oscuro para definición */
+    border-radius: 8px;
     /* Bordes ligeramente redondeados */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    /* Sombra ligera para darle profundidad */
-    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    /* Suavizamos las transiciones */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Sombra suave para dar profundidad */
+    transition: all 0.2s ease-in-out;
+    /* Transiciones suaves */
     cursor: pointer;
     margin-bottom: 20px;
-
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-new-task:hover {
-    background-color: #333333;
-    /* Cambia a un gris ligeramente más claro en hover */
+    background: linear-gradient(145deg, #2a2a2a, #3a3a3a);
+    /* Gradiente más claro en hover */
+    border-color: #333333;
+    /* Borde más claro */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    /* Sombra más profunda */
     transform: translateY(-2px);
-    /* Efecto de levantamiento suave */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    /* Sombra más pronunciada al hacer hover */
+    /* Efecto de elevación en hover */
 }
 
 .btn-new-task:active {
-    background-color: #4A4A4A;
-    /* Un color intermedio entre el gris claro y oscuro para la acción activa */
+    border-color: #1e1e1e;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    /* Sombra reducida en clic */
     transform: translateY(0);
     /* Vuelve a su posición original */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    /* Sombra original cuando se hace clic */
 }
+
+
+
+.btn-excel {
+    background-color: #f3f4f6;
+    /* Fondo claro para un look profesional */
+    border: 1px solid #d1d5db;
+    /* Borde ligero para delinear */
+    border-radius: 8px;
+    /* Bordes redondeados */
+    padding: 8px;
+    /* Espaciado interno */
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    /* Efecto de transición */
+    display: inline-flex;
+    /* Alinear el contenido */
+    align-items: center;
+    /* Centrar la imagen */
+}
+
+.btn-excel img {
+    width: 36px;
+    /* Ajuste del tamaño del ícono */
+    height: auto;
+    display: block;
+}
+
+/* Efecto al pasar el ratón */
+.btn-excel:hover {
+    background-color: #e5e7eb;
+    /* Fondo más oscuro en hover */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+    /* Sombra suave */
+}
+
+/* Efecto al hacer clic */
+.btn-excel:active {
+    background-color: #d1d5db;
+    /* Fondo ligeramente más oscuro en clic */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    /* Sombra reducida en clic */
+}
+
 
 
 /* Estilo general de la notificación */
@@ -333,16 +398,20 @@
 
 .form-group.grow {
     flex-grow: 1;
-    min-width: 200px; /* Ajuste mínimo si es necesario */
+    min-width: 200px;
+    /* Ajuste mínimo si es necesario */
 }
 
 .form-group.narrow {
     flex: 0 0 auto;
     display: flex;
 }
+
 .form-group.time {
-    width: 5%; /* Ajusta el valor según el ancho deseado */
-    display: inline-block; /* Para mantenerlos en una línea, si lo deseas */
+    width: 5%;
+    /* Ajusta el valor según el ancho deseado */
+    display: inline-block;
+    /* Para mantenerlos en una línea, si lo deseas */
     box-sizing: border-box;
 }
 
@@ -540,12 +609,24 @@
     background-color: #f0f0f0;
 }
 
+.highlight {
+    font-weight: bold;
+    color: #007bff;
+    /* Puedes elegir el color que mejor se adapte a tu diseño */
+}
+
+#cliente-info {
+    color: #666;
+    font-style: italic;
+    margin-left: 5px;
+}
+
 /* Estilos del Modal */
 .modal {
     display: none;
     /* Oculto por defecto */
     position: fixed;
-    z-index: 1000;
+    z-index: 6000;
     left: 0;
     top: 0;
     width: 100%;
@@ -946,7 +1027,77 @@ input[type="date"].planificacion-date-picker:focus {
     border-color: rgba(255, 255, 255, 0.25);
 }
 
+.hours-summary {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: #f4f4f9;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 1px 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
+.hours-summary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hours-summary p {
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+.hours-summary strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.hours-summary span {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2563eb;
+    margin-left: 8px;
+    transition: color 0.3s ease, font-size 0.3s ease;
+}
+
+.hours-summary span.updated {
+    color: #059669;
+    font-size: 20px;
+    animation: highlight 0.5s ease-in-out;
+}
+
+@keyframes highlight {
+    0% {
+        background-color: #d1fae5;
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Adaptabilidad para dispositivos pequeños */
+@media (max-width: 768px) {
+    .hours-summary {
+        width: 100%;
+        padding: 12px 16px;
+        margin: 12px 0;
+    }
+
+    .hours-summary p {
+        font-size: 14px;
+    }
+
+    .hours-summary span {
+        font-size: 16px;
+    }
+}
 
 /* Ajustes generales para dispositivos grandes */
 @media (max-width: 1200px) {
@@ -1011,7 +1162,7 @@ input[type="date"].planificacion-date-picker:focus {
     }
 
     .filter-info-panel {
-       display: none;
+        display: none;
     }
 
     .btn-new-task,

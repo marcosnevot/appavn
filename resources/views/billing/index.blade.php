@@ -2,10 +2,9 @@
 
 @section('content')
 <div class="header-tareas">
-    <h2 style="width: auto; min-width:220px; max-width:600px;" class="title">
-        Tareas de <span id="selected-user-names">todos</span>
+<h2 style="width: auto; min-width:220px; max-width:600px;" class="title">
+        Facturación de <span id="selected-user-names">todos</span>
     </h2>
-
     <div class="actions">
 
         <!-- Contenedor de Filtro Rápido de Planificación -->
@@ -60,7 +59,7 @@
 
 
 <!-- Contenedor de la tabla de tareas -->
-@include('tasks.partials.task-table')
+@include('billing.partials.task-table')
 
 <!-- Pasamos los datos de clientes, asuntos y tipos como un atributo data -->
 <div id="clientes-data" data-clientes='@json($clientes)'></div>
@@ -69,10 +68,10 @@
 <div id="usuarios-data" data-usuarios='@json($usuarios)'></div>
 
 <!-- Incluir el formulario de nueva tarea -->
-@include('tasks.partials.task-form')
+@include('billing.partials.task-form')
 
 <!-- Incluir el formulario de filtrar tareas -->
-@include('tasks.partials.filter-task-form')
+@include('billing.partials.filter-task-form')
 
 <!-- Formulario de edición de la tarea -->
 @include('tasks.partials.edit-task-form')
@@ -81,11 +80,16 @@
 
 @section('scripts')
 
-<script src="{{ asset('js/tasks/common-tasks.js') }}"></script>
-<script src="{{ asset('js/tasks/add-tasks.js') }}"></script>
-<script src="{{ asset('js/tasks/filter-tasks.js') }}"></script>
-<script src="{{ asset('js/tasks/tasks.js') }}"></script>
-<script src="{{ asset('js/tasks/task-modal.js') }}"></script>
+<script>
+    // Variable para indicar que estamos en la vista de facturación
+    const isBillingView = true;
+</script>
+
+<script src="{{ asset('js/billing/common-billing.js') }}"></script>
+<script src="{{ asset('js/billing/add-billing.js') }}"></script>
+<script src="{{ asset('js/billing/filter-billing.js') }}"></script>
+<script src="{{ asset('js/billing/billing.js') }}"></script>
+<script src="{{ asset('js/billing/billing-modal.js') }}"></script>
 
 
 @endsection

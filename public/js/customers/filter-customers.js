@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let tributacionesData = JSON.parse(document.getElementById('tributaciones-data').getAttribute('data-tributaciones'));
     let situacionesData = JSON.parse(document.getElementById('situaciones-data').getAttribute('data-situaciones'));
     let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+    let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
 
     const filterCustomerButton = document.getElementById('filter-customer-button');
     const filterCustomerForm = document.getElementById('filter-customer-form');
@@ -225,12 +226,28 @@ document.addEventListener('DOMContentLoaded', function () {
         item => item.nombre
     );
 
+    // Autocompletar para Cliente Nombre
+    setupAutocomplete('filter-nombre-fiscal-input', 'filter-nombre-fiscal-id-input', 'filter-nombre-fiscal-list', clientesData,
+        item => item.nombre_fiscal,
+        item => item.nombre_fiscal
+    );
+
+    // Autocompletar para Cliente NIF
+    setupAutocomplete('filter-nif-input', 'filter-nif-id-input', 'filter-nif-list', clientesData,
+        item => item.nif,
+        item => item.nif
+    );
+
     document.addEventListener('click', function (e) {
         // Cerrar todas las listas de autocompletar si el clic no es en un input o en una lista de autocompletar
         closeAutocompleteListIfClickedOutside('filter-tipo-cliente-input', 'filter-tipo-cliente-list', e);
         closeAutocompleteListIfClickedOutside('filter-clasificacion-input', 'filter-clasificacion-list', e);
         closeAutocompleteListIfClickedOutside('filter-tributacion-input', 'filter-tributacion-list', e);
         closeAutocompleteListIfClickedOutside('filter-situacion-input', 'filter-situacion-list', e);
+        closeAutocompleteListIfClickedOutside('filter-nombre-fiscal-input', 'filter-nombre-fiscal-list', e);
+        closeAutocompleteListIfClickedOutside('filter-nif-input', 'filter-nif-list', e);
+
+
     });
 
 
@@ -243,12 +260,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function filterItems(query) {
             const filtered = dataList.filter(item => {
-                const mainMatch = itemSelector(item).toLowerCase().includes(query.toLowerCase());
-                const extraMatch = extraMatchSelector ? extraMatchSelector(item).toLowerCase().includes(query.toLowerCase()) : false;
+                const mainMatchValue = itemSelector(item);
+                const mainMatch = mainMatchValue && mainMatchValue.toLowerCase().includes(query.toLowerCase());
+                
+                const extraMatchValue = extraMatchSelector ? extraMatchSelector(item) : null;
+                const extraMatch = extraMatchValue && extraMatchValue.toLowerCase().includes(query.toLowerCase());
+        
                 return mainMatch || extraMatch;
             });
             renderList(filtered);
         }
+        
 
         function renderList(filtered) {
             list.innerHTML = '';

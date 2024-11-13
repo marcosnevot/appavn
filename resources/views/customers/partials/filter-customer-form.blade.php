@@ -8,12 +8,20 @@
         <div class="form-row">
             <div class="form-group wide">
                 <label for="filter-nombre-fiscal-input">Nombre Fiscal:</label>
-                <input type="text" id="filter-nombre-fiscal-input" name="filter_nombre_fiscal" placeholder="Buscar nombre fiscal..." autocomplete="off">
+                <div class="autocomplete">
+                    <input type="text" id="filter-nombre-fiscal-input" name="filter_nombre_fiscal"  class="autocomplete-input" placeholder="Buscar cliente..." autocomplete="off">
+                    <input type="hidden" name="filter_nombre-fiscal_id" id="filter-nombre-fiscal-id-input">
+                    <ul id="filter-nombre-fiscal-list" class="autocomplete-list"></ul>
+                </div>
             </div>
 
             <div class="form-group medium">
                 <label for="filter-nif-input">NIF:</label>
-                <input type="text" id="filter-nif-input" name="filter_nif" placeholder="Buscar NIF..." autocomplete="off">
+                <div class="autocomplete">
+                    <input type="text" id="filter-nif-input" name="filter_nif"  class="autocomplete-input" placeholder="Buscar NIF..." autocomplete="off">
+                    <input type="hidden" name="filter_nif_id" id="filter-nif-id-input">
+                    <ul id="filter-nif-list" class="autocomplete-list"></ul>
+                </div>
             </div>
 
             <div class="form-group medium">

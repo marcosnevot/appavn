@@ -4,7 +4,7 @@
 <div class="header-clientes">
     <h2 class="title">Clientes</h2>
 
-    <div class="actions">
+    <div class="actions2">
         <!-- Panel informativo de los filtros aplicados -->
         <div id="filter-info-panel" class="filter-info-panel hide">
             <div id="filter-info-content" class="filter-info-content">
@@ -49,6 +49,8 @@
 <div id="situaciones-data" data-situaciones='@json($situaciones)'></div>
 <div id="tributaciones-data" data-tributaciones='@json($tributaciones)'></div>
 <div id="usuarios-data" data-usuarios='@json($usuarios)'></div>
+<div id="clientes-data" data-clientes='@json($clientes)'></div>
+
 
 <!-- Incluir el formulario de nuevo cliente -->
 @include('customers.partials.customer-form')

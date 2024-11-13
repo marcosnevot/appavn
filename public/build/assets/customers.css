@@ -7,8 +7,11 @@
 }
 
 .header-clientes h2 {
-    margin: 0;
-    /* Asegura que no haya margen extra en el h2 */
+    
+        margin: 0;
+        padding: 0px 10px;
+        width: 150px;   
+  
 }
 
 .header-clientes .btn-new-customer {
@@ -22,7 +25,14 @@
 }
 
 
-
+/* Contenedor de las acciones a la derecha */
+.actions2 {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    /* Espacio entre el select y el botón */
+    margin-left: 50px;
+}
 
 /* Botón de nuevo cliente */
 .btn-new-customer {

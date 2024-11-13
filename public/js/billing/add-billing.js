@@ -937,24 +937,13 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
-            <td>${task.facturable ? 'Sí' : 'No'}</td>
-            <td>${task.facturado || 'No'}</td>
-            <td>${task.subtipo || ''}</td>
-            <td>${task.estado}</td>
+            <td>${task.facturable ? 'SI' : 'NO'}</td>
+            <td>${task.facturado || 'NO'}</td>
+ 
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.tiempo_previsto || 'N/A'}</td>
-            <td>${task.tiempo_real || 'N/A'}</td>
-            <td>
-            ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-            </td>             
-            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
-            
-            <td style="display: none;>${task.archivo || 'No disponible'}</td>
-            <td style="display: none;>${task.precio || 'N/A'}</td>
-            <td style="display: none;>${task.suplido || 'N/A'}</td>
-            <td style="display: none;>${task.coste || 'N/A'}</td>
+    
             <td style="display: none;">${task.created_at || 'Sin fecha'}</td> <!-- Campo oculto para created_at -->
         `;
 
@@ -987,23 +976,13 @@ function updateSingleTaskRow(task) {
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
-            <td style="display: none;">${task.archivo || 'No disponible'}</td>
-            <td>${task.facturable ? 'Sí' : 'No'}</td>
-            <td>${task.facturado || 'No'}</td>
-            <td>${task.subtipo || ''}</td>
-            <td>${task.estado}</td>
-            <td style="display: none;">${task.precio || 'N/A'}</td>
-            <td style="display: none;">${task.suplido || 'N/A'}</td>
-            <td style="display: none;">${task.coste || 'N/A'}</td>
+            <td>${task.facturable ? 'SI' : 'NO'}</td>
+            <td>${task.facturado || 'NO'}</td>
+           
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.tiempo_previsto || 'N/A'}</td>
-            <td>${task.tiempo_real || 'N/A'}</td>
-            <td>
-            ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-            </td>             
-            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+           
             <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
         `;
     } else {

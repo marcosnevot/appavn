@@ -5,6 +5,9 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskExportController;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,8 +27,15 @@ Route::get('/', function () {
 */
 
 Route::get('/', function () {
+    $user = Auth::user();
+
+    if ($user && $user->hasRole('employee') && $user->name === 'Nacho') {
+        return redirect()->route('billing.index');
+    }
+
     return redirect()->route('tasks.index');
 })->middleware(['auth', 'verified'])->name('home');
+
 
 
 Route::middleware('auth')->group(function () {
@@ -44,9 +54,13 @@ Route::middleware('auth')->group(function () {
     Route::put('/tareas/{id}', [TaskController::class, 'update'])->name('tareas.update');
     Route::post('/tareas/export', [TaskController::class, 'exportFilteredTasks'])->name('tareas.export');
 
+    Route::get('/billing', [TaskController::class, 'billingIndex'])->name('billing.index');
+    Route::get('/billing/getBilling', [TaskController::class, 'getBilling'])->name('billing.get');
 
-   
-   
+    Route::get('/times', [TaskController::class, 'timesIndex'])->name('times.index')->middleware(['auth', 'role:admin']);
+
+
+
     Route::get('/clientes', [ClientController::class, 'index'])->name('client.index');
     Route::post('/clientes', [ClientController::class, 'store'])->name('client.store');
     Route::post('/clientes/filtrar', [ClientController::class, 'filter'])->name('clients.filtrar');

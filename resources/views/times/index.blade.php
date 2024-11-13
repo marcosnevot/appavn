@@ -2,21 +2,51 @@
 
 @section('content')
 <div class="header-tareas">
-    <h2 style="width: auto; min-width:220px; max-width:600px;" class="title">
-        Tareas de <span id="selected-user-names">todos</span>
-    </h2>
+    <h2 style="width: auto; min-width:220px;max-width:600px;" class="title">Tiempos de <span id="selected-user-names">todos</span></h2>
 
     <div class="actions">
 
         <!-- Contenedor de Filtro Rápido de Planificación -->
-        <div class="quick-filter-planificacion">
+        <div class="quick-filter-planificacion" style="display: none;">
             <div id="planificacion-filter-buttons" class="planificacion-buttons-container">
                 <!-- Aquí aparecerán los botones de planificación dinámica -->
             </div>
         </div>
 
+        <!-- Contenedor de Filtro Rápido de Asignación de Usuarios -->
+        <div class="form-group grow" style="margin-bottom: 15px;">
+            <div class="quick-filter-asignacion" style="width:150px;">
+                <div class="custom-select" name="quick-filter-user-select" tabindex="0" id="quick-filter-user-select">
+                    <div id="quick-filter-selected-users" class="selected-users">
+                        <!-- Aquí se añadirán los usuarios seleccionados para el filtro rápido -->
+                    </div>
+                    <div id="quick-filter-user-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            @foreach($usuarios as $user)
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="quick-filter-user-{{ $user->id }}" value="{{ $user->id }}">
+                                <label for="quick-filter-user-{{ $user->id }}">{{ $user->name }}</label>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="quick_filter_users" id="quick-filter-user-ids"> <!-- Campo oculto para IDs seleccionados -->
+            </div>
+        </div>
+
+
+
 
         <span class="actions-space"></span>
+
+
+        <!-- Panel de horas -->
+        <div class="hours-summary">
+            <p><strong>Total horas previstas:</strong> <span id="total-tiempo-previsto">0</span> h</p>
+            <p><strong>Total horas totales:</strong> <span id="total-tiempo-real">0</span> h</p>
+        </div>
+
 
         <!-- Panel informativo de los filtros aplicados -->
         <div id="filter-info-panel" class="filter-info-panel hide">
@@ -43,7 +73,7 @@
         <button id="filter-task-button" class="btn-new-task">Filtrar</button>
 
         <!-- Botón de Nueva Tarea -->
-        <button id="new-task-button" class="btn-new-task">Nueva Tarea</button>
+        <button id="new-task-button" class="btn-new-task" style="display: none;">Nueva Tarea</button>
 
 
     </div>
@@ -60,7 +90,7 @@
 
 
 <!-- Contenedor de la tabla de tareas -->
-@include('tasks.partials.task-table')
+@include('times.partials.task-table')
 
 <!-- Pasamos los datos de clientes, asuntos y tipos como un atributo data -->
 <div id="clientes-data" data-clientes='@json($clientes)'></div>
@@ -72,7 +102,7 @@
 @include('tasks.partials.task-form')
 
 <!-- Incluir el formulario de filtrar tareas -->
-@include('tasks.partials.filter-task-form')
+@include('times.partials.filter-task-form')
 
 <!-- Formulario de edición de la tarea -->
 @include('tasks.partials.edit-task-form')
@@ -82,9 +112,9 @@
 @section('scripts')
 
 <script src="{{ asset('js/tasks/common-tasks.js') }}"></script>
-<script src="{{ asset('js/tasks/add-tasks.js') }}"></script>
-<script src="{{ asset('js/tasks/filter-tasks.js') }}"></script>
-<script src="{{ asset('js/tasks/tasks.js') }}"></script>
+<script src="{{ asset('js/times/add-times.js') }}"></script>
+<script src="{{ asset('js/times/filter-times.js') }}"></script>
+<script src="{{ asset('js/times/times.js') }}"></script>
 <script src="{{ asset('js/tasks/task-modal.js') }}"></script>
 
 

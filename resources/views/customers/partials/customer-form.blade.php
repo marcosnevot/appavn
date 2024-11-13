@@ -8,7 +8,7 @@
         <div class="form-row">
             <div class="form-group wide">
                 <label for="nombre_fiscal">Nombre Fiscal:</label>
-                <input type="text" name="nombre_fiscal" id="nombre_fiscal" placeholder="Nombre Fiscal del Cliente" autocomplete="off" required>
+                <input type="text" name="nombre_fiscal" id="nombre_fiscal" placeholder="Nombre Fiscal" autocomplete="off" required>
             </div>
 
             <div class="form-group narrow">
@@ -28,7 +28,7 @@
 
             <div class="form-group wide">
                 <label for="email">Email:</label>
-                <input type="email" name="email" id="email" autocomplete="off" placeholder="Email del Cliente">
+                <input type="email" name="email" id="email" autocomplete="off" placeholder="Email">
             </div>
         </div>
 
@@ -113,7 +113,7 @@
         <div class="form-row">
             <div class="form-group wide">
                 <label for="subclase">Subclase:</label>
-                <input type="text" name="subclase" id="subclase" placeholder="Subclase del Cliente">
+                <input type="text" name="subclase" id="subclase" placeholder="Subclase">
             </div>
 
             <div class="form-group wide">
@@ -123,12 +123,12 @@
 
             <div class="form-group narrow">
                 <label for="puntaje">Puntaje:</label>
-                <input type="number" name="puntaje" id="puntaje" step="1" placeholder="Puntaje del Cliente">
+                <input type="number" name="puntaje" id="puntaje" step="1" placeholder="Puntaje">
             </div>
 
             <div class="form-group narrow">
                 <label for="codigo_sage">Código SAGE:</label>
-                <input type="number" name="codigo_sage" id="codigo_sage" step="1" placeholder="Código SAGE del Cliente">
+                <input type="number" name="codigo_sage" id="codigo_sage" step="1" placeholder="Código SAGE">
             </div>
         </div>
 

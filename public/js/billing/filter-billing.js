@@ -92,17 +92,15 @@ document.addEventListener('DOMContentLoaded', function () {
             subtipo: document.getElementById('filter-subtipo').value || '',
             estado: document.getElementById('filter-estado').value || '',
             usuario: document.getElementById('filter-user-ids').value || '',
-            archivo: document.getElementById('filter-archivo').value || '',
-            facturable: document.getElementById('filter-facturable').value || '',
-            facturado: document.getElementById('filter-facturado').value || '',
-            precio: document.getElementById('filter-precio').value || '',
-            suplido: document.getElementById('filter-suplido').value || '',
-            coste: document.getElementById('filter-coste').value || '',
             fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
             fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
             fecha_imputacion: document.getElementById('filter-fecha-imputacion').value || '',
             tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
-            tiempo_real: document.getElementById('filter-tiempo-real').value || ''
+            tiempo_real: document.getElementById('filter-tiempo-real').value || '',
+
+            // Filtros por defecto para la vista de Facturación
+            facturable: true,
+            facturado: 'NO'
         };
 
         console.log('Datos de filtro:', filterData);
@@ -138,6 +136,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     applyFilterButton.addEventListener('click', function (e) {
         e.preventDefault();
+
+        // Agregar filtros predeterminados para facturación
+        document.getElementById('filter-facturable').value = 'true';
+        document.getElementById('filter-facturado').value = 'No';
+
         loadFilteredTasks();
     });
 
@@ -150,26 +153,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const botonTodas = document.querySelector('.btn-filter-planificacion[data-fecha=""]');
         if (botonTodas) {
             botonTodas.classList.add('active');
-        }
-    }
-
-    // Función para actualizar el nombre de los usuarios en el título desde el formulario
-    function updateSelectedUserNamesFromFilterForm() {
-        const selectedUserNamesElement = document.getElementById('selected-user-names'); // Seleccionar el span en el título
-        const selectedCheckboxes = document.querySelectorAll('#filter-user-list input.user-checkbox:checked'); // Checkboxes seleccionados
-
-        if (selectedCheckboxes.length === 0) {
-            // Si no hay usuarios seleccionados, mostrar "todos"
-            selectedUserNamesElement.textContent = 'todos';
-        } else {
-            // Obtén los nombres de los usuarios seleccionados
-            const selectedNames = Array.from(selectedCheckboxes).map(checkbox => {
-                const label = document.querySelector(`label[for="${checkbox.id}"]`);
-                return label ? label.textContent : ''; // Extrae el texto del label asociado
-            }).join(', ');
-
-            // Actualiza el contenido del span con los nombres seleccionados
-            selectedUserNamesElement.textContent = selectedNames;
         }
     }
 
@@ -378,6 +361,28 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('filter-asunto-list').style.display = 'none';
         document.getElementById('filter-tipo-list').style.display = 'none';
     }
+
+
+    // Función para actualizar el nombre de los usuarios en el título desde el formulario
+    function updateSelectedUserNamesFromFilterForm() {
+        const selectedUserNamesElement = document.getElementById('selected-user-names'); // Seleccionar el span en el título
+        const selectedCheckboxes = document.querySelectorAll('#filter-user-list input.user-checkbox:checked'); // Checkboxes seleccionados
+
+        if (selectedCheckboxes.length === 0) {
+            // Si no hay usuarios seleccionados, mostrar "todos"
+            selectedUserNamesElement.textContent = 'todos';
+        } else {
+            // Obtén los nombres de los usuarios seleccionados
+            const selectedNames = Array.from(selectedCheckboxes).map(checkbox => {
+                const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                return label ? label.textContent : ''; // Extrae el texto del label asociado
+            }).join(', ');
+
+            // Actualiza el contenido del span con los nombres seleccionados
+            selectedUserNamesElement.textContent = selectedNames;
+        }
+    }
+
 
     // Función para manejar la selección de usuarios en el formulario de filtrado
     const filterUserSelect = document.getElementById('filter-user-select');
@@ -596,8 +601,7 @@ document.addEventListener('DOMContentLoaded', function () {
             estado: document.getElementById('filter-estado')?.value || '',
             usuario: document.getElementById('filter-user-ids')?.value || '',
             archivo: document.getElementById('filter-archivo')?.value || '',
-            facturable: document.getElementById('filter-facturable')?.value || '',
-            facturado: document.getElementById('filter-facturado')?.value || '',
+
             precio: document.getElementById('filter-precio')?.value || '',
             suplido: document.getElementById('filter-suplido')?.value || '',
             coste: document.getElementById('filter-coste')?.value || '',
@@ -606,7 +610,10 @@ document.addEventListener('DOMContentLoaded', function () {
             fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
             fecha_planificacion: fecha === "past" ? "past" : fecha, // Este valor viene del filtro rápido de planificación
             tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
-            tiempo_real: document.getElementById('filter-tiempo-real')?.value || ''
+            tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
+            // Filtros por defecto para la vista de Facturación
+            facturable: true,
+            facturado: 'NO'
         };
 
         console.log('Datos de filtro:', filterData);

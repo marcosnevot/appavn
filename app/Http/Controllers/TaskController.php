@@ -64,10 +64,10 @@ class TaskController extends Controller
             });
         }
 
-        // Si no hay un filtro específico para fecha de planificación, filtrar por tareas de hoy
+        /* Si no hay un filtro específico para fecha de planificación, filtrar por tareas de hoy
         if (!$request->has('fecha_planificacion') || $request->input('fecha_planificacion') === 'Hoy') {
             $query->whereDate('fecha_planificacion', $fechaHoy);
-        }
+        } */
 
         // Ejecutar la consulta con paginación
         $tasks = $query->paginate(50);
@@ -86,6 +86,82 @@ class TaskController extends Controller
             ]
         ]);
     }
+
+
+    public function billingIndex()
+    {
+
+        // Obtener todas las tareas de la base de datos, ordenadas por las más recientes
+        $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
+            ->orderBy('created_at', 'desc') // Ordenar por la fecha de creación, de más reciente a más antigua
+            ->get();
+
+        // Obtener datos adicionales necesarios para el formulario
+        $clientes = Cliente::all();
+        $asuntos = Asunto::all();
+        $tipos = Tipo::all();
+        $usuarios = User::all();
+
+        // Pasar las tareas y los datos adicionales a la vista
+        return view('billing.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
+    }
+
+    public function getBilling(Request $request)
+    {
+        // Obtener el ID de usuario de la solicitud (si existe)
+        $userId = $request->query('user_id');
+
+
+        // Crear la consulta base para las tareas con relaciones necesarias
+        $query = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
+            ->where('facturable', true) // Filtrar para facturable = true
+            ->where('facturado', 'No')  // Filtrar para facturado = No
+            ->orderBy('created_at', 'desc');
+
+        // Si se pasa un user_id, filtrar las tareas asignadas a ese usuario
+        if ($userId) {
+            $query->whereHas('users', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            });
+        }
+
+
+        // Ejecutar la consulta con paginación
+        $tasks = $query->paginate(50);
+
+        // Devolver las tareas en formato JSON, junto con enlaces de paginación
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks->items(), // Las tareas actuales
+            'pagination' => [
+                'total' => $tasks->total(),
+                'current_page' => $tasks->currentPage(),
+                'last_page' => $tasks->lastPage(),
+                'per_page' => $tasks->perPage(),
+                'next_page_url' => $tasks->nextPageUrl(),
+                'prev_page_url' => $tasks->previousPageUrl()
+            ]
+        ]);
+    }
+
+    public function timesIndex()
+    {
+
+        // Obtener todas las tareas de la base de datos, ordenadas por las más recientes
+        $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
+            ->orderBy('created_at', 'desc') // Ordenar por la fecha de creación, de más reciente a más antigua
+            ->get();
+
+        // Obtener datos adicionales necesarios para el formulario
+        $clientes = Cliente::all();
+        $asuntos = Asunto::all();
+        $tipos = Tipo::all();
+        $usuarios = User::all();
+
+        // Pasar las tareas y los datos adicionales a la vista
+        return view('times.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
+    }
+
 
     public function show($id)
     {
@@ -120,6 +196,9 @@ class TaskController extends Controller
             $validated = $request->validate([
                 'cliente_id' => 'nullable',
                 'cliente_nombre' => 'nullable|string|max:255', // Permitir nulo o string
+                'cliente_nif' => 'nullable|string|max:20', // Validación para NIF
+                'cliente_email' => 'nullable|email|max:255', // Validación para email
+                'cliente_telefono' => 'nullable|string|max:15',
                 'asunto_id' => 'nullable',
                 'asunto_nombre' => 'nullable|string|max:255', // Permitir nulo o string
                 'tipo_id' => 'nullable',
@@ -146,7 +225,7 @@ class TaskController extends Controller
             Log::debug('Datos validados:', $validated);
 
 
-            /// Verificar si se debe crear un nuevo cliente
+            // Verificar si se debe crear un nuevo cliente
             if (!$validated['cliente_id'] && !empty($validated['cliente_nombre'])) {
                 // Buscar si el cliente ya existe antes de crear uno nuevo
                 $clienteExistente = Cliente::where('nombre_fiscal', strtoupper($validated['cliente_nombre']))->first();
@@ -155,11 +234,17 @@ class TaskController extends Controller
                     // Si ya existe, asignar el ID del cliente existente
                     $validated['cliente_id'] = $clienteExistente->id;
                 } else {
-                    // Si no existe, crear un nuevo cliente
-                    $cliente = Cliente::create(['nombre_fiscal' => strtoupper($validated['cliente_nombre'])]);
+                    // Si no existe, crear un nuevo cliente con los datos adicionales
+                    $cliente = Cliente::create([
+                        'nombre_fiscal' => strtoupper($validated['cliente_nombre']),
+                        'nif' => $validated['cliente_nif'] ?? null, // Añadir NIF si está presente
+                        'email' => $validated['cliente_email'] ?? null, // Añadir email si está presente
+                        'telefono' => $validated['cliente_telefono'] ?? null // Añadir teléfono si está presente
+                    ]);
                     $validated['cliente_id'] = $cliente->id;
                 }
             }
+
 
             // Verificar si se debe crear un nuevo asunto
             if (!$validated['asunto_id'] && !empty($validated['asunto_nombre'])) {
@@ -352,8 +437,9 @@ class TaskController extends Controller
             // Filtrar por fecha de planificación
             if (!empty($filters['fecha_planificacion'])) {
                 if ($filters['fecha_planificacion'] === 'past') {
-                    // Filtrar por fechas anteriores a hoy
-                    $query->whereDate('fecha_planificacion', '<', now()->toDateString());
+                    // Filtrar por fechas anteriores a hoy y que no estén completadas
+                    $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                        ->whereIn('estado', ['PENDIENTE', 'ENESPERA']); // Asegúrate de que estos valores coincidan con tu ENUM de estado
                 } else {
                     // Filtrar por una fecha específica
                     $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);

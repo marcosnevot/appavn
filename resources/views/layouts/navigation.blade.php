@@ -22,6 +22,47 @@
                 </span>
                 {{ __('Tareas') }}
             </a>
+            <a href="{{ route('billing.index') }}" class="menu-link {{ request()->routeIs('billing.index') ? 'active' : '' }}">
+                <span class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <!-- Contorno del Documento -->
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 3h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2z" />
+
+                        <!-- Líneas de Texto en el Documento -->
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h6M8 15h4" />
+
+                        <!-- Marca de Pago -->
+                        <circle cx="16" cy="18" r="1" fill="currentColor" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h2v2h-2" />
+                    </svg>
+                </span>
+                {{ __('Facturación') }}
+            </a>
+
+            <hr class="border-gray-700">
+
+            @role('admin')
+            <a href="{{ route('times.index') }}" class="menu-link {{ request()->routeIs('times.index') ? 'active' : '' }}">
+                <span class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <!-- Círculo exterior del reloj -->
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+
+                        <!-- Aguja del reloj -->
+                        <line x1="12" y1="6" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <line x1="12" y1="12" x2="16" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+                        <!-- Punto central del reloj -->
+                        <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                    </svg>
+
+                </span>
+                {{ __('Control de Tiempos') }}
+            </a>
+            <hr class="border-gray-700">
+            @endrole
+
+
             <a href="{{ route('client.index') }}" class="menu-link {{ request()->routeIs('client.index') ? 'active' : '' }}">
                 <span class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 500 500" fill="currentColor">

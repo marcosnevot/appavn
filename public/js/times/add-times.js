@@ -935,6 +935,8 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+            <td>${task.tiempo_previsto || 'N/A'}</td>
+            <td>${task.tiempo_real || 'N/A'}</td>
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
@@ -944,8 +946,7 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.tiempo_previsto || 'N/A'}</td>
-            <td>${task.tiempo_real || 'N/A'}</td>
+            
             <td>
             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
             </td>             
@@ -985,6 +986,8 @@ function updateSingleTaskRow(task) {
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+            <td>${task.tiempo_previsto || 'N/A'}</td>
+            <td>${task.tiempo_real || 'N/A'}</td>
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
             <td style="display: none;">${task.archivo || 'No disponible'}</td>
@@ -998,8 +1001,7 @@ function updateSingleTaskRow(task) {
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.tiempo_previsto || 'N/A'}</td>
-            <td>${task.tiempo_real || 'N/A'}</td>
+     
             <td>
             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
             </td>             

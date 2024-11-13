@@ -98,6 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
             precio: document.getElementById('filter-precio').value || '',
             suplido: document.getElementById('filter-suplido').value || '',
             coste: document.getElementById('filter-coste').value || '',
+            fecha_planificacion: document.getElementById('filter-fecha-planificacion').value || '',
             fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
             fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
             fecha_imputacion: document.getElementById('filter-fecha-imputacion').value || '',
@@ -107,8 +108,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         console.log('Datos de filtro:', filterData);
 
+        // Obtener los IDs de usuario seleccionados como array
+        const selectedUserIds = filterData.usuario ? filterData.usuario.split(',').map(id => parseInt(id)) : [];
+
+        // Sincronizar el filtro rápido de usuario con los seleccionados en el formulario
+        syncQuickFilterWithFormFilter(selectedUserIds);
+
         // Actualizar el panel con los filtros actuales
         updateFilterInfoPanel(filterData);
+
 
         // Realizar la solicitud al servidor para filtrar las tareas
         fetch(`/tareas/filtrar?page=${page}`, {  // <-- Asegúrate de pasar el número de página
@@ -124,8 +132,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     updateTaskTable(data.filteredTasks);
                     updatePagination(data.pagination, loadFilteredTasks);  // Pasa loadFilteredTasks como argumento
+                    updateHoursSummary(data.filteredTasks);
                     resetFiltroRapidoPlanificacion();
-                    updateSelectedUserNamesFromFilterForm();
                     closeFilterTaskForm();
                 } else {
                     console.error('Error al filtrar tareas:', data.message);
@@ -150,26 +158,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const botonTodas = document.querySelector('.btn-filter-planificacion[data-fecha=""]');
         if (botonTodas) {
             botonTodas.classList.add('active');
-        }
-    }
-
-    // Función para actualizar el nombre de los usuarios en el título desde el formulario
-    function updateSelectedUserNamesFromFilterForm() {
-        const selectedUserNamesElement = document.getElementById('selected-user-names'); // Seleccionar el span en el título
-        const selectedCheckboxes = document.querySelectorAll('#filter-user-list input.user-checkbox:checked'); // Checkboxes seleccionados
-
-        if (selectedCheckboxes.length === 0) {
-            // Si no hay usuarios seleccionados, mostrar "todos"
-            selectedUserNamesElement.textContent = 'todos';
-        } else {
-            // Obtén los nombres de los usuarios seleccionados
-            const selectedNames = Array.from(selectedCheckboxes).map(checkbox => {
-                const label = document.querySelector(`label[for="${checkbox.id}"]`);
-                return label ? label.textContent : ''; // Extrae el texto del label asociado
-            }).join(', ');
-
-            // Actualiza el contenido del span con los nombres seleccionados
-            selectedUserNamesElement.textContent = selectedNames;
         }
     }
 
@@ -408,8 +396,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateFilterInfoPanel({
         usuario: sessionUserId  // Define el usuario en sesión como filtro activo
     });
-    // Llama a la función inicialmente para cargar el título al abrir la página
-    updateSelectedUserNamesFromFilterForm();
 
     // Mostrar el panel de información de filtros
     document.getElementById('filter-info-panel').classList.remove('hide');
@@ -507,6 +493,194 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+
+    // Filtro rápido asignación
+    const quickFilterUserSelect = document.getElementById('quick-filter-user-select');
+    const quickFilterUserList = document.getElementById('quick-filter-user-list');
+    const quickFilterSelectedUsersContainer = document.getElementById('quick-filter-selected-users');
+    const quickFilterUserIdsInput = document.getElementById('quick-filter-user-ids');
+    const selectedUserNamesContainer = document.getElementById('selected-user-names');
+    let quickFilterSelectedUsers = [];
+    const sessionUserCheckboxQuick = document.getElementById(`quick-filter-user-${sessionUserId}`);
+
+
+    // Seleccionar automáticamente el usuario en sesión
+    if (sessionUserCheckboxQuick) {
+        sessionUserCheckboxQuick.checked = true;
+        const sessionUserName = sessionUserCheckboxQuick.nextElementSibling.textContent;
+        quickFilterSelectedUsers.push({ id: sessionUserId, name: sessionUserName });
+        updateQuickFilterSelectedUsersDisplay();
+        updateQuickFilterUserIdsInput();
+        applyQuickUserFilter();
+    }
+
+
+    // Función para actualizar el filtro rápido basado en el filtro del formulario
+    function syncQuickFilterWithFormFilter(selectedUserIds) {
+        // Limpiar las selecciones actuales en el filtro rápido
+        quickFilterSelectedUsers = [];
+
+        // Desmarcar todos los checkboxes en el filtro rápido
+        quickFilterUserList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Marcar checkboxes según los IDs seleccionados en el formulario de filtro
+        selectedUserIds.forEach(userId => {
+            const checkbox = document.getElementById(`quick-filter-user-${userId}`);
+            if (checkbox) {
+                checkbox.checked = true;
+                const userName = checkbox.nextElementSibling.textContent;
+                quickFilterSelectedUsers.push({ id: userId, name: userName });
+            }
+        });
+
+        // Actualizar la visualización y el input oculto en el filtro rápido
+        updateQuickFilterSelectedUsersDisplay();
+        updateQuickFilterUserIdsInput();
+        updateSelectedUserNames();
+        applyQuickUserFilter(); // Aplicar el filtro en tiempo real
+    }
+
+    // Mostrar/ocultar la lista de usuarios al hacer clic
+    quickFilterUserSelect.addEventListener('click', toggleQuickFilterUserList);
+
+    function toggleQuickFilterUserList() {
+        quickFilterUserList.style.display = quickFilterUserList.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Manejar la selección de usuarios en el filtro rápido
+    quickFilterUserList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            const userId = this.value;
+            const userName = this.nextElementSibling.textContent;
+
+            if (this.checked) {
+                quickFilterSelectedUsers.push({ id: userId, name: userName });
+            } else {
+                quickFilterSelectedUsers = quickFilterSelectedUsers.filter(user => user.id !== userId);
+            }
+
+
+
+            updateQuickFilterSelectedUsersDisplay();
+            updateQuickFilterUserIdsInput();
+            updateSelectedUserNames();
+            applyQuickUserFilter(); // Aplicar el filtro en tiempo real
+        });
+    });
+
+    // Actualizar la visualización de los usuarios seleccionados en el filtro rápido
+    function updateQuickFilterSelectedUsersDisplay() {
+        quickFilterSelectedUsersContainer.innerHTML = '';
+        quickFilterSelectedUsers.forEach(user => {
+            const span = document.createElement('span');
+            span.textContent = user.name;
+            quickFilterSelectedUsersContainer.appendChild(span);
+        });
+    }
+
+    // Actualizar el campo oculto con los IDs de usuarios seleccionados en el filtro rápido
+    function updateQuickFilterUserIdsInput() {
+        quickFilterUserIdsInput.value = quickFilterSelectedUsers.map(user => user.id).join(',');
+    }
+
+    // Actualizar el nombre de los usuarios en el título
+    function updateSelectedUserNames() {
+        const title = document.querySelector('.title');
+        if (quickFilterSelectedUsers.length === 0) {
+            title.textContent = 'Tiempos de todos';
+        } else {
+            const names = quickFilterSelectedUsers.map(user => user.name).join(', ');
+            title.textContent = `Tiempos de ${names}`;
+        }
+    }
+    updateSelectedUserNames();
+
+    // Aplicar el filtro de usuarios seleccionados en la tabla de tareas
+    function applyQuickUserFilter() {
+
+        const filterData = {
+            cliente: document.getElementById('filter-cliente-id-input')?.value || '', // Usar el ID del cliente
+            asunto: document.getElementById('filter-asunto-input')?.value || '',
+            tipo: document.getElementById('filter-tipo-input')?.value || '',
+            subtipo: document.getElementById('filter-subtipo')?.value || '',
+            estado: document.getElementById('filter-estado')?.value || '',
+            archivo: document.getElementById('filter-archivo')?.value || '',
+            facturable: document.getElementById('filter-facturable')?.value || '',
+            facturado: document.getElementById('filter-facturado')?.value || '',
+            precio: document.getElementById('filter-precio')?.value || '',
+            suplido: document.getElementById('filter-suplido')?.value || '',
+            coste: document.getElementById('filter-coste')?.value || '',
+            fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
+            fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
+            fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
+            tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
+            tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
+            usuario: quickFilterUserIdsInput.value // Usar el ID(s) de los usuarios seleccionados en el filtro rápido
+        };
+        // Actualizar el panel con los filtros actuales
+        updateFilterInfoPanel(filterData);
+
+        fetch(`/tareas/filtrar`, {
+            method: 'POST',
+            body: JSON.stringify(filterData),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateTaskTable(data.filteredTasks); // Actualizar la tabla con las tareas filtradas
+                    // Actualizar el resumen de horas
+                    updateHoursSummary(data.filteredTasks);
+                } else {
+                    console.error('Error al filtrar tareas:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud:', error.message);
+            });
+    }
+
+    // Cerrar el selector al hacer clic fuera
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.custom-select') && e.target !== quickFilterUserSelect) {
+            quickFilterUserList.style.display = 'none';
+        }
+    });
+
+
+    // Función para actualizar el resumen de horas
+    function updateHoursSummary(tasks) {
+        let totalTiempoPrevisto = 0;
+        let totalTiempoReal = 0;
+
+        // Iterar sobre las tareas y sumar los valores
+        tasks.forEach(task => {
+            totalTiempoPrevisto += parseFloat(task.tiempo_previsto || 0);
+            totalTiempoReal += parseFloat(task.tiempo_real || 0);
+        });
+
+        // Actualizar los valores en el panel, verificando la existencia de los elementos
+        const tiempoPrevistoElement = document.getElementById('total-tiempo-previsto');
+        const tiempoRealElement = document.getElementById('total-tiempo-real');
+
+        if (tiempoPrevistoElement) {
+            tiempoPrevistoElement.textContent = totalTiempoPrevisto.toFixed(2);
+        } else {
+            console.warn("Elemento 'total-tiempo-previsto' no encontrado en el DOM.");
+        }
+
+        if (tiempoRealElement) {
+            tiempoRealElement.textContent = totalTiempoReal.toFixed(2);
+        } else {
+            console.warn("Elemento 'total-tiempo-real' no encontrado en el DOM.");
+        }
+    }
+
     // Filtro según la planificación
     const planificacionFilterContainer = document.getElementById('planificacion-filter-buttons');
 
@@ -594,7 +768,7 @@ document.addEventListener('DOMContentLoaded', function () {
             tipo: document.getElementById('filter-tipo-input')?.value || '',
             subtipo: document.getElementById('filter-subtipo')?.value || '',
             estado: document.getElementById('filter-estado')?.value || '',
-            usuario: document.getElementById('filter-user-ids')?.value || '',
+            usuario: quickFilterUserIdsInput.value || document.getElementById('filter-user-ids')?.value || '',
             archivo: document.getElementById('filter-archivo')?.value || '',
             facturable: document.getElementById('filter-facturable')?.value || '',
             facturado: document.getElementById('filter-facturado')?.value || '',
@@ -643,8 +817,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+
     // Generar los botones de filtro de planificación al cargar la página
     generarBotonesFiltroPlanificacion();
+
 
 
 });
