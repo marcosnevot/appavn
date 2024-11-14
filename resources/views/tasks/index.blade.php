@@ -88,4 +88,5 @@
 <script src="{{ asset('js/tasks/task-modal.js') }}"></script>
 
 
+
 @endsection

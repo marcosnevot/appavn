@@ -253,6 +253,21 @@ document.addEventListener('DOMContentLoaded', function () {
         .listen('TaskCreated', (e) => {
             console.log('Nueva tarea creada:', e);
 
+            // Obtener el ID del usuario autenticado
+            const currentUserId = parseInt(sessionUserId); // Asegúrate de definir `sessionUserId`
+
+            // Verificar si el usuario autenticado está en los asignados
+            if (!e.assignedUserIds.includes(currentUserId)) {
+                console.log('Tarea no asignada al usuario actual, ignorando...');
+                return;
+            }
+            
+            // Verificar si la tarea es facturable y no está facturada
+            if (e.task.facturable !== true || e.task.facturado !== 'No') {
+                console.log('Tarea no cumple los criterios de facturación (facturable: true, facturado: NO), ignorando...');
+                return;
+            }
+
             // Verificar si los filtros existen y están activos
             let currentFilters = null;
             if (document.getElementById('filter-cliente-id-input')) {

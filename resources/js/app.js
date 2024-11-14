@@ -9,7 +9,7 @@ Alpine.start();
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
- window.Pusher = Pusher;
+window.Pusher = Pusher;
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
@@ -19,17 +19,28 @@ window.Echo = new Echo({
     forceTLS: false,
     disableStats: true,
     encrypted: false,  // No es necesario para local
-    cluster: 'mt1', 
+    cluster: 'mt1',
+    csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute("content"), // Incluye el token CSRF
+    authEndpoint: "/broadcasting/auth", // Este es el endpoint predeterminado de Laravel
+    auth: {
+        headers: {
+            "X-CSRF-TOKEN": document
+                .querySelector('meta[name="csrf-token"]')
+                .getAttribute("content"),
+        },
+    },
 });
 
-window.Echo.connector.pusher.connection.bind('state_change', function(states) {
+window.Echo.connector.pusher.connection.bind('state_change', function (states) {
     console.log(states);
 });
 
-window.Echo.connector.pusher.connection.bind('disconnected', function() {
+window.Echo.connector.pusher.connection.bind('disconnected', function () {
     console.log('WebSocket desconectado.');
 });
 
-window.Echo.connector.pusher.connection.bind('connected', function() {
+window.Echo.connector.pusher.connection.bind('connected', function () {
     console.log('Successfully reconnected to WebSocket.');
 });
+
+

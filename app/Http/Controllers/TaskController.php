@@ -13,6 +13,7 @@ use App\Models\Cliente;
 use App\Models\Tarea;
 use App\Models\Tipo;
 use App\Models\User;
+use App\Notifications\TaskAssignedNotification;
 use Carbon\Carbon;
 use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
@@ -310,9 +311,21 @@ class TaskController extends Controller
                 'tiempo_real' => $validated['tiempo_real'] ?? null,
             ]);
 
-            // Asociar los usuarios a la tarea (si se han seleccionado)
+            // 1. Asignar usuarios a la tarea en la base de datos
+            $assignedUserIds = [];
             if (!empty($validated['users'])) {
-                $task->users()->sync($validated['users']); // Asocia los usuarios a la tarea
+                $task->users()->sync($validated['users']); // Asociar los usuarios a la tarea
+                $assignedUserIds = $validated['users'];    // Guardar los IDs para notificaciones
+            }
+
+            // 2. Enviar notificaciones a los usuarios asignados
+            foreach ($assignedUserIds as $userId) {
+                if ($userId != auth()->id()) { // Evitar notificar al usuario que asigna la tarea
+                    $user = User::find($userId);
+                    if ($user) {
+                        $user->notify(new TaskAssignedNotification($task)); // Enviar notificación
+                    }
+                }
             }
 
             // Emitir el evento para otros usuarios
@@ -708,8 +721,18 @@ class TaskController extends Controller
 
             // Asociar los usuarios a la tarea (si se han seleccionado)
             if (!empty($validated['usersEdit'])) {
-                $task->users()->sync($validated['usersEdit']); // Asocia los usuarios a la tarea
+                $task->users()->sync($validated['usersEdit']);
+
+                foreach ($validated['usersEdit'] as $userId) {
+                    if ($userId != auth()->id()) { // Evitar notificar al usuario que está actualizando
+                        $user = User::find($userId);
+                        if ($user) {
+                            $user->notify(new TaskAssignedNotification($task)); // Enviar notificación
+                        }
+                    }
+                }
             }
+
 
 
             Log::debug('Emitiendo evento TaskUpdated para la tarea con ID: ' . $task->id);

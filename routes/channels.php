@@ -14,8 +14,10 @@ use Illuminate\Support\Facades\Broadcast;
 */
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
+    // Permite suscribirse solo si el usuario autenticado es el dueño del canal
     return (int) $user->id === (int) $id;
 });
+
 
 Broadcast::channel('tasks', function ($user) {
     return true; // Permitir a cualquier usuario unirse al canal 'tasks'

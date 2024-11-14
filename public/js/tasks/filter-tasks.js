@@ -609,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function () {
             tiempo_real: document.getElementById('filter-tiempo-real')?.value || ''
         };
 
-        console.log('Datos de filtro:', filterData);
+        // console.log('Datos de filtro:', filterData);
 
         // Actualizar el panel con los filtros actuales
         updateFilterInfoPanel(filterData);
@@ -626,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log("Tareas filtradas recibidas:", data.filteredTasks);
+                    // console.log("Tareas filtradas recibidas:", data.filteredTasks);
 
                     updateTaskTable(data.filteredTasks); // Actualizar la tabla con las tareas filtradas
                     updatePagination(data.pagination, loadFilteredTasks);  // Pasar loadFilteredTasks para paginación si es necesario

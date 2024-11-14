@@ -63,6 +63,8 @@ return [
         'null' => [
             'driver' => 'null',
         ],
+        'guard' => env('BROADCASTING_GUARD', 'web'),
+
 
     ],
 

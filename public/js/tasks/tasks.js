@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     const sessionUserId = document.getElementById('user-session-id').value;
+ 
+
 
 
     // Cargar tareas inicialmente

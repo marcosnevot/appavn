@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskExportController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Log;
 
 /*
@@ -26,6 +27,7 @@ Route::get('/', function () {
 
 */
 
+
 Route::get('/', function () {
     $user = Auth::user();
 
@@ -39,6 +41,7 @@ Route::get('/', function () {
 
 
 Route::middleware('auth')->group(function () {
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -58,6 +61,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/billing/getBilling', [TaskController::class, 'getBilling'])->name('billing.get');
 
     Route::get('/times', [TaskController::class, 'timesIndex'])->name('times.index')->middleware(['auth', 'role:admin']);
+
+    Route::get('/notifications', function () {
+        return response()->json(auth()->user()->unreadNotifications);
+    });
+    Route::post('/notifications/{id}/read', function ($id) {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+        return response()->json(['success' => true]);
+    });
+    Route::post('/notifications/mark-all-read', function () {
+        Auth::user()->unreadNotifications->markAsRead();
+        return response()->json(['status' => 'success']);
+    });
 
 
 

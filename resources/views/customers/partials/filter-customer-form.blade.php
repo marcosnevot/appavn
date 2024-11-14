@@ -1,3 +1,5 @@
+<input type="hidden" id="user-session-id" value="{{ auth()->user()->id }}">
+
 <!-- Formulario para filtrar clientes -->
 <div id="filter-customer-form" class="customer-form hide">
     <h3 class="form-title">Filtrar Clientes</h3>

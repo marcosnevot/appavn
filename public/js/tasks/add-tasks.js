@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
+    // Obtener el ID del usuario en sesión
+    const sessionUserId = document.querySelector('meta[name="user-id"]').getAttribute('content');
 
     const modal = document.getElementById('confirm-modal'); // Modal de confirmación
     const modalMessage = document.getElementById('modal-message');
@@ -179,10 +181,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // Función para limpiar los usuarios seleccionados
+    // Función para limpiar los usuarios seleccionados y preseleccionar el usuario en sesión
     function resetSelectedUsers() {
         const selectedUsersContainer = document.getElementById('selected-users');
         const userIdsInput = document.getElementById('user-ids');
+
+        // Obtener el ID del usuario actual (debe estar en el HTML como un meta o input oculto)
+        const currentUserId = document.querySelector('meta[name="user-id"]').getAttribute('content');
 
         // Limpiar el contenedor visual de los usuarios seleccionados
         selectedUsersContainer.innerHTML = '';
@@ -193,9 +198,32 @@ document.addEventListener('DOMContentLoaded', function () {
         // Desmarcar todos los checkboxes
         const checkboxes = document.querySelectorAll('#user-list input[type="checkbox"]');
         checkboxes.forEach(checkbox => {
-            checkbox.checked = false;
+            checkbox.checked = false; // Desmarcar todos los checkboxes
         });
+
+        // Seleccionar el checkbox del usuario actual
+        const currentUserCheckbox = document.querySelector(`#user-list input[type="checkbox"][value="${currentUserId}"]`);
+        if (currentUserCheckbox) {
+            currentUserCheckbox.checked = true; // Marcar el checkbox del usuario actual
+
+            // Obtener el nombre del usuario actual para mostrarlo en el contenedor visual
+            const userName = currentUserCheckbox.nextElementSibling.textContent;
+
+            // Crear un elemento visual para el usuario seleccionado
+            const userItem = document.createElement('span');
+            userItem.className = 'selected-user';
+            userItem.textContent = userName;
+
+            // Añadir el usuario actual al contenedor visual
+            selectedUsersContainer.appendChild(userItem);
+
+            // Actualizar el campo oculto con el ID del usuario actual
+            userIdsInput.value = currentUserId;
+        } else {
+            console.error('El usuario actual no está en la lista de usuarios.');
+        }
     }
+
 
 
     // Manejar el evento de envío del formulario
@@ -253,15 +281,29 @@ document.addEventListener('DOMContentLoaded', function () {
         .listen('TaskCreated', (e) => {
             console.log('Nueva tarea creada:', e);
 
-            // Verificar si los filtros existen y están activos
-            let currentFilters = null;
-            if (document.getElementById('filter-cliente-id-input')) {
-                currentFilters = getCurrentFilters(); // Obtener los filtros actuales solo si están disponibles
+            // Obtener el ID del usuario autenticado
+            const currentUserId = parseInt(sessionUserId); // Asegúrate de definir `sessionUserId`
+
+            // Verificar si el usuario autenticado está en los asignados
+            if (!e.assignedUserIds.includes(currentUserId)) {
+                console.log('Tarea no asignada al usuario actual, ignorando...');
+                return;
             }
 
-            // Actualizar la tabla con la nueva tarea y los filtros actuales
+            console.log('Tarea asignada al usuario actual.');
+
+            // Actualizar la tabla con los filtros actuales
+            let currentFilters = null;
+            if (document.getElementById('filter-cliente-id-input')) {
+                currentFilters = getCurrentFilters();
+            }
+
             updateTaskTable(e.task, true, currentFilters);
         });
+
+
+
+
 
     // Buscador de clientes
 
@@ -654,8 +696,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const userList = document.getElementById('user-list');
     const selectedUsersContainer = document.getElementById('selected-users');
     const userIdsInput = document.getElementById('user-ids');
-    // Obtener el ID del usuario en sesión
-    const sessionUserId = document.querySelector('meta[name="user-id"]').getAttribute('content');
+
 
     let selectedUsers = [];
     let currentFocus = -1;

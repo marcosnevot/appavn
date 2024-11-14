@@ -1,5 +1,6 @@
 <!-- Formulario de edición de cliente -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="user-id" content="{{ auth()->user()->id }}">
 
 <div id="edit-customer-form-container" class="customer-form hide">
     <h3 class="form-title">Editar Cliente</h3>

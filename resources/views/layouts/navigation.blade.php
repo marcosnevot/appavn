@@ -72,12 +72,48 @@
                 {{ __('Clientes') }}
             </a>
 
-
         </div>
     </div>
 
     <!-- Bottom Section (User and Logout) -->
     <div class="user-section">
+
+        <!-- Notification Button -->
+        <div id="notification-toggle" class="notification-toggle">
+
+            <button class="notification-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14V11a6 6 0 10-12 0v3c0 .386-.146.735-.405 1.005L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span id="notification-counter">0</span>
+            </button>
+            <!-- Notificación flotante -->
+            <!-- Notificación flotante de ejemplo -->
+            <div id="floating-notification" class="floating-notification hidden">
+            </div>
+
+            <!-- Notification Panel -->
+            <div id="notification-panel" class="notification-panel hidden">
+                <div class="notification-header">
+                    <h3>Notificaciones</h3>
+                    <button id="clear-notifications" title="Marcar todas como leídas">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon-clear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6h16z" />
+                        </svg>
+                    </button>
+
+                </div>
+                <ul id="notification-list" class="notification-list">
+
+                </ul>
+
+                <div id="no-notifications" class="no-notifications hidden">
+                    <p>No tienes notificaciones pendientes.</p>
+                </div>
+            </div>
+        </div>
+        <hr class="border-gray-700" style="margin-bottom: 20px; ">
+
         <div class="user-info">
             <div class="user-avatar">
                 <span>{{ substr(Auth::user()->name, 0, 1) }}</span>
@@ -103,6 +139,219 @@
         </form>
     </div>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const notificationList = document.getElementById('notification-list');
+        const notificationCounter = document.getElementById('notification-counter');
+        const noNotifications = document.getElementById('no-notifications');
+        const clearNotifications = document.getElementById('clear-notifications');
+        const floatingNotification = document.getElementById('floating-notification');
+
+        const notificationToggle = document.getElementById('notification-toggle');
+        const notificationPanel = document.getElementById('notification-panel');
+        console.log(floatingNotification.classList);
+
+        const updateNotificationCounter = (count) => {
+            if (count > 0) {
+                notificationCounter.textContent = count;
+                notificationCounter.style.display = 'inline-block'; // Muestra el contador
+            } else {
+                notificationCounter.textContent = '0';
+                notificationCounter.style.display = 'none'; // Oculta el contador
+            }
+        };
+
+
+        const sessionUserId = document.getElementById('user-session-id').value;
+
+   
+
+        window.Echo.private(`App.Models.User.${sessionUserId}`)
+            .notification((notification) => {
+                console.log(notification);
+
+                // Obtener el panel de notificaciones y el contador
+                const notificationList = document.getElementById('notification-list');
+                const notificationCounter = document.getElementById('notification-counter');
+                const noNotifications = document.getElementById('no-notifications');
+
+            
+
+                // Verificar si la notificación ya existe en la lista
+                if (document.querySelector(`.notification-item[data-id="${notification.task_id}"]`)) {
+                    console.log(`Notificación ${notification.task_id} ya existe.`);
+                    return; // Evita añadir duplicados
+                }
+
+                // Mostrar la notificación flotante
+                floatingNotification.textContent = `${notification.assigned_by} te asignó la tarea: ${notification.task_title || 'Sin asunto'}`;
+                floatingNotification.classList.remove('hidden'); // Asegúrate de mostrarla
+                floatingNotification.classList.add('show'); // Activa la animación
+
+                // Ocultar después de 3 segundos
+                setTimeout(() => {
+                    floatingNotification.classList.remove('show');
+                    setTimeout(() => {
+                        floatingNotification.classList.add('hidden'); // Ocultar completamente
+                    }, 500); // Tiempo suficiente para que termine la animación
+                }, 3000);
+
+
+
+                // Crear un nuevo elemento de notificación con la estructura HTML adecuada
+                const notificationItem = document.createElement('li');
+                notificationItem.className = 'notification-item';
+                notificationItem.innerHTML = `
+                                                <p class="notification-content">
+                                                    <strong>${notification.assigned_by}</strong> te asignó la tarea: 
+                                                            <a href="{{ route('tasks.index') }}" class="notification-link" title="Ver tarea">
+                                                                                ${notification.task_title || 'Sin asunto'}
+                                                                            </a>                                               
+                                                                             </p>
+                                                <button class="mark-as-read-btn" data-id="${notification.task_id}" title="Marcar como leída" style="height:10px; width:100%;">
+                                                    Marcar como leída
+                                                </button>
+                                                `;
+
+                // Añadir la notificación al inicio de la lista
+                notificationList.prepend(notificationItem);
+
+
+                // Actualizar el contador de notificaciones
+                if (notificationCounter) {
+                    notificationCounter.textContent = parseInt(notificationCounter.textContent || 0) + 1;
+                }
+
+                // Asegurarse de ocultar el mensaje "No tienes notificaciones pendientes"
+                if (!noNotifications.classList.contains('hidden')) {
+                    noNotifications.classList.add('hidden');
+                }
+            });
+
+
+        if (!notificationToggle) {
+            console.error('No se encontró el elemento con ID "notification-toggle".');
+            return;
+        }
+
+        if (!notificationPanel) {
+            console.error('No se encontró el elemento con ID "notification-panel".');
+            return;
+        }
+
+        // Alternar la visibilidad del panel
+        notificationToggle.addEventListener('click', (event) => {
+            console.log('Botón de notificaciones pulsado');
+            event.stopPropagation(); // Prevenir propagación del evento
+
+            if (notificationPanel.classList.contains('hidden')) {
+                notificationPanel.classList.remove('hidden');
+                notificationPanel.classList.add('active');
+            } else {
+                notificationPanel.classList.remove('active');
+                notificationPanel.classList.add('hidden');
+            }
+        });
+
+        // Prevenir que el clic dentro del panel cierre el panel
+        notificationPanel.addEventListener('click', (event) => {
+            event.stopPropagation(); // Evitar que el clic cierre el panel
+        });
+
+
+        // Ocultar el panel si se hace clic fuera de él
+        document.addEventListener('click', (event) => {
+            if (!notificationPanel.contains(event.target) && !notificationToggle.contains(event.target)) {
+                notificationPanel.classList.remove('active');
+                notificationPanel.classList.add('hidden');
+            }
+        });
+        // Fetch notifications from the server
+        fetch('/notifications')
+            .then((response) => response.json())
+            .then((notifications) => {
+                // Obtener elementos del DOM
+                const notificationList = document.getElementById('notification-list');
+                const notificationCounter = document.getElementById('notification-counter');
+                const noNotifications = document.getElementById('no-notifications');
+
+                // Limpiar la lista de notificaciones existentes
+                notificationList.innerHTML = '';
+
+
+                if (notifications.length === 0) {
+                    noNotifications.classList.remove('hidden');
+                    notificationCounter.style.display = 'none'; // Oculta el contador
+                } else {
+                    noNotifications.classList.add('hidden');
+                    notificationCounter.style.display = 'inline-block'; // Muestra el contador
+                }
+
+                // Añadir notificaciones al panel
+                notifications.forEach((notification) => {
+                    const notificationItem = document.createElement('li');
+                    notificationItem.className = 'notification-item';
+                    notificationItem.dataset.id = notification.id;
+                    notificationItem.innerHTML = `
+                    <p class="notification-content">
+                        <strong>${notification.data.assigned_by}</strong> te asignó la tarea: 
+                        <a href="{{ route('tasks.index') }}" class="notification-link" title="Ver tarea">
+                            ${notification.data.task_title || 'Sin asunto'}
+                        </a>
+                    </p>
+                    <button class="mark-as-read-btn" data-id="${notification.id}" title="Marcar como leída" style="height:10px; width:100%;">
+                        Marcar como leída
+                    </button>
+                `;
+
+
+                    notificationList.appendChild(notificationItem);
+                });
+
+                // Actualizar el contador de notificaciones
+                notificationCounter.textContent = notifications.length;
+            })
+            .catch((error) => {
+                console.error('Error al cargar las notificaciones:', error);
+            });
+
+
+        // Handle clearing notifications
+        clearNotifications.addEventListener('click', () => {
+            fetch('/notifications/mark-all-read', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+            }).then(() => {
+                notificationList.innerHTML = '';
+                notificationCounter.textContent = '0';
+                noNotifications.classList.remove('hidden');
+            });
+        });
+
+        // Mark individual notification as read
+        notificationList.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const notificationId = e.target.getAttribute('data-id');
+                fetch(`/notifications/${notificationId}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                }).then(() => {
+                    e.target.parentElement.remove();
+                    const remaining = notificationList.childElementCount;
+                    notificationCounter.textContent = remaining;
+                    if (remaining === 0) {
+                        noNotifications.classList.remove('hidden');
+                    }
+                });
+            }
+        });
+    });
+</script>
 
 <!-- Custom CSS for the sidebar -->
 <style>
@@ -215,5 +464,339 @@
     .logout:hover {
         background-color: #333333;
         color: #FFFFFF;
+    }
+
+
+
+    /* Notification Toggle Button */
+    .notification-toggle {
+        position: relative;
+        margin-bottom: 10px;
+    }
+
+    .notification-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        color: #FFFFFF;
+        font-size: 1rem;
+    }
+
+    .notification-btn svg {
+        width: 24px;
+        height: 24px;
+        transition: transform 0.3s ease;
+    }
+
+    .notification-btn span {
+        background-color: #FF3E3E;
+        color: #FFFFFF;
+        border-radius: 50%;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        transform: translate(-40%, -60%);
+        line-height: 1;
+        display: inline-block;
+        min-width: 20px;
+        text-align: center;
+        z-index: 1001;
+    }
+
+    .notification-panel {
+        position: absolute;
+        bottom: 100%;
+        /* Aparece justo encima del botón */
+        left: 50%;
+        /* Centrar el panel respecto al botón */
+        transform: translate(-50%, 20px);
+        /* Posición inicial más abajo */
+        background-color: #2A2A2A;
+        border-radius: 8px;
+        padding: 15px;
+        max-width: 220px;
+        width: 220px;
+        box-sizing: border-box;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        /* Invisible inicialmente */
+        z-index: 1000;
+        /* Asegura que esté encima de otros elementos */
+        pointer-events: none;
+        /* Deshabilita interacciones cuando está oculto */
+    }
+
+    /* Keyframes para la animación de aparición */
+    @keyframes slideIn {
+        0% {
+            transform: translate(-50%, 20px);
+            /* Comienza más abajo */
+            opacity: 0;
+            /* Invisible */
+        }
+
+        100% {
+            transform: translate(-50%, 0);
+            /* Posición final */
+            opacity: 1;
+            /* Totalmente visible */
+        }
+    }
+
+    @keyframes slideOut {
+        0% {
+            transform: translate(-50%, 0);
+            /* Posición actual */
+            opacity: 1;
+            /* Visible */
+        }
+
+        100% {
+            transform: translate(-50%, 20px);
+            /* Se desliza hacia abajo */
+            opacity: 0;
+            /* Invisible */
+        }
+    }
+
+    /* Clase activa: animación de entrada */
+    .notification-panel.active {
+        animation: slideIn 0.3s ease-out forwards;
+        /* Aplicamos la animación */
+        pointer-events: auto;
+        /* Permitir interacciones */
+    }
+
+    /* Clase oculta: animación de salida */
+    .notification-panel.hidden {
+        animation: slideOut 0.3s ease-in forwards;
+        /* Aplicamos la animación */
+        pointer-events: none;
+        /* Prevenir interacciones */
+    }
+
+
+
+    /* Lista de notificaciones */
+    .notification-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 200px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #4A4A4A #2A2A2A;
+    }
+
+    .notification-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .notification-list::-webkit-scrollbar-thumb {
+        background: #4A4A4A;
+        border-radius: 4px;
+    }
+
+    /* Estilo adicional para las notificaciones */
+    .notification-item {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: #333333;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 8px;
+        color: #FFFFFF;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        font-size: 0.85rem;
+        /* Tamaño reducido para adaptarlo al ancho */
+        line-height: 1.4;
+        /* Espaciado más compacto */
+    }
+
+    .notification-item:hover {
+        background-color: #444444;
+        transform: translateY(-2px);
+    }
+
+    /* Párrafo de la notificación */
+    .notification-item p {
+        margin: 0;
+        white-space: normal;
+        /* Permitir que el texto haga salto de línea */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        /* Añadir puntos suspensivos si es necesario */
+        word-break: break-word;
+        /* Cortar palabras largas si exceden el ancho */
+    }
+
+    /* Botón de acción para marcar como leído */
+    .notification-item button {
+        align-self: flex-start;
+        /* Alinear a la izquierda */
+        background: none;
+        border: none;
+        color: #AAAAAA;
+        font-size: 0.8rem;
+        cursor: pointer;
+        margin-top: 5px;
+        transition: color 0.3s ease;
+    }
+
+    .notification-item button:hover {
+        color: #FFFFFF;
+    }
+
+    /* Empty State for Notifications */
+    .no-notifications {
+        text-align: center;
+        color: #AAAAAA;
+        font-size: 0.9rem;
+    }
+
+    /* Clear Notifications Button */
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .notification-header h3 {
+        font-size: 1rem;
+        color: #FFFFFF;
+        margin: 0;
+    }
+
+    .notification-header button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .notification-header button .icon-clear {
+        width: 20px;
+        height: 20px;
+        stroke: #CCCCCC;
+        transition: stroke 0.3s ease;
+    }
+
+    .notification-header button:hover .icon-clear {
+        stroke: #FFFFFF;
+    }
+
+    .mark-as-read-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: right;
+        color: #aaaaaa;
+        transition: color 0.3s ease;
+    }
+
+    .mark-as-read-btn:hover {
+        color: #ffffff;
+    }
+
+    .icon-clear {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        stroke-width: 2;
+    }
+
+
+    /* Notificación flotante */
+    .floating-notification {
+        position: absolute;
+        top: -120px;
+        /* Ajusta para que esté encima del botón */
+        left: -100%;
+        /* Comienza fuera de la pantalla a la izquierda */
+        background-color: #333333;
+        /* Azul oscuro profesional */
+        color: #FFFFFF;
+        /* Texto blanco */
+        padding: 12px 18px;
+        /* Más espacio para contenido */
+        border-radius: 10px;
+        /* Bordes más redondeados */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+        /* Sombra más marcada */
+        font-size: 14px;
+        font-weight: 500;
+        /* Peso moderado para un texto profesional */
+        line-height: 1.5;
+        /* Mejor separación del texto */
+        max-width: 280px;
+        /* Limitar ancho */
+        z-index: 1000;
+        /* Asegura que esté encima de otros elementos */
+        opacity: 0;
+        /* Invisible inicialmente */
+        pointer-events: none;
+        /* No interactuable */
+        transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        /* Suavidad en la animación */
+        border: 2px solid #2563eb;
+        /* Borde azul para resaltar */
+        width: 200px;
+
+    }
+
+
+    .floating-notification a {
+        color: #93C5FD;
+        /* Azul claro profesional */
+        text-decoration: none;
+        /* Quitar subrayado */
+        font-weight: 500;
+        /* Peso medio para enlace */
+    }
+
+    .floating-notification a:hover {
+        color: #FFFFFF;
+        /* Cambiar a blanco al pasar el cursor */
+        text-decoration: underline;
+        /* Subrayado para accesibilidad */
+    }
+
+    /* Cuando se muestra la notificación flotante */
+    .floating-notification.show {
+        animation: slideInFromLeft 1s ease-out forwards, fadeOut 3s 2.5s ease-in forwards;
+        /* Deslizarse y luego desvanecer */
+    }
+
+    /* Animación para deslizarse desde la izquierda */
+    @keyframes slideInFromLeft {
+        0% {
+            left: -100%;
+            opacity: 0;
+        }
+
+        100% {
+            left: 50%;
+            /* Centrarse horizontalmente respecto al contenedor */
+            transform: translateX(-60%);
+            opacity: 1;
+            /* Visible */
+        }
+    }
+
+    /* Animación para desvanecerse */
+    @keyframes fadeOut {
+        0% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+        }
     }
 </style>
