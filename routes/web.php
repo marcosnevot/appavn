@@ -63,8 +63,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/times', [TaskController::class, 'timesIndex'])->name('times.index')->middleware(['auth', 'role:admin']);
 
     Route::get('/notifications', function () {
-        return response()->json(auth()->user()->unreadNotifications);
+        $notifications = auth()->user()->unreadNotifications()->latest()->take(30)->get();
+        return response()->json($notifications);
     });
+    
     Route::post('/notifications/{id}/read', function ($id) {
         $notification = auth()->user()->notifications()->findOrFail($id);
         $notification->markAsRead();

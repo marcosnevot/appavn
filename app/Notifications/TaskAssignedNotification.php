@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Notifications;
 
 use App\Models\Asunto;
@@ -14,7 +15,7 @@ class TaskAssignedNotification extends Notification implements ShouldQueue
 
     private $task;
 
-    public function __construct($task) 
+    public function __construct($task)
     {
         $this->task = $task;
     }
@@ -32,7 +33,8 @@ class TaskAssignedNotification extends Notification implements ShouldQueue
             'task_id' => $this->task->id,
             'task_title' => is_string($this->task->asunto->nombre) ? $this->task->asunto->nombre : 'Sin asunto', // Asegura que sea un string
             'assigned_by' => auth()->user()->name, // Usuario que asignó la tarea
-            'url' => route('tasks.index') // Enlace a la tarea
+            'url' => route('tasks.index'), // Enlace a la tarea
+            'created_at' => $this->task->created_at ? $this->task->created_at->toISOString() : now()->toISOString(),
         ];
     }
 
@@ -44,6 +46,7 @@ class TaskAssignedNotification extends Notification implements ShouldQueue
             'task_title' => $this->task->asunto->nombre ?? 'Sin asunto', // Valor predeterminado
             'assigned_by' => auth()->user()->name,
             'url' => route('tasks.index'),
+            'created_at' => $this->task->created_at ? $this->task->created_at->toISOString() : now()->toISOString(),
         ]);
     }
 }

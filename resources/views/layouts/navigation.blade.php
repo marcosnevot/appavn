@@ -165,7 +165,7 @@
 
         const sessionUserId = document.getElementById('user-session-id').value;
 
-   
+
 
         window.Echo.private(`App.Models.User.${sessionUserId}`)
             .notification((notification) => {
@@ -176,7 +176,10 @@
                 const notificationCounter = document.getElementById('notification-counter');
                 const noNotifications = document.getElementById('no-notifications');
 
-            
+                // Si ya hay más de 30 notificaciones, elimina la más antigua
+                if (notificationList.children.length >= 30) {
+                    notificationList.removeChild(notificationList.lastChild);
+                }
 
                 // Verificar si la notificación ya existe en la lista
                 if (document.querySelector(`.notification-item[data-id="${notification.task_id}"]`)) {
@@ -207,11 +210,14 @@
                                                     <strong>${notification.assigned_by}</strong> te asignó la tarea: 
                                                             <a href="{{ route('tasks.index') }}" class="notification-link" title="Ver tarea">
                                                                                 ${notification.task_title || 'Sin asunto'}
-                                                                            </a>                                               
-                                                                             </p>
-                                                <button class="mark-as-read-btn" data-id="${notification.task_id}" title="Marcar como leída" style="height:10px; width:100%;">
-                                                    Marcar como leída
-                                                </button>
+                                                             </a>                                               
+                                                </p>
+                                                <div class="notification-footer">
+                                                    <span class="notification-date">${formatNotificationDate(notification.created_at)}</span>
+                                                    <button class="mark-as-read-btn" data-id="${notification.id}" title="Marcar como leída">
+                                                        Borrar
+                                                    </button>
+                                                </div>
                                                 `;
 
                 // Añadir la notificación al inicio de la lista
@@ -300,11 +306,13 @@
                             ${notification.data.task_title || 'Sin asunto'}
                         </a>
                     </p>
-                    <button class="mark-as-read-btn" data-id="${notification.id}" title="Marcar como leída" style="height:10px; width:100%;">
-                        Marcar como leída
-                    </button>
+                     <div class="notification-footer">
+                        <span class="notification-date">${formatNotificationDate(notification.created_at)}</span>
+                        <button class="mark-as-read-btn" data-id="${notification.id}" title="Marcar como leída">
+                            Borrar
+                        </button>
+                    </div>
                 `;
-
 
                     notificationList.appendChild(notificationItem);
                 });
@@ -350,6 +358,50 @@
                 });
             }
         });
+
+        // Función para formatear la fecha de la notificación
+        function formatNotificationDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+
+            // Diferencias en milisegundos
+            const msInDay = 24 * 60 * 60 * 1000;
+
+            // Calcular diferencia de días
+            const daysDiff = Math.floor((now - date) / msInDay);
+
+            // Verificar si la fecha es de hoy
+            if (
+                date.getDate() === now.getDate() &&
+                date.getMonth() === now.getMonth() &&
+                date.getFullYear() === now.getFullYear()
+            ) {
+                return `${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            }
+
+            // Verificar si la fecha es de ayer
+            if (daysDiff === 1) {
+                return `Ayer ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            }
+
+            // Verificar si la fecha es de esta semana
+            const dayOfWeek = date.getDay();
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - now.getDay() + 1); // Comienzo de la semana (lunes)
+
+            if (date >= weekStart) {
+                const daysOfWeek = ["Dom.", "Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb."];
+                return `${daysOfWeek[dayOfWeek]} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            }
+
+            // Para fechas anteriores a esta semana, mostrar fecha completa
+            return date.toLocaleDateString([], {
+                day: '2-digit',
+                month: 'short', // Mes abreviado (e.g., "Nov.")
+                year: 'numeric'
+            });
+        }
+
     });
 </script>
 
@@ -688,17 +740,26 @@
         stroke: #FFFFFF;
     }
 
+    .notification-footer {
+        display: flex;
+        justify-content: space-between;
+        /* Alinea los elementos a los extremos */
+        align-items: center;
+        /* Alinea los elementos en la parte inferior */
+        
+    }
+
     .mark-as-read-btn {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 5px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: right;
-        color: #aaaaaa;
-        transition: color 0.3s ease;
+        color: #2563eb;
+        /* Azul sutil */
+        padding: 0px;
+        font-size: 12px;
+        transition: color 0.3s ease, background-color 0.3s ease;
     }
+
 
     .mark-as-read-btn:hover {
         color: #ffffff;
@@ -710,6 +771,18 @@
         stroke: currentColor;
         stroke-width: 2;
     }
+
+    .notification-date {
+        display: block;
+        font-size: 0.85rem;
+        color: #6b7280;
+        /* Gris claro */
+        margin-top: 5px;
+        padding: 0px;
+        text-align: left;
+        
+    }
+
 
 
     /* Notificación flotante */
