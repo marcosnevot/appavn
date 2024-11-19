@@ -37,11 +37,12 @@ return [
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                'useTLS' => false, // Para local no es necesario TLS
+                'useTLS' => true, // Para local no es necesario TLS
                 'host' => env('PUSHER_HOST', '127.0.0.1'),
                 'port' => env('PUSHER_PORT', 6001),
                 'scheme' => env('PUSHER_SCHEME', 'http'),
-                'encrypted' => false,
+                'encrypted' => true,
+                'verify' => false, 
             ],
         ],
 

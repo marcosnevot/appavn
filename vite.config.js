@@ -5,9 +5,7 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/css/app.css',
-                'resources/css/panel.css',
-                'resources/js/app.js',
+                'resources/js/websockets.js',     // Compilar solo websockets.js
             ],
             refresh: true,
         }),

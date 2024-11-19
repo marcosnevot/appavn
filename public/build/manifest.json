@@ -1,4 +1,16 @@
 {
+  "resources/js/app.js": {
+    "file": "assets/app-DLXkxiZ3.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/websockets.js": {
+    "file": "assets/websockets-DBNS55NJ.js",
+    "name": "websockets",
+    "src": "resources/js/websockets.js",
+    "isEntry": true
+  }, 
   "resources/css/app.css": {
     "file": "assets/app-DM6lPmjB.css",
     "src": "resources/css/app.css",
@@ -28,11 +40,6 @@
     "file": "assets/customers.css",
     "src": "resources/css/customers.css",
     "isEntry": true
-  },
-  "resources/js/app.js": {
-    "file": "assets/app-NjygHGYW.js",
-    "name": "app",
-    "src": "resources/js/app.js",
-    "isEntry": true
   }
+
 }
