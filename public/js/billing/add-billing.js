@@ -261,9 +261,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('Tarea no asignada al usuario actual, ignorando...');
                 return;
             }
-            
+
             // Verificar si la tarea es facturable y no está facturada
-            if (e.task.facturable !== true || e.task.facturado !== 'No') {
+            const isFacturable = Boolean(e.task.facturable);
+            const isFacturadoNo = e.task.facturado.toUpperCase() === 'NO';
+
+            // Verificar si la tarea es facturable y no está facturada
+            if (!isFacturable || !isFacturadoNo) {
                 console.log('Tarea no cumple los criterios de facturación (facturable: true, facturado: NO), ignorando...');
                 return;
             }

@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         console.log('Datos de filtro:', filterData);
+        window.currentFilters = filterData; // Actualiza los filtros activos en la variable global
 
         // Actualizar el panel con los filtros actuales
         updateFilterInfoPanel(filterData);

@@ -5,21 +5,29 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentPage = 1;
     let globalTasksArray = []; // Definir una variable global para las tareas
 
-
+    
+    let currentSortKey = null; // Almacena la clave de ordenación actual
+    let currentSortDirection = 'none'; // Dirección de orden actual
     const sessionUserId = document.getElementById('user-session-id').value;
- 
-
-
 
     // Cargar tareas inicialmente
     loadTasks();
 
     // Función para cargar las tareas mediante AJAX con paginación
-    function loadTasks(page = 1) {
+    function loadTasks(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
         const tableBody = document.querySelector('table tbody');
         tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
 
-        fetch(`/tareas/getTasks?page=${page}&user_id=${sessionUserId}`, {
+        // Construir los parámetros de la URL
+        const params = new URLSearchParams({
+            ...window.currentFilters, // Usar filtros activos de la variable global
+            page, // Página actual
+            sortKey, // Clave de ordenación
+            sortDirection, // Dirección de ordenación
+            user_id: sessionUserId // Usuario actual
+        });
+
+        fetch(`/tareas/getTasks?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -30,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.success) {
                     loadInitialTasks(data.tasks);
-                    updatePagination(data.pagination, loadTasks);  // Pasa loadTasks como argumento
+                    updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
                 } else {
                     console.error('Error al cargar tareas:', data.message);
                 }
@@ -40,6 +48,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 tableBody.innerHTML = '<tr><td colspan="21" class="text-center text-red-500">Error al cargar las tareas.</td></tr>';
             });
     }
+
+    
+
+    document.querySelectorAll('th[data-sort-key]').forEach(header => {
+        header.addEventListener('click', function () {
+            const sortKey = this.getAttribute('data-sort-key');
+
+            // Determinar la dirección de orden
+            if (currentSortKey === sortKey) {
+                currentSortDirection = currentSortDirection === 'asc'
+                    ? 'desc'
+                    : currentSortDirection === 'desc'
+                        ? 'none'
+                        : 'asc';
+            } else {
+                currentSortKey = sortKey;
+                currentSortDirection = 'asc'; // Reiniciar a ascendente para nueva columna
+            }
+
+            // Quitar clases de todos los encabezados
+            document.querySelectorAll('th[data-sort-key]').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            // Añadir clase según la dirección actual
+            if (currentSortDirection === 'asc') {
+                this.classList.add('sorted-asc');
+            } else if (currentSortDirection === 'desc') {
+                this.classList.add('sorted-desc');
+            }
+
+            // Si el estado es "none", reestablecer al orden original
+            const sortKeyToSend = currentSortDirection === 'none' ? 'created_at' : currentSortKey;
+            const sortDirectionToSend = currentSortDirection === 'none' ? 'desc' : currentSortDirection;
+
+            // Recargar tareas con la nueva ordenación y filtros activos
+            loadTasks(1, sortKeyToSend, sortDirectionToSend);
+        });
+    });
 
     // Función para cargar y actualizar la tabla de tareas inicialmente
     function loadInitialTasks(tasks) {

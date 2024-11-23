@@ -4,23 +4,23 @@
     <table class="min-w-full table-auto task-table bg-white dark:bg-gray-800">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Asunto</th>
-                <th class="col-cliente">Cliente</th>
-                <th>Tipo</th>
-                <th>Tiempo Previsto</th>
-                <th>Tiempo Real</th>
-                <th>Descripción</th>
-                <th>Observaciones</th>
-                <th>Facturable</th>
-                <th>Facturado</th>
-                <th>Subtipo</th>
-                <th>Estado</th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Vencimiento</th>
-                <th>Fecha Imputación</th>
-                <th>Planificación</th>
-                <th>Asignado a</th>
+            <th data-sort-key="id" style="cursor: pointer;">ID</th>
+                <th data-sort-key="asunto.nombre" style="cursor: pointer;">Asunto</th>
+                <th data-sort-key="cliente.nombre_fiscal" class="col-cliente" id="header-client" style="cursor: pointer;">Cliente</th>
+                <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
+                <th data-sort-key="tiempo_previsto" style="cursor: pointer;">Tiempo Previsto</th>
+                <th data-sort-key="tiempo_real" style="cursor: pointer;">Tiempo Real</th>
+                <th data-sort-key="descripcion" style="cursor: pointer;">Descripción</th>
+                <th data-sort-key="observaciones" style="cursor: pointer;">Observaciones</th>
+                <th data-sort-key="facturable" style="cursor: pointer;">Facturable</th>
+                <th data-sort-key="facturado" style="cursor: pointer;">Facturado</th>
+                <th data-sort-key="subtipo" style="cursor: pointer;">Subtipo</th>
+                <th data-sort-key="estado" style="cursor: pointer;">Estado</th>
+                <th data-sort-key="fecha_inicio" style="cursor: pointer;">Fecha Inicio</th>
+                <th data-sort-key="fecha_vencimiento" style="cursor: pointer;">Fecha Vencimiento</th>
+                <th data-sort-key="fecha_imputacion" style="cursor: pointer;">Fecha Imputación</th>
+                <th data-sort-key="fecha_planificacion" style="cursor: pointer;">Planificación</th>
+                <th data-sort-key="users" style="cursor: pointer;">Asignado a</th>
                 <th style="display: none;">Archivo</th>
                 <th style="display: none;">Precio</th>
                 <th style="display: none;">Suplido</th>

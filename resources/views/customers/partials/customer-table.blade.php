@@ -4,26 +4,27 @@
     <table class="min-w-full table-auto bg-white dark:bg-gray-800">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Nombre Fiscal</th>
-                <th>NIF</th>
-                <th>Móvil</th>
-                <th>Fijo</th>
-                <th>Email</th>
-                <th>Dirección</th>
-                <th>Código Postal</th>
-                <th>Población</th>
-                <th>Responsable</th>
-                <th>Tipo de Cliente</th>
-                <th>Tributación</th>
-                <th>Clasificación</th>
-                <th>Situación</th>
-                <th>Datos Bancarios</th>
-                <th>Subclase</th>
-                <th>Puntaje</th>
-                <th>Código Sage</th>
-                <th style="display: none;">Fecha de Creación</th> <!-- Columna oculta para created_at -->
+                <th data-sort-key="id" style="cursor: pointer;">ID</th>
+                <th data-sort-key="nombre_fiscal" style="cursor: pointer;" class="col-cliente">Nombre Fiscal</th>
+                <th data-sort-key="nif" style="cursor: pointer;">NIF</th>
+                <th data-sort-key="movil" style="cursor: pointer;">Móvil</th>
+                <th data-sort-key="fijo" style="cursor: pointer;">Fijo</th>
+                <th data-sort-key="email" style="cursor: pointer;">Email</th>
+                <th data-sort-key="direccion" style="cursor: pointer;">Dirección</th>
+                <th data-sort-key="codigo_postal" style="cursor: pointer;">Código Postal</th>
+                <th data-sort-key="poblacion" style="cursor: pointer;">Población</th>
+                <th data-sort-key="responsable" style="cursor: pointer;">Responsable</th>
+                <th data-sort-key="tipo_cliente" style="cursor: pointer;">Tipo de Cliente</th>
+                <th data-sort-key="tributacion" style="cursor: pointer;">Tributación</th>
+                <th data-sort-key="clasificacion" style="cursor: pointer;">Clasificación</th>
+                <th data-sort-key="situacion" style="cursor: pointer;">Situación</th>
+                <th data-sort-key="datos_bancarios" style="cursor: pointer;">Datos Bancarios</th>
+                <th data-sort-key="subclase" style="cursor: pointer;">Subclase</th>
+                <th data-sort-key="puntaje" style="cursor: pointer;">Puntaje</th>
+                <th data-sort-key="codigo_sage" style="cursor: pointer;">Código Sage</th>
+                <th data-sort-key="created_at" style="cursor: pointer; display: none;">Fecha de Creación</th>
             </tr>
+
         </thead>
         <tbody>
             <!-- Aquí se rellenarán los clientes dinámicamente mediante JS -->

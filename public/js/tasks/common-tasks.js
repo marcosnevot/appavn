@@ -58,6 +58,7 @@ function handleError(message) {
     tableBody.innerHTML = '<tr><td colspan="21" class="text-center text-red-500">Error al cargar los datos.</td></tr>';
 }
 
+window.currentFilters = {}; // Variable global para los filtros activos
 
 // Función para abrir el modal con los detalles de la tarea
 function openTasksModal(taskId) {

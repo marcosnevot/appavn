@@ -67,8 +67,8 @@
 
 <script src="{{ asset('js/customers/common-customers.js') }}"></script>
 <script src="{{ asset('js/customers/add-customers.js') }}"></script>
-<script src="{{ asset('js/customers/filter-customers.js') }}"></script>
 <script src="{{ asset('js/customers/customers.js') }}"></script>
+<script src="{{ asset('js/customers/filter-customers.js') }}"></script>
 <script src="{{ asset('js/customers/customer-modal.js') }}"></script>
 
 @endsection

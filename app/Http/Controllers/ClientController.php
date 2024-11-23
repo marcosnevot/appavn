@@ -44,26 +44,132 @@ class ClientController extends Controller
 
     public function getCustomers(Request $request)
     {
-        // Obtener todas las tareas con las relaciones necesarias, ordenadas por la más reciente
-        $clientes = Cliente::with(['tipoCliente', 'clasificacion', 'tributacion', 'situacion', 'users'])
-            ->orderBy('created_at', 'desc')
-            ->orderBy('id', 'desc') // Orden secundario por ID
-            ->paginate(50); // Ajustar el número de clientes por página
+        try {
+            $sortKey = $request->query('sortKey', 'clientes.created_at'); // Campo por defecto
+            $sortDirection = $request->query('sortDirection', 'desc'); // Dirección por defecto
+            $filters = $request->all(); // Capturar todos los filtros enviados
 
-        // Devolver las tareas en formato JSON, junto con enlaces de paginación
-        return response()->json([
-            'success' => true,
-            'customers' => $clientes->items(), // Las tareas actuales
-            'pagination' => [
-                'total' => $clientes->total(),
-                'current_page' => $clientes->currentPage(),
-                'last_page' => $clientes->lastPage(),
-                'per_page' => $clientes->perPage(),
-                'next_page_url' => $clientes->nextPageUrl(),
-                'prev_page_url' => $clientes->previousPageUrl()
-            ]
-        ]);
+            // Crear la consulta base
+            $query = Cliente::query()->select('clientes.*');
+
+            // Ordenación en relaciones
+            if ($sortKey === 'tipoCliente.nombre') {
+                $query->leftJoin('tipo_clientes', 'clientes.tipo_cliente_id', '=', 'tipo_clientes.id');
+                $query->addSelect('tipo_clientes.nombre as tipo_cliente_nombre');
+                $sortKey = 'tipo_clientes.nombre';
+            } elseif ($sortKey === 'clasificacion.nombre') {
+                $query->leftJoin('clasificaciones', 'clientes.clasificacion_id', '=', 'clasificaciones.id');
+                $query->addSelect('clasificaciones.nombre as clasificacion_nombre');
+                $sortKey = 'clasificaciones.nombre';
+            } elseif ($sortKey === 'tributacion.nombre') {
+                $query->leftJoin('tributaciones', 'clientes.tributacion_id', '=', 'tributaciones.id');
+                $query->addSelect('tributaciones.nombre as tributacion_nombre');
+                $sortKey = 'tributaciones.nombre';
+            } elseif ($sortKey === 'situacion.nombre') {
+                $query->leftJoin('situaciones', 'clientes.situacion_id', '=', 'situaciones.id');
+                $query->addSelect('situaciones.nombre as situacion_nombre');
+                $sortKey = 'situaciones.nombre';
+            }
+
+            // Aplicar filtros dinámicos basados en la función `filter`
+            if (!empty($filters['nombre_fiscal'])) {
+                $query->where('nombre_fiscal', 'like', '%' . $filters['nombre_fiscal'] . '%');
+            }
+
+            if (!empty($filters['nif'])) {
+                $query->where('nif', 'like', '%' . $filters['nif'] . '%');
+            }
+
+            if (!empty($filters['tipo_cliente'])) {
+                $tipoCliente = TipoCliente::where('nombre', 'like', '%' . $filters['tipo_cliente'] . '%')->first();
+                if ($tipoCliente) {
+                    $query->where('tipo_cliente_id', $tipoCliente->id);
+                }
+            }
+
+            if (!empty($filters['clasificacion'])) {
+                $clasificacion = Clasificacion::where('nombre', 'like', '%' . $filters['clasificacion'] . '%')->first();
+                if ($clasificacion) {
+                    $query->where('clasificacion_id', $clasificacion->id);
+                }
+            }
+
+            if (!empty($filters['tributacion'])) {
+                $tributacion = Tributacion::where('nombre', 'like', '%' . $filters['tributacion'] . '%')->first();
+                if ($tributacion) {
+                    $query->where('tributacion_id', $tributacion->id);
+                }
+            }
+
+            if (!empty($filters['situacion'])) {
+                $situacion = Situacion::where('nombre', 'like', '%' . $filters['situacion'] . '%')->first();
+                if ($situacion) {
+                    $query->where('situacion_id', $situacion->id);
+                }
+            }
+
+            if (!empty($filters['direccion'])) {
+                $query->where('direccion', 'like', '%' . $filters['direccion'] . '%');
+            }
+
+            if (!empty($filters['codigo_postal'])) {
+                $query->where('codigo_postal', 'like', '%' . $filters['codigo_postal'] . '%');
+            }
+
+            if (!empty($filters['usuario'])) {
+                $userIds = explode(',', $filters['usuario']);
+                $query->whereHas('users', function ($q) use ($userIds) {
+                    $q->whereIn('users.id', $userIds);
+                });
+            }
+
+            if (!empty($filters['datos_bancarios'])) {
+                $query->where('datos_bancarios', 'like', '%' . $filters['datos_bancarios'] . '%');
+            }
+
+            if (!empty($filters['subclase'])) {
+                $query->where('subclase', 'like', '%' . $filters['subclase'] . '%');
+            }
+
+            if (!empty($filters['puntaje'])) {
+                $query->where('puntaje', '=', $filters['puntaje']);
+            }
+
+            if (!empty($filters['codigo_sage'])) {
+                $query->where('codigo_sage', 'like', '%' . $filters['codigo_sage'] . '%');
+            }
+
+            // Evitar duplicados y ordenar
+            $query->distinct()->orderBy($sortKey, $sortDirection);
+
+            // Incluir relaciones necesarias
+            $query->with(['tipoCliente', 'clasificacion', 'tributacion', 'situacion', 'users']);
+
+            // Paginación
+            $clientes = $query->paginate(50);
+
+            return response()->json([
+                'success' => true,
+                'customers' => $clientes->items(),
+                'pagination' => [
+                    'total' => $clientes->total(),
+                    'current_page' => $clientes->currentPage(),
+                    'last_page' => $clientes->lastPage(),
+                    'per_page' => $clientes->perPage(),
+                    'next_page_url' => $clientes->nextPageUrl(),
+                    'prev_page_url' => $clientes->previousPageUrl()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener clientes: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor.',
+            ], 500);
+        }
     }
+
+
 
     public function show($id)
     {

@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         console.log('Datos de filtro:', filterData);
+        window.currentFilters = filterData; // Actualiza los filtros activos en la variable global
 
         // Actualizar el panel con los filtros actuales
         updateFilterInfoPanel(filterData);
@@ -123,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.success) {
                     updateTaskTable(data.filteredTasks);
-                    updatePagination(data.pagination, loadFilteredTasks);  // Pasa loadFilteredTasks como argumento
+                    updatePagination(data.pagination, (newPage) => loadFilteredTasks(newPage)); // Paginación con filtros
                     resetFiltroRapidoPlanificacion();
                     updateSelectedUserNamesFromFilterForm();
                     closeFilterTaskForm();

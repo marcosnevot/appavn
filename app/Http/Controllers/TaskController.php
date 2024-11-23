@@ -45,48 +45,123 @@ class TaskController extends Controller
         // Pasar las tareas y los datos adicionales a la vista
         return view('tasks.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
     }
-
     public function getTasks(Request $request)
     {
-        // Obtener el ID de usuario de la solicitud (si existe)
-        $userId = $request->query('user_id');
+        try {
+            $userId = $request->query('user_id'); // Usuario actual
+            $sortKey = $request->query('sortKey', 'tareas.created_at'); // Campo por defecto
+            $sortDirection = $request->query('sortDirection', 'desc'); // Dirección por defecto
+            $filters = $request->all(); // Capturar todos los filtros enviados
 
-        // Obtener la fecha actual en formato YYYY-MM-DD
-        $fechaHoy = date('Y-m-d');
+            $query = Tarea::query()->select('tareas.*');
 
-        // Crear la consulta base para las tareas con relaciones necesarias
-        $query = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
-            ->orderBy('created_at', 'desc');
+            // Ordenación en relaciones
+            if ($sortKey === 'asunto.nombre') {
+                $query->leftJoin('asuntos', 'tareas.asunto_id', '=', 'asuntos.id');
+                $query->addSelect('asuntos.nombre as asunto_nombre'); // Alias para asunto
+                $sortKey = 'asuntos.nombre';
+            }
+            if ($sortKey === 'cliente.nombre_fiscal') {
+                $query->leftJoin('clientes', 'tareas.cliente_id', '=', 'clientes.id');
+                $query->addSelect('clientes.nombre_fiscal as cliente_nombre_fiscal'); // Alias para cliente
+                $sortKey = 'clientes.nombre_fiscal';
+            }
+            if ($sortKey === 'tipo.nombre') {
+                $query->leftJoin('tipos', 'tareas.tipo_id', '=', 'tipos.id');
+                $query->addSelect('tipos.nombre as tipo_nombre'); // Alias para tipo
+                $sortKey = 'tipos.nombre';
+            }
 
-        // Si se pasa un user_id, filtrar las tareas asignadas a ese usuario
-        if ($userId) {
-            $query->whereHas('users', function ($q) use ($userId) {
-                $q->where('users.id', $userId);
-            });
+
+            // Filtros dinámicos
+            foreach (['subtipo', 'facturado', 'estado', 'precio', 'tiempo_previsto', 'tiempo_real', 'facturable'] as $filter) {
+                if (!empty($filters[$filter])) {
+                    $query->where($filter, $filters[$filter]);
+                }
+            }
+
+            // Filtros con búsqueda en relaciones
+            if (!empty($filters['asunto'])) {
+                $query->whereHas('asunto', function ($q) use ($filters) {
+                    $q->where('nombre', 'like', '%' . $filters['asunto'] . '%');
+                });
+            }
+
+            if (!empty($filters['tipo'])) {
+                $query->whereHas('tipo', function ($q) use ($filters) {
+                    $q->where('nombre', 'like', '%' . $filters['tipo'] . '%');
+                });
+            }
+
+            // Filtro por usuario asignado
+            if (!empty($filters['usuario'])) {
+                // Si se filtra explícitamente por usuario desde el frontend
+                $userIds = explode(',', $filters['usuario']);
+                $query->whereHas('users', function ($q) use ($userIds) {
+                    $q->whereIn('users.id', $userIds);
+                });
+            } elseif ($userId) {
+                // Si no hay un filtro explícito de usuario, aplicar el usuario logueado
+                $query->whereHas('users', function ($q) use ($userId) {
+                    $q->where('users.id', $userId);
+                });
+            }
+
+            // Filtros de rangos de fechas
+            foreach (['fecha_inicio' => '>=', 'fecha_vencimiento' => '<='] as $field => $operator) {
+                if (!empty($filters[$field])) {
+                    $query->whereDate($field, $operator, $filters[$field]);
+                }
+            }
+
+            // Filtros específicos de planificación
+            if (!empty($filters['fecha_planificacion'])) {
+                if ($filters['fecha_planificacion'] === 'past') {
+                    $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                        ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
+                } else {
+                    $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+                }
+            }
+
+            // Filtro por cliente
+            if (!empty($filters['cliente'])) {
+                $query->where('cliente_id', $filters['cliente']);
+            }
+
+
+            // Evitar duplicados y ordenar
+            $query->distinct()->orderBy($sortKey, $sortDirection);
+
+            // Incluir relaciones necesarias
+            $query->with(['cliente', 'asunto', 'tipo', 'users']);
+
+            // Paginación
+            $tasks = $query->paginate(50);
+
+            return response()->json([
+                'success' => true,
+                'tasks' => $tasks->items(),
+                'pagination' => [
+                    'current_page' => $tasks->currentPage(),
+                    'last_page' => $tasks->lastPage(),
+                    'per_page' => $tasks->perPage(),
+                    'total' => $tasks->total(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener tareas: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor.',
+            ], 500);
         }
-
-        /* Si no hay un filtro específico para fecha de planificación, filtrar por tareas de hoy
-        if (!$request->has('fecha_planificacion') || $request->input('fecha_planificacion') === 'Hoy') {
-            $query->whereDate('fecha_planificacion', $fechaHoy);
-        } */
-
-        // Ejecutar la consulta con paginación
-        $tasks = $query->paginate(50);
-
-        // Devolver las tareas en formato JSON, junto con enlaces de paginación
-        return response()->json([
-            'success' => true,
-            'tasks' => $tasks->items(), // Las tareas actuales
-            'pagination' => [
-                'total' => $tasks->total(),
-                'current_page' => $tasks->currentPage(),
-                'last_page' => $tasks->lastPage(),
-                'per_page' => $tasks->perPage(),
-                'next_page_url' => $tasks->nextPageUrl(),
-                'prev_page_url' => $tasks->previousPageUrl()
-            ]
-        ]);
     }
+
+
+
+
+
 
 
     public function billingIndex()
@@ -109,41 +184,123 @@ class TaskController extends Controller
 
     public function getBilling(Request $request)
     {
-        // Obtener el ID de usuario de la solicitud (si existe)
-        $userId = $request->query('user_id');
+        try {
+            $userId = $request->query('user_id'); // Usuario actual
+            $sortKey = $request->query('sortKey', 'tareas.created_at'); // Campo por defecto
+            $sortDirection = $request->query('sortDirection', 'desc'); // Dirección por defecto
+            $filters = $request->all(); // Capturar todos los filtros enviados
 
+            // Crear la consulta base
+            $query = Tarea::query()->select('tareas.*');
 
-        // Crear la consulta base para las tareas con relaciones necesarias
-        $query = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
-            ->where('facturable', true) // Filtrar para facturable = true
-            ->where('facturado', 'No')  // Filtrar para facturado = No
-            ->orderBy('created_at', 'desc');
+            // Ordenación en relaciones
+            if ($sortKey === 'asunto.nombre') {
+                $query->leftJoin('asuntos', 'tareas.asunto_id', '=', 'asuntos.id');
+                $query->addSelect('asuntos.nombre as asunto_nombre');
+                $sortKey = 'asuntos.nombre';
+            } elseif ($sortKey === 'cliente.nombre_fiscal') {
+                $query->leftJoin('clientes', 'tareas.cliente_id', '=', 'clientes.id');
+                $query->addSelect('clientes.nombre_fiscal as cliente_nombre_fiscal');
+                $sortKey = 'clientes.nombre_fiscal';
+            } elseif ($sortKey === 'tipo.nombre') {
+                $query->leftJoin('tipos', 'tareas.tipo_id', '=', 'tipos.id');
+                $query->addSelect('tipos.nombre as tipo_nombre');
+                $sortKey = 'tipos.nombre';
+            }
 
-        // Si se pasa un user_id, filtrar las tareas asignadas a ese usuario
-        if ($userId) {
-            $query->whereHas('users', function ($q) use ($userId) {
-                $q->where('users.id', $userId);
-            });
+            // Filtros dinámicos
+            foreach (['subtipo', 'estado', 'precio', 'tiempo_previsto', 'tiempo_real'] as $filter) {
+                if (!empty($filters[$filter])) {
+                    $query->where($filter, $filters[$filter]);
+                }
+            }
+
+            // Filtros con búsqueda en relaciones
+            if (!empty($filters['asunto'])) {
+                $query->whereHas('asunto', function ($q) use ($filters) {
+                    $q->where('nombre', 'like', '%' . $filters['asunto'] . '%');
+                });
+            }
+
+            if (!empty($filters['tipo'])) {
+                $query->whereHas('tipo', function ($q) use ($filters) {
+                    $q->where('nombre', 'like', '%' . $filters['tipo'] . '%');
+                });
+            }
+
+            // Filtro por usuario asignado
+            if (!empty($filters['usuario'])) {
+                // Si se filtra explícitamente por usuario desde el frontend
+                $userIds = explode(',', $filters['usuario']);
+                $query->whereHas('users', function ($q) use ($userIds) {
+                    $q->whereIn('users.id', $userIds);
+                });
+            } elseif ($userId) {
+                // Si no hay un filtro explícito de usuario, aplicar el usuario logueado
+                $query->whereHas('users', function ($q) use ($userId) {
+                    $q->where('users.id', $userId);
+                });
+            }
+
+            // Filtros de rangos de fechas
+            foreach (['fecha_inicio' => '>=', 'fecha_vencimiento' => '<='] as $field => $operator) {
+                if (!empty($filters[$field])) {
+                    $query->whereDate($field, $operator, $filters[$field]);
+                }
+            }
+
+            // Filtros específicos de planificación
+            if (!empty($filters['fecha_planificacion'])) {
+                if ($filters['fecha_planificacion'] === 'past') {
+                    $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                        ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
+                } else {
+                    $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+                }
+            }
+
+            // Filtro por cliente
+            if (!empty($filters['cliente'])) {
+                $query->where('cliente_id', $filters['cliente']);
+            }
+
+        
+            // Filtrar por facturable y no facturado
+            $query->where('facturable', true)
+                ->where('facturado', 'NO');
+
+            // Evitar duplicados y ordenar
+            $query->distinct()->orderBy($sortKey, $sortDirection);
+
+            // Incluir relaciones necesarias
+            $query->with(['cliente', 'asunto', 'tipo', 'users']);
+
+            // Paginación
+            $tasks = $query->paginate(50);
+            Log::info('Tareas obtenidas:', $query->get()->toArray());
+
+            // Respuesta JSON
+            return response()->json([
+                'success' => true,
+                'tasks' => $tasks->items(),
+                'pagination' => [
+                    'current_page' => $tasks->currentPage(),
+                    'last_page' => $tasks->lastPage(),
+                    'per_page' => $tasks->perPage(),
+                    'total' => $tasks->total(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener tareas para facturación: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor.',
+            ], 500);
         }
-
-
-        // Ejecutar la consulta con paginación
-        $tasks = $query->paginate(50);
-
-        // Devolver las tareas en formato JSON, junto con enlaces de paginación
-        return response()->json([
-            'success' => true,
-            'tasks' => $tasks->items(), // Las tareas actuales
-            'pagination' => [
-                'total' => $tasks->total(),
-                'current_page' => $tasks->currentPage(),
-                'last_page' => $tasks->lastPage(),
-                'per_page' => $tasks->perPage(),
-                'next_page_url' => $tasks->nextPageUrl(),
-                'prev_page_url' => $tasks->previousPageUrl()
-            ]
-        ]);
     }
+
+
+
 
     public function timesIndex()
     {

@@ -4,21 +4,21 @@
     <table class="min-w-full table-auto task-table bg-white dark:bg-gray-800">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Asunto</th>
-                <th class="col-cliente">Cliente</th>
-                <th>Tipo</th>
-                
-                <th>Descripción</th>
-                <th>Observaciones</th>
+                <th data-sort-key="id" style="cursor: pointer;">ID</th>
+                <th data-sort-key="asunto.nombre" style="cursor: pointer;">Asunto</th>
+                <th data-sort-key="cliente.nombre_fiscal" class="col-cliente" id="header-client" style="cursor: pointer;">Cliente</th>
+                <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
 
-                <th>Facturable</th>
-                <th>Facturado</th>
-              
-                <th>Fecha Inicio</th>
-                <th>Fecha Vencimiento</th>
-                <th>Fecha Imputación</th>
-               
+                <th data-sort-key="descripcion" style="cursor: pointer;">Descripción</th>
+                <th data-sort-key="observaciones" style="cursor: pointer;">Observaciones</th>
+
+                <th data-sort-key="facturable" style="cursor: pointer;">Facturable</th>
+                <th data-sort-key="facturado" style="cursor: pointer;">Facturado</th>
+
+                <th data-sort-key="fecha_inicio" style="cursor: pointer;">Fecha Inicio</th>
+                <th data-sort-key="fecha_vencimiento" style="cursor: pointer;">Fecha Vencimiento</th>
+                <th data-sort-key="fecha_imputacion" style="cursor: pointer;">Fecha Imputación</th>
+
                 <th style="display: none;">Fecha de Creación</th> <!-- Columna oculta para created_at -->
             </tr>
         </thead>
@@ -40,4 +40,3 @@
     </div>
     <button id="close-task-detail-modal" class="btn-close-task-detail-modal">Cerrar</button>
 </div>
-

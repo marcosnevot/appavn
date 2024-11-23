@@ -1,3 +1,5 @@
+window.currentFilters = {}; // Variable global para los filtros activos
+
 // Función para actualizar la paginación
 function updatePagination(pagination, loadFunction, isFiltered = false) {
     const paginationContainer = document.getElementById('pagination-controls');
@@ -197,7 +199,7 @@ function showNotification(message = "Acción completada", type = "success") {
     setTimeout(() => {
         notification.classList.add('hide');
         notification.classList.remove('show');
-        
+
         // Ocultar visibilidad al terminar la animación
         setTimeout(() => {
             notification.style.visibility = 'hidden';
