@@ -690,6 +690,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Predefinir el campo de fecha_imputacion
+    
+    // Obtener la fecha actual en formato YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
+
+    // Predefinir la fecha de imputación en el formulario
+    const fechaImputacionInput = document.querySelector('input[name="fecha_imputacion"]');
+    if (fechaImputacionInput) {
+        fechaImputacionInput.value = today;
+    }
+
 
     // Asignar Usuarios a una tarea
     const userSelect = document.getElementById('user-select');

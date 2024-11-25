@@ -1,3 +1,5 @@
+const sessionUserId = document.getElementById('user-session-id').value;
+
 document.addEventListener('DOMContentLoaded', function () {
     // console.log('El script tasks.js ha sido cargado correctamente.');
 
@@ -7,50 +9,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let currentSortKey = null; // Almacena la clave de ordenación actual
     let currentSortDirection = 'none'; // Dirección de orden actual
-    const sessionUserId = document.getElementById('user-session-id').value;
 
     // Cargar tareas inicialmente
     loadTasks();
 
-    // Función para cargar las tareas mediante AJAX con paginación
-    function loadTasks(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
-        const tableBody = document.querySelector('table tbody');
-        tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
 
-        // Construir los parámetros de la URL
-        const params = new URLSearchParams({
-            ...window.currentFilters, // Usar filtros activos de la variable global
-            page, // Página actual
-            sortKey, // Clave de ordenación
-            sortDirection, // Dirección de ordenación
-            user_id: sessionUserId // Usuario actual
-        });
-
-        fetch(`/billing/getBilling?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    loadInitialTasks(data.tasks);
-                    updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
-                } else {
-                    console.error('Error al cargar tareas:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error en la solicitud:', error.message);
-                tableBody.innerHTML = '<tr><td colspan="21" class="text-center text-red-500">Error al cargar las tareas.</td></tr>';
-            });
-    }
-
-
-    
-    
 
     document.querySelectorAll('th[data-sort-key]').forEach(header => {
         header.addEventListener('click', function () {
@@ -88,93 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
             loadTasks(1, sortKeyToSend, sortDirectionToSend);
         });
     });
-    
 
-    // Función para cargar y actualizar la tabla de tareas inicialmente
-    function loadInitialTasks(tasks) {
-        globalTasksArray = tasks;  // Almacenar las tareas cargadas globalmente
-
-        const tableBody = document.querySelector('table tbody');
-        tableBody.innerHTML = ''; // Limpiar la tabla existente
-
-        tasks.forEach(task => {
-            const row = document.createElement('tr');
-            row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
-            row.innerHTML = `
-            <td>${task.id}</td>
-            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
-            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
-            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            
-            <td>${task.descripcion || ''}</td>
-            <td>${task.observaciones || ''}</td>
-            <td>${task.facturable ? 'SI' : 'NO'}</td>
-            <td>${task.facturado || 'NO'}</td>
-
-            <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-           
-        `;
-            tableBody.appendChild(row);
-
-            // Añadir el evento de doble clic a las filas de la tabla
-            addDoubleClickEventToRows();
-        });
-    }
-
-    function formatFechaPlanificacion(fecha) {
-        const hoy = new Date();
-        const manana = new Date();
-        manana.setDate(hoy.getDate() + 1);
-        const fechaPlanificacion = new Date(fecha);
-
-        // Array con los nombres de los días de la semana
-        const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-
-        // Verificar si la fecha es hoy
-        if (
-            fechaPlanificacion.getDate() === hoy.getDate() &&
-            fechaPlanificacion.getMonth() === hoy.getMonth() &&
-            fechaPlanificacion.getFullYear() === hoy.getFullYear()
-        ) {
-            return "HOY";
-        }
-
-        // Verificar si la fecha es mañana
-        if (
-            fechaPlanificacion.getDate() === manana.getDate() &&
-            fechaPlanificacion.getMonth() === manana.getMonth() &&
-            fechaPlanificacion.getFullYear() === manana.getFullYear()
-        ) {
-            return "MAÑANA";
-        }
-
-        // Calcular el último día laborable de esta semana (viernes)
-        const diaHoy = hoy.getDay();
-        const diasHastaViernes = 5 - diaHoy; // 5 es viernes
-        const viernesDeEstaSemana = new Date(hoy);
-        viernesDeEstaSemana.setDate(hoy.getDate() + diasHastaViernes);
-
-        // Excluir sábado y domingo
-        const diaSemanaPlanificacion = fechaPlanificacion.getDay();
-        if (diaSemanaPlanificacion === 0 || diaSemanaPlanificacion === 6) {
-            return fechaPlanificacion.toLocaleDateString();
-        }
-
-        // Verificar si la fecha está en esta semana y es entre lunes y viernes
-        if (fechaPlanificacion <= viernesDeEstaSemana && fechaPlanificacion > hoy) {
-            return diasSemana[diaSemanaPlanificacion];
-        }
-
-        // Si la fecha es anterior a hoy, formatearla en rojo
-        if (fechaPlanificacion < hoy) {
-            return `<span style="color: red;">${fechaPlanificacion.toLocaleDateString()}</span>`;
-        }
-
-        // Mostrar la fecha en formato normal para cualquier otra condición
-        return fechaPlanificacion.toLocaleDateString();
-    }
 
 
     document.getElementById('export-tasks-button').addEventListener('click', async function () {
@@ -239,3 +116,177 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 });
+ // Función para cargar las tareas mediante AJAX con paginación
+ function loadTasks(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
+    const tableBody = document.querySelector('table tbody');
+    tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
+
+    // Construir los parámetros de la URL
+    const params = new URLSearchParams({
+        ...window.currentFilters, // Usar filtros activos de la variable global
+        page, // Página actual
+        sortKey, // Clave de ordenación
+        sortDirection, // Dirección de ordenación
+        user_id: sessionUserId // Usuario actual
+    });
+
+    fetch(`/billing/getBilling?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadInitialTasks(data.tasks);
+                updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
+            } else {
+                console.error('Error al cargar tareas:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error en la solicitud:', error.message);
+            tableBody.innerHTML = '<tr><td colspan="21" class="text-center text-red-500">Error al cargar las tareas.</td></tr>';
+        });
+}
+
+
+
+    // Función para cargar y actualizar la tabla de tareas inicialmente
+    function loadInitialTasks(tasks) {
+        globalTasksArray = tasks;  // Almacenar las tareas cargadas globalmente
+
+        const tableBody = document.querySelector('table tbody');
+        tableBody.innerHTML = ''; // Limpiar la tabla existente
+
+        tasks.forEach(task => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
+            row.innerHTML = `
+            <td>${task.id}</td>
+            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
+            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
+            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+            
+            <td>${task.descripcion || ''}</td>
+            <td>${task.observaciones || ''}</td>
+            <td>${task.facturable ? 'SI' : 'NO'}</td>
+            <td class="facturado-cell" 
+            data-facturado="${task.facturado || 'NO'}" 
+                 data-task-id="${task.id}">
+                 ${task.facturado || 'NO'}
+             </td>
+            <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
+           
+        `;
+            tableBody.appendChild(row);
+
+            // Añadir el evento de doble clic a las filas de la tabla
+            addDoubleClickEventToRows();
+            // Inicializar el evento de clic derecho en las celdas de "Facturado"
+            initializeFacturadoContextMenu(loadTasks);
+        });
+    }
+
+
+    
+function initializeFacturadoContextMenu() {
+    const tableBody = document.querySelector('table tbody');
+
+    tableBody.addEventListener('contextmenu', function (event) {
+        const targetCell = event.target;
+
+        // Verificar si el clic fue en una celda de "Facturado"
+        if (targetCell.classList.contains('facturado-cell')) {
+            event.preventDefault(); // Prevenir el menú contextual predeterminado
+
+            // Limpiar cualquier otro select abierto
+            const existingSelect = document.querySelector('.facturado-select');
+            if (existingSelect) existingSelect.remove();
+
+            // Crear un menú desplegable (select)
+            const currentValue = targetCell.getAttribute('data-facturado');
+            const taskId = targetCell.getAttribute('data-task-id');
+
+            const select = document.createElement('select');
+            select.classList.add('facturado-select');
+            ['SI', 'NO', 'NUNCA'].forEach(optionValue => {
+                const option = document.createElement('option');
+                option.value = optionValue;
+                option.textContent = optionValue;
+                if (optionValue === currentValue) option.selected = true;
+                select.appendChild(option);
+            });
+
+            // Posicionar el select cerca del cursor
+            select.style.position = 'absolute';
+            select.style.left = `${event.pageX}px`;
+            select.style.top = `${event.pageY}px`;
+            document.body.appendChild(select);
+
+            // Manejar el cambio de selección
+            select.addEventListener('change', function () {
+                const newValue = select.value;
+                updateTaskFacturado(taskId, newValue, targetCell, select);
+            });
+
+            // Cerrar el select al hacer clic fuera
+            document.addEventListener('click', function closeSelect(e) {
+                if (!select.contains(e.target)) {
+                    select.remove();
+                    document.removeEventListener('click', closeSelect);
+                }
+            });
+        }
+    });
+}
+
+// Función para actualizar la columna "Facturado"
+function updateTaskFacturado(taskId, newValue, targetCell, select) {
+    const formData = new FormData();
+    formData.append('_method', 'PUT'); // Simular un método PUT
+    formData.append('facturado', newValue);
+
+    fetch(`/tareas/${taskId}`, {
+        method: 'POST', // Usamos POST para enviar datos al backend
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    console.error("Error en la respuesta:", err);
+                    throw new Error('Error en la respuesta del servidor');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Actualizar la celda con el nuevo valor
+                targetCell.setAttribute('data-facturado', newValue);
+                targetCell.textContent = newValue;
+
+                loadTasks();            
+                // Mostrar notificación de éxito
+                showNotification('Columna Facturado actualizada correctamente', 'info');
+            } else {
+                console.error('Errores de validación:', data.errors);
+                showNotification('Error al actualizar la columna', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error al actualizar la columna:', error);
+            showNotification('Error al actualizar la columna', 'error');
+        })
+        .finally(() => {
+            // Remover el select una vez completado
+            select.remove();
+        });
+}

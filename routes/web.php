@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/billing', [TaskController::class, 'billingIndex'])->name('billing.index');
     Route::get('/billing/getBilling', [TaskController::class, 'getBilling'])->name('billing.get');
 
-    Route::get('/times', [TaskController::class, 'timesIndex'])->name('times.index')->middleware(['auth', 'role:admin']);
+    Route::get('/times', [TaskController::class, 'timesIndex'])->name('times.index');
 
     Route::get('/notifications', function () {
         $notifications = auth()->user()->unreadNotifications()->latest()->take(30)->get();

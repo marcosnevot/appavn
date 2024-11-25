@@ -108,11 +108,12 @@ class TaskController extends Controller
             }
 
             // Filtros de rangos de fechas
-            foreach (['fecha_inicio' => '>=', 'fecha_vencimiento' => '<='] as $field => $operator) {
+            foreach (['fecha_inicio' => '>=', 'fecha_vencimiento' => '<=', 'fecha_imputacion' => '='] as $field => $operator) {
                 if (!empty($filters[$field])) {
                     $query->whereDate($field, $operator, $filters[$field]);
                 }
             }
+
 
             // Filtros específicos de planificación
             if (!empty($filters['fecha_planificacion'])) {
@@ -264,7 +265,7 @@ class TaskController extends Controller
                 $query->where('cliente_id', $filters['cliente']);
             }
 
-        
+
             // Filtrar por facturable y no facturado
             $query->where('facturable', true)
                 ->where('facturado', 'NO');
@@ -590,6 +591,12 @@ class TaskController extends Controller
                 $query->whereDate('fecha_vencimiento', '<=', $filters['fecha_vencimiento']);
             }
 
+            // Filtrar por fecha_imputacion
+            if (!empty($filters['fecha_imputacion'])) {
+                $query->whereDate('fecha_imputacion', '=', $filters['fecha_imputacion']);
+            }
+
+
             // Filtrar por precio
             if (!empty($filters['precio'])) {
                 $query->where('precio', '=', $filters['precio']);
@@ -829,51 +836,79 @@ class TaskController extends Controller
             // Iniciar una transacción para asegurar la integridad de los datos
             DB::beginTransaction();
 
-            // Validar los datos de la solicitud
-            $validated = $request->validate([
-                'subtipoEdit' => 'nullable|string', // Validar subtipo
-                'estadoEdit' => 'nullable|string',  // Validar estado
-                'archivoEdit' => 'nullable|string',  // Validar archivo
-                'descripcionEdit' => 'nullable|string',  // Validar descripción
-                'observacionesEdit' => 'nullable|string',  // Validar observaciones
-                'facturableEdit' => 'nullable|boolean',  // Validar facturable (checkbox)
-                'facturadoEdit' => 'nullable|string',  // Validar facturado
-                'precioEdit' => 'nullable|numeric',  // Validar precio
-                'suplidoEdit' => 'nullable|numeric',  // Validar suplido
-                'costeEdit' => 'nullable|numeric',  // Validar coste
-                'fecha_planificacionEdit' => 'nullable|date',  // Validar fecha de planificación
-                'fecha_inicioEdit' => 'nullable|date',  // Validar fecha de inicio
-                'fecha_vencimientoEdit' => 'nullable|date',  // Validar fecha de vencimiento
-                'fecha_imputacionEdit' => 'nullable|date',  // Validar fecha de imputación
-                'tiempo_previstoEdit' => 'nullable|numeric',  // Validar tiempo previsto
-                'tiempo_realEdit' => 'nullable|numeric',  // Validar tiempo real
-                'usersEdit' => 'nullable|array',  // Validar usuarios asignados
-                'usersEdit.*' => 'exists:users,id',  // Cada usuario debe existir en la tabla de usuarios
-                'duplicar' => 'nullable|boolean', // Validar el checkbox de duplicación
-            ]);
+            // Reglas de validación dinámica
+            $rules = [];
+            foreach (
+                [
+                    'subtipoEdit' => 'nullable|string',
+                    'estadoEdit' => 'nullable|string',
+                    'archivoEdit' => 'nullable|string',
+                    'descripcionEdit' => 'nullable|string',
+                    'observacionesEdit' => 'nullable|string',
+                    'facturableEdit' => 'nullable|boolean',
+                    'facturadoEdit' => 'nullable|string',
+                    'facturado' => 'nullable|string',  // Facturado desde la celda
+                    'precioEdit' => 'nullable|numeric',
+                    'suplidoEdit' => 'nullable|numeric',
+                    'costeEdit' => 'nullable|numeric',
+                    'fecha_planificacionEdit' => 'nullable|date',
+                    'fecha_inicioEdit' => 'nullable|date',
+                    'fecha_vencimientoEdit' => 'nullable|date',
+                    'fecha_imputacionEdit' => 'nullable|date',
+                    'tiempo_previstoEdit' => 'nullable|numeric',
+                    'tiempo_realEdit' => 'nullable|numeric',
+                    'usersEdit' => 'nullable|array',
+                    'usersEdit.*' => 'exists:users,id',
+                    'duplicar' => 'nullable|boolean',
+                ] as $field => $rule
+            ) {
+                if ($request->has($field)) { // Validar solo campos presentes
+                    $rules[$field] = $rule;
+                }
+            }
 
+            // Validar la solicitud
+            $validated = $request->validate($rules);
             // Buscar la tarea por ID
             $task = Tarea::findOrFail($id);
 
-            // Actualizar la tarea con los datos validados
-            $task->update([
-                'subtipo' => $validated['subtipoEdit'],  // No usar coalescencia nula
-                'estado' => $validated['estadoEdit'],
-                'archivo' => $validated['archivoEdit'],
-                'descripcion' => $validated['descripcionEdit'],  // Permitir que se guarde como vacío
-                'observaciones' => $validated['observacionesEdit'],  // Permitir vacío
-                'facturable' => $validated['facturableEdit'] ?? false,  // Checkbox
-                'facturado' => $validated['facturadoEdit'],
-                'precio' => $validated['precioEdit'],
-                'suplido' => $validated['suplidoEdit'],
-                'coste' => $validated['costeEdit'],
-                'fecha_planificacion' => $validated['fecha_planificacionEdit'],
-                'fecha_inicio' => $validated['fecha_inicioEdit'],
-                'fecha_vencimiento' => $validated['fecha_vencimientoEdit'],
-                'fecha_imputacion' => $validated['fecha_imputacionEdit'],
-                'tiempo_previsto' => $validated['tiempo_previstoEdit'],
-                'tiempo_real' => $validated['tiempo_realEdit'],
-            ]);
+            // Construir datos de actualización dinámicamente
+            $updateData = [];
+            foreach (
+                [
+                    'subtipo' => 'subtipoEdit',
+                    'estado' => 'estadoEdit',
+                    'archivo' => 'archivoEdit',
+                    'descripcion' => 'descripcionEdit',
+                    'observaciones' => 'observacionesEdit',
+                    'facturable' => 'facturableEdit',
+                    'precio' => 'precioEdit',
+                    'suplido' => 'suplidoEdit',
+                    'coste' => 'costeEdit',
+                    'fecha_planificacion' => 'fecha_planificacionEdit',
+                    'fecha_inicio' => 'fecha_inicioEdit',
+                    'fecha_vencimiento' => 'fecha_vencimientoEdit',
+                    'fecha_imputacion' => 'fecha_imputacionEdit',
+                    'tiempo_previsto' => 'tiempo_previstoEdit',
+                    'tiempo_real' => 'tiempo_realEdit',
+                ] as $field => $requestKey
+            ) {
+                if ($request->has($requestKey)) { // Incluir solo campos presentes
+                    $updateData[$field] = $request->input($requestKey);
+                }
+            }
+
+
+            // Manejar el campo "facturado" (priorizar celda sobre formulario)
+            if ($request->has('facturado')) {
+                $updateData['facturado'] = $request->input('facturado');
+            } elseif ($request->has('facturadoEdit')) {
+                $updateData['facturado'] = $request->input('facturadoEdit');
+            }
+
+
+            // Actualizar la tarea con los datos procesados
+            $task->update($updateData);
 
 
             // Asociar los usuarios a la tarea (si se han seleccionado)

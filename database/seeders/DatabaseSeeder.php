@@ -12,12 +12,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-      // Ejecutar seeders individuales
-      $this->call([
-      // UserSeeder::class,
-       // ClienteSeeder::class,
-        TareaSeeder::class,
-        // Puedes añadir más seeders aquí si los tienes
-    ]);
+        // Ejecutar seeders individuales
+        $this->call([
+            RoleSeeder::class,
+            UserSeeder::class,
+            ClienteSeeder::class,
+            // TareaSeeder::class,
+            // Puedes añadir más seeders aquí si los tienes
+        ]);
     }
 }

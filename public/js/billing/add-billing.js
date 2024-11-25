@@ -957,7 +957,11 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
             <td>${task.facturable ? 'SI' : 'NO'}</td>
-            <td>${task.facturado || 'NO'}</td>
+            <td class="facturado-cell" 
+            data-facturado="${task.facturado || 'NO'}" 
+                 data-task-id="${task.id}">
+                 ${task.facturado || 'NO'}
+             </td>
  
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
@@ -976,6 +980,8 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
 
         // Añadir el evento de doble clic a las filas de la tabla
         addDoubleClickEventToRows();
+        // Inicializar el evento de clic derecho en las celdas de "Facturado"
+        initializeFacturadoContextMenu(loadTasks());
     });
 
 
@@ -996,7 +1002,11 @@ function updateSingleTaskRow(task) {
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
             <td>${task.facturable ? 'SI' : 'NO'}</td>
-            <td>${task.facturado || 'NO'}</td>
+            <td class="facturado-cell" 
+            data-facturado="${task.facturado || 'NO'}" 
+                 data-task-id="${task.id}">
+                 ${task.facturado || 'NO'}
+             </td>
            
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
@@ -1010,6 +1020,8 @@ function updateSingleTaskRow(task) {
 
     // Añadir el evento de doble clic a la fila actualizada (si es necesario)
     addDoubleClickEventToRows();
+    // Inicializar el evento de clic derecho en las celdas de "Facturado"
+    initializeFacturadoContextMenu(loadTasks());
 }
 
 

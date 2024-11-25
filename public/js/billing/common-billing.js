@@ -147,6 +147,8 @@ function addDoubleClickEventToRows() {
 }
 
 
+
+
 // Función para mostrar la notificación unificada
 function showNotification(message = "Acción completada", type = "success") {
     const notification = document.getElementById('notification');
@@ -199,7 +201,7 @@ function showNotification(message = "Acción completada", type = "success") {
     setTimeout(() => {
         notification.classList.add('hide');
         notification.classList.remove('show');
-        
+
         // Ocultar visibilidad al terminar la animación
         setTimeout(() => {
             notification.style.visibility = 'hidden';

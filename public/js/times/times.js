@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const sessionUserId = document.getElementById('user-session-id').value;
 
+    // Definir la fecha actual
+    const today = new Date().toISOString().split('T')[0];
+
+
 
     // Cargar tareas inicialmente
     loadTasks();
@@ -23,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
             page, // Página actual
             sortKey, // Clave de ordenación
             sortDirection, // Dirección de ordenación
+            fecha_imputacion: today ,
             user_id: sessionUserId // Usuario actual
         });
 

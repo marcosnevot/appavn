@@ -21,9 +21,9 @@
             <div class="form-group grow">
                 <label for="facturado">Facturado:</label>
                 <select name="facturadoEdit" id="facturado">
-                    <option value="No">No</option>
-                    <option value="Sí">Sí</option>
-                    <option value="Nunca">Nunca</option>
+                    <option value="NO">NO</option>
+                    <option value="SI">SI</option>
+                    <option value="NUNCA">NUNCA</option>
                 </select>
             </div>
 

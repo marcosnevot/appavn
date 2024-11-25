@@ -61,9 +61,9 @@
             <div class="form-group grow">
                 <label for="facturado">Facturado:</label>
                 <select name="facturado" id="facturado">
-                    <option value="NO">No</option>
-                    <option value="SI">Sí</option>
-                    <option value="NUNCA">Nunca</option>
+                    <option value="NO">NO</option>
+                    <option value="SI">SI</option>
+                    <option value="NUNCA">NUNCA</option>
                 </select>
             </div>
 

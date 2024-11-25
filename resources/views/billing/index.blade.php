@@ -86,8 +86,8 @@
 </script>
 
 <script src="{{ asset('js/billing/common-billing.js') }}"></script>
-<script src="{{ asset('js/billing/add-billing.js') }}"></script>
 <script src="{{ asset('js/billing/billing.js') }}"></script>
+<script src="{{ asset('js/billing/add-billing.js') }}"></script>
 <script src="{{ asset('js/billing/filter-billing.js') }}"></script>
 <script src="{{ asset('js/billing/billing-modal.js') }}"></script>
 
