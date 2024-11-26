@@ -101,7 +101,7 @@
                 <select name="filter_estado" id="filter-estado">
                     <option value="">Cualquiera</option>
                     <option value="PENDIENTE">Pendiente</option>
-                    <option value="ENPROGRESO">En Espera</option>
+                    <option value="ENESPERA">En Espera</option>
                     <option value="COMPLETADA">Completada</option>
                 </select>
             </div>
