@@ -87,7 +87,7 @@
                 <label for="estado">Estado:</label>
                 <select name="estado" id="estado">
                     <option value="PENDIENTE">Pendiente</option>
-                    <option value="ENPROGRESO">En Espera</option>
+                    <option value="ENESPERA">En Espera</option>
                     <option value="COMPLETADA">Completada</option>
                 </select>
             </div>

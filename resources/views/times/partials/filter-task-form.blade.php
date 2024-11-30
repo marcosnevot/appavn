@@ -146,6 +146,7 @@
                     </div>
                 </div>
                 <input type="hidden" name="filter_estado" id="filter-estado-ids"> <!-- Campo oculto -->
+
             </div>
         </div>
 
