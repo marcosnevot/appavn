@@ -85,7 +85,7 @@
                 <label for="estado">Estado:</label>
                 <select name="estado" id="estado">
                     <option value="PENDIENTE">Pendiente</option>
-                    <option value="ENPROGRESO">En Espera</option>
+                    <option value="ENESPERA">En Espera</option>
                     <option value="COMPLETADA">Completada</option>
                 </select>
             </div>
@@ -160,7 +160,7 @@
                 <input type="date" name="fecha_vencimiento" id="fecha_vencimiento">
             </div>
 
-            <div class="form-group grow">
+            <div class="form-group grow" style="display: none;">
                 <label for="fecha_imputacion">Fecha de Imputación:</label>
                 <input type="date" name="fecha_imputacion" id="fecha_imputacion">
             </div>

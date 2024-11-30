@@ -691,7 +691,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Predefinir el campo de fecha_imputacion
-    
+
     // Obtener la fecha actual en formato YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0];
 
@@ -823,57 +823,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // Ordenar la tabla
-    const tableBody = document.querySelector('table tbody');
-    const sortSelect = document.getElementById('sort-select');
-
-    // Función para ordenar la tabla
-    function sortTableBy(attribute) {
-        // Obtener las filas actuales de la tabla
-        let rows = Array.from(tableBody.querySelectorAll('tr'));
-
-        // Definir la lógica de ordenación según el atributo seleccionado
-        rows.sort((a, b) => {
-            let valA, valB;
-
-            switch (attribute) {
-                case 'cliente':
-                    valA = a.children[2].textContent.trim().toLowerCase();
-                    valB = b.children[2].textContent.trim().toLowerCase();
-                    break;
-                case 'asunto':
-                    valA = a.children[1].textContent.trim().toLowerCase();
-                    valB = b.children[1].textContent.trim().toLowerCase();
-                    break;
-                case 'estado':
-                    valA = a.children[5].textContent.trim().toLowerCase();
-                    valB = b.children[5].textContent.trim().toLowerCase();
-                    break;
-                case 'fecha_creacion':
-                default:
-                    // Utilizar created_at (última columna oculta)
-                    valA = new Date(a.children[20].textContent); // Índice de created_at
-                    valB = new Date(b.children[20].textContent);
-                    return valB - valA; // Orden descendente por fecha de creación
-            }
-
-            // Ordenar alfabéticamente para otros atributos
-            return valA > valB ? 1 : (valA < valB ? -1 : 0);
-        });
-
-        // Vaciar el contenido de la tabla y agregar las filas ordenadas
-        tableBody.innerHTML = '';
-        rows.forEach(row => tableBody.appendChild(row));
-    }
-
-    // Evento para cambiar la ordenación cuando se selecciona un nuevo atributo
-    sortSelect.addEventListener('change', function () {
-        const selectedAttribute = this.value;
-        sortTableBy(selectedAttribute);
-    });
-
-    // Ordenar inicialmente por fecha de creación (ID)
-    sortTableBy('fecha_creacion');
 
     // Definir referencias globales a los elementos de la planificación
     const planificacionContainer = document.getElementById('planificacion-buttons');
@@ -969,9 +918,28 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
     if (!isSingleTask) {
         tableBody.innerHTML = ''; // Limpiar la tabla existente
     }
+    console.log('Filtros actuales en window.currentFilters:', window.currentFilters);
 
     // Convertir el parámetro `tasks` a un array si es un solo objeto
     const tasksArray = isSingleTask ? [tasks] : tasks;
+
+    tasks.sort((a, b) => {
+        const dateA = a.fecha_planificacion ? new Date(a.fecha_planificacion) : null;
+        const dateB = b.fecha_planificacion ? new Date(b.fecha_planificacion) : null;
+    
+        // Manejo de valores nulos
+        if (!dateA && !dateB) return a.id - b.id; // Si ambas fechas son nulas, ordenar por ID
+        if (!dateA) return 1; // NULL al final
+        if (!dateB) return -1;
+    
+        // Ordenar por fecha en orden ascendente
+        const dateComparison = dateA - dateB;
+        if (dateComparison !== 0) return dateComparison;
+    
+        // Ordenar por ID como criterio secundario
+        return a.id - b.id;
+    });
+    
 
     tasksArray.forEach(task => {
         // Verificar si la tarea coincide con los filtros actuales (si es que hay filtros)
@@ -1003,11 +971,6 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             </td>             
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             
-            <td style="display: none;>${task.archivo || 'No disponible'}</td>
-            <td style="display: none;>${task.precio || 'N/A'}</td>
-            <td style="display: none;>${task.suplido || 'N/A'}</td>
-            <td style="display: none;>${task.coste || 'N/A'}</td>
-            <td style="display: none;">${task.created_at || 'Sin fecha'}</td> <!-- Campo oculto para created_at -->
         `;
 
         // Insertar la nueva fila al principio si es una tarea única (añadir tarea)
@@ -1039,14 +1002,11 @@ function updateSingleTaskRow(task) {
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.descripcion || ''}</td>
             <td>${task.observaciones || ''}</td>
-            <td style="display: none;">${task.archivo || 'No disponible'}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
             <td>${task.facturado || 'No'}</td>
             <td>${task.subtipo || ''}</td>
             <td>${task.estado}</td>
-            <td style="display: none;">${task.precio || 'N/A'}</td>
-            <td style="display: none;">${task.suplido || 'N/A'}</td>
-            <td style="display: none;">${task.coste || 'N/A'}</td>
+
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
@@ -1056,7 +1016,6 @@ function updateSingleTaskRow(task) {
             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
             </td>             
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
-            <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
         `;
     } else {
         console.error(`No se encontró una fila con el ID de la tarea: ${task.id}`);

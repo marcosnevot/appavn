@@ -98,9 +98,9 @@ document.addEventListener('DOMContentLoaded', function () {
             tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
             tiempo_real: document.getElementById('filter-tiempo-real').value || '',
 
-            // Filtros por defecto para la vista de Facturación
-            facturable: true,
-            facturado: 'NO'
+            // Filtros personalizados para Facturación
+            facturable: document.getElementById('filter-facturable-ids').value || '', // Usar el campo oculto con los valores seleccionados
+            facturado: document.getElementById('filter-facturado-ids').value || '', // Usar el campo oculto con los valores seleccionados
         };
 
         console.log('Datos de filtro:', filterData);
@@ -121,6 +121,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    console.log('Datos enviados:', filterData);
+                    console.log('Respuesta del servidor:', data);
                     updateTaskTable(data.filteredTasks);
                     updatePagination(data.pagination, loadFilteredTasks);  // Pasa loadFilteredTasks como argumento
                     resetFiltroRapidoPlanificacion();
@@ -139,8 +141,8 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
 
         // Agregar filtros predeterminados para facturación
-        document.getElementById('filter-facturable').value = 'true';
-        document.getElementById('filter-facturado').value = 'No';
+        //document.getElementById('filter-facturable').value = 'true';
+        //document.getElementById('filter-facturado').value = 'No';
 
         loadFilteredTasks();
     });
@@ -511,6 +513,131 @@ document.addEventListener('DOMContentLoaded', function () {
         filterCurrentFocus = (filterCurrentFocus + direction + checkboxes.length) % checkboxes.length; // Calcular el índice
         checkboxes[filterCurrentFocus].focus();
     }
+
+
+    // Checklists de los campos Facturable y Facturado
+
+    function initializeChecklistFilter(fieldName, isBoolean = false, defaultValues = []) {
+        const selectElement = document.getElementById(`filter-${fieldName}-select`);
+        const listElement = document.getElementById(`filter-${fieldName}-list`);
+        const hiddenInput = document.getElementById(`filter-${fieldName}-ids`);
+        const selectedContainer = document.getElementById(`filter-selected-${fieldName}s`);
+        let selectedItems = [...defaultValues]; // Inicializar con valores predeterminados
+        let currentFocus = -1;
+
+        // Marcar los checkboxes correspondientes a los valores predeterminados
+        const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]')); // Convertir NodeList a Array
+        checkboxes.forEach((checkbox, index) => {
+            checkbox.dataset.index = index; // Asignar índice único al checkbox
+            const value = isBoolean ? checkbox.value === "1" : checkbox.value;
+
+            // Marcar los valores predeterminados
+            if (defaultValues.includes(value)) {
+                checkbox.checked = true;
+            }
+
+            // Manejar selección/deselección
+            checkbox.addEventListener('change', function () {
+                const value = isBoolean ? this.value === "1" : this.value;
+
+                if (this.checked) {
+                    selectedItems.push(value);
+                } else {
+                    selectedItems = selectedItems.filter(item => item !== value);
+                }
+
+                hiddenInput.value = selectedItems.join(',');
+                updateSelectedDisplay(selectedContainer, selectedItems, isBoolean);
+            });
+
+            // Manejar el foco de los checkboxes
+            checkbox.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    focusNextCheckbox(1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    focusNextCheckbox(-1);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    checkboxes[currentFocus].click(); // Simular clic para seleccionar/deseleccionar
+                } else if (e.key === 'Escape') {
+                    listElement.style.display = 'none';
+                    selectElement.focus(); // Devolver el foco al select principal
+                }
+            });
+        });
+
+        // Alternar visibilidad de la lista
+        selectElement.addEventListener('click', function (event) {
+            event.stopPropagation(); // Evitar que se cierre inmediatamente
+            toggleListVisibility();
+        });
+
+        // Cerrar lista al hacer clic fuera
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest(`#filter-${fieldName}-list`) && e.target !== selectElement) {
+                listElement.style.display = 'none';
+            }
+        });
+
+        // Función para mostrar u ocultar la lista
+        function toggleListVisibility() {
+            listElement.style.display = listElement.style.display === 'block' ? 'none' : 'block';
+
+            if (listElement.style.display === 'block') {
+                currentFocus = -1; // Reiniciar la selección cuando se vuelve a abrir
+                focusNextCheckbox(1); // Foco en el primer checkbox al abrir
+            }
+        }
+
+        // Actualizar visualización de ítems seleccionados
+        function updateSelectedDisplay(container, items, isBoolean) {
+            container.innerHTML = '';
+            if (items.length === 0) {
+                const placeholder = document.createElement('span');
+                placeholder.textContent = 'Seleccionar...';
+                placeholder.style.color = '#aaa';
+                placeholder.style.fontStyle = 'italic';
+                container.appendChild(placeholder);
+            } else {
+                items.forEach(item => {
+                    const span = document.createElement('span');
+                    span.textContent = isBoolean ? (item === true ? 'Sí' : 'No') : item;
+                    span.style.backgroundColor = '#f0f0f0';
+                    span.style.color = '#333';
+                    span.style.padding = '3px 8px';
+                    span.style.borderRadius = '15px';
+                    span.style.fontSize = '12px';
+                    span.style.lineHeight = '1.5';
+                    span.style.border = '1px solid #ddd';
+                    container.appendChild(span);
+                });
+            }
+        }
+
+        // Función para manejar el enfoque de los checkboxes
+        function focusNextCheckbox(direction) {
+            currentFocus = (currentFocus + direction + checkboxes.length) % checkboxes.length; // Calcular el índice
+            checkboxes[currentFocus].focus();
+        }
+
+        // Actualizar la visualización inicial con valores predeterminados
+        hiddenInput.value = selectedItems.join(',');
+        updateSelectedDisplay(selectedContainer, selectedItems, isBoolean);
+    }
+
+
+    initializeChecklistFilter('facturado', false, ['NO']); // Facturado predeterminado a "NO"
+    initializeChecklistFilter('facturable', true, [true]); // Facturable predeterminado a true
+
+
+
+
+
+
+
+
 
 
     // Filtro según la planificación

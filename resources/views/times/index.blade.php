@@ -10,7 +10,7 @@
         <div id="quick-filters-container" style="display:flex">
 
             <!-- Contenedor de Filtro Rápido de Asignación de Usuarios -->
-            <div class="form-group grow" style="margin-bottom: 15px;">
+            <div class="form-group grow" style="margin-bottom: 0px;">
                 <div class="quick-filter-asignacion" style="width:150px;">
                     <div class="custom-select" name="quick-filter-user-select" tabindex="0" id="quick-filter-user-select">
                         <div id="quick-filter-selected-users" class="selected-users">
@@ -30,11 +30,16 @@
                     <input type="hidden" name="quick_filter_users" id="quick-filter-user-ids"> <!-- Campo oculto para IDs seleccionados -->
                 </div>
             </div>
-            <div class="form-group grow" style="margin-bottom: 15px;">
-                <div id="quick-filter-fecha-imputacion">
-                    <input type="date" id="quick-fecha-imputacion" />
-                </div>
+
+            <div class="form-group grow">
+                <input type="text"
+                    name="quick_fecha_planificacion"
+                    id="quick-fecha-planificacion"
+                    placeholder="Seleccionar rango de fechas"
+                    readonly
+                    class="form-control">
             </div>
+
         </div>
 
         <span class="actions-space"></span>

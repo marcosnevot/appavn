@@ -40,7 +40,7 @@
 
         <!-- Fila 2: Asignado a, Archivo, Facturable, Facturado -->
         <div class="form-row" style="display: none;">
-            
+
 
 
             <div class="form-group narrow" style="display: none;">
@@ -48,24 +48,7 @@
                 <input type="text" name="filter_archivo" id="filter-archivo">
             </div>
 
-            <div class="form-group grow">
-                <label for="filter-facturable">Facturable:</label>
-                <select name="filter_facturable" id="filter-facturable">
-                    <option value="">Cualquiera</option>
-                    <option value="1">Sí</option>
-                    <option value="0">No</option>
-                </select>
-            </div>
 
-            <div class="form-group grow">
-                <label for="filter-facturado">Facturado:</label>
-                <select name="filter_facturado" id="filter-facturado">
-                    <option value="">Cualquiera</option>
-                    <option value="NO">No</option>
-                    <option value="SI">Sí</option>
-                    <option value="NUNCA">Nunca</option>
-                </select>
-            </div>
 
 
             <div class="form-group grow">
@@ -119,6 +102,46 @@
 
         <!-- Fila 4: Fechas, Tiempo Previsto, Tiempo Real -->
         <div class="form-row" style="margin-bottom:30px">
+
+            <!-- Facturable -->
+            <div class="form-group grow">
+                <label for="filter-facturable">Facturable:</label>
+                <div class="custom-select" id="filter-facturable-select">
+                    <div id="filter-selected-facturables" class="selected-facturables">
+                    </div>
+                    <div id="filter-facturable-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-facturable-1" value="1">
+                                <label for="filter-facturable-1">Sí</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-facturable-0" value="0">
+                                <label for="filter-facturable-0">No</label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_facturable" id="filter-facturable-ids"> <!-- Campo oculto -->
+            </div>
+
+
+            <!-- Facturado -->
+            <div class="form-group grow">
+                <label for="filter-facturado">Facturado:</label>
+                <div class="custom-select" id="filter-facturado-select">
+                    <div id="filter-selected-facturados" class="selected-items"></div>
+                    <div id="filter-facturado-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-si" value="SI"><label for="filter-facturado-si">Sí</label></li>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-no" value="NO"><label for="filter-facturado-no">No</label></li>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-nunca" value="NUNCA"><label for="filter-facturado-nunca">Nunca</label></li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_facturado" id="filter-facturado-ids">
+            </div>
+
             <div class="form-group grow">
                 <label for="filter-fecha-inicio">Fecha de Inicio:</label>
                 <input type="date" name="filter_fecha_inicio" id="filter-fecha-inicio">

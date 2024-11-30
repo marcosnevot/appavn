@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('El script de filtro ha sido cargado correctamente.');
 
@@ -33,14 +34,16 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('click', function (event) {
         const isInsideForm = filterTaskForm.contains(event.target); // Verifica si el clic fue dentro del formulario
         const isfilterTaskButton = document.getElementById('filter-task-button').contains(event.target);
+        const isDateRangePicker = event.target.closest('.daterangepicker'); // Verifica si el clic fue dentro del Date Range Picker
 
-        // Verifica si el clic no es dentro del formulario o dentro del botón de abrir el formulario
-        if (!isInsideForm && !isfilterTaskButton) {
+        // Verifica si el clic no es dentro del formulario, del botón o del Date Range Picker
+        if (!isInsideForm && !isfilterTaskButton && !isDateRangePicker) {
             if (filterTaskForm.classList.contains('show')) {
                 closeFilterTaskForm();
             }
         }
     });
+
 
 
     // Función para cerrar el formulario
@@ -82,27 +85,36 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    function loadFilteredTasks(page = 1) {
+    function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
+
+        // Extraer fechas del rango de planificación desde el formulario
+        const fechaPlanificacionInput = document.getElementById('filter-fecha-planificacion').value || '';
+        const [fechaPlanificacionInicio, fechaPlanificacionFin] = fechaPlanificacionInput
+            ? fechaPlanificacionInput.split(' - ')
+            : ['', ''];
 
         const filterData = {
             cliente: document.getElementById('filter-cliente-id-input').value || '', // Usar el ID del cliente
             asunto: document.getElementById('filter-asunto-input').value || '',
             tipo: document.getElementById('filter-tipo-input').value || '',
-            subtipo: document.getElementById('filter-subtipo').value || '',
-            estado: document.getElementById('filter-estado').value || '',
+            subtipo: document.getElementById('filter-subtipo-ids').value || '', // Usar el campo oculto con los valores seleccionados
+            estado: document.getElementById('filter-estado-ids').value || '',
             usuario: document.getElementById('filter-user-ids').value || '',
             archivo: document.getElementById('filter-archivo').value || '',
-            facturable: document.getElementById('filter-facturable').value || '',
-            facturado: document.getElementById('filter-facturado').value || '',
+            facturable: document.getElementById('filter-facturable-ids').value || '', // Usar el campo oculto con los valores seleccionados
+            facturado: document.getElementById('filter-facturado-ids').value || '', // Usar el campo oculto con los valores seleccionados
             precio: document.getElementById('filter-precio').value || '',
             suplido: document.getElementById('filter-suplido').value || '',
             coste: document.getElementById('filter-coste').value || '',
-            fecha_planificacion: document.getElementById('filter-fecha-planificacion').value || '',
+            fecha_planificacion: fechaPlanificacionInicio,
             fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
             fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
-            fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || fechaImputacionInput.value, // Priorizar formulario
+            // fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || fechaImputacionInput.value, // Priorizar formulario
             tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
-            tiempo_real: document.getElementById('filter-tiempo-real').value || ''
+            tiempo_real: document.getElementById('filter-tiempo-real').value || '',
+            // Enviar las fechas de planificación como valores separados
+            fecha_planificacion_inicio: fechaPlanificacionInicio || '',
+            fecha_planificacion_fin: fechaPlanificacionFin || '',
         };
 
         console.log('Datos de filtro:', filterData);
@@ -110,14 +122,17 @@ document.addEventListener('DOMContentLoaded', function () {
         // Obtener los IDs de usuario seleccionados como array
         const selectedUserIds = filterData.usuario ? filterData.usuario.split(',').map(id => parseInt(id)) : [];
 
-        const selectedDate = filterData.fecha_imputacion;
+        const selectedDate = filterData.fecha_planificacion;
         // Sincronizar el filtro rápido de usuario con los seleccionados en el formulario
         syncQuickFilterWithFormFilter(selectedUserIds, selectedDate);
+        window.currentFilters = filterData; // Actualiza los filtros activos en la variable global
 
         // Actualizar el panel con los filtros actuales
         updateFilterInfoPanel(filterData);
 
-        window.currentFilters = filterData; // Actualiza los filtros activos en la variable global
+        const quickFechaPlanificacionInput = $('#quick-fecha-planificacion');
+        quickFechaPlanificacionInput.val(`${fechaPlanificacionInicio} - ${fechaPlanificacionFin}`);
+
 
         // Realizar la solicitud al servidor para filtrar las tareas
         fetch(`/tareas/filtrar?page=${page}`, {  // <-- Asegúrate de pasar el número de página
@@ -132,7 +147,9 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.success) {
                     updateTaskTable(data.filteredTasks);
-                    updatePagination(data.pagination, loadFilteredTasks);  // Pasa loadFilteredTasks como argumento
+                    updatePagination(data.pagination, (newPage) =>
+                        loadFilteredTasks(newPage, sortKey, sortDirection)
+                    );
                     updateHoursSummary(data.filteredTasks);
                     closeFilterTaskForm();
                 } else {
@@ -146,6 +163,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     applyFilterButton.addEventListener('click', function (e) {
         e.preventDefault();
+        // Extraer fechas seleccionadas en el formulario
+        const formFechaPlanificacionInput = document.getElementById('filter-fecha-planificacion').value || '';
+        const [formFechaInicio, formFechaFin] = formFechaPlanificacionInput.split(' - ');
+
+        // Actualizar el filtro rápido con las fechas seleccionadas
+        const quickFechaPlanificacionInput = $('#quick-fecha-planificacion');
+        quickFechaPlanificacionInput.val(`${formFechaInicio} - ${formFechaFin}`);
+        quickFilterSelectedDates = [formFechaInicio, formFechaFin];
         loadFilteredTasks();
     });
 
@@ -492,27 +517,87 @@ document.addEventListener('DOMContentLoaded', function () {
     let quickFilterSelectedUsers = [];
     const sessionUserCheckboxQuick = document.getElementById(`quick-filter-user-${sessionUserId}`);
 
-
-    const fechaImputacionInput = document.getElementById('quick-fecha-imputacion');
+    const fechaPlanificacionInput = document.getElementById('quick-fecha-planificacion');
     const today = new Date().toISOString().split('T')[0];
     let quickFilterSelectedDates = [today]; // Inicia con la fecha de hoy
-    const fechaImputacionField = document.getElementById('filter-fecha-imputacion');
-
-    if (fechaImputacionField && !fechaImputacionField.value) {
-        fechaImputacionField.value = today; // Establecer la fecha de hoy solo si no hay valor previo
-    }
+    let formFilterSelectedDates = [today]; // Inicia con la fecha de hoy
 
 
-    // Establecer el valor inicial en el campo de fecha imputación
-    if (fechaImputacionInput) {
-        fechaImputacionInput.value = today;
-    }
+    $(document).ready(function () {
+        const today = new Date().toISOString().split('T')[0];
 
-    // Evento para actualizar el filtro cuando cambie la fecha
-    fechaImputacionInput.addEventListener('change', function () {
-        quickFilterSelectedDates = [fechaImputacionInput.value];
-        applyQuickFilters();
+        // Inicialización para el campo rápido (Quick Filter)
+        const quickFechaPlanificacionInput = $('#quick-fecha-planificacion');
+
+        quickFechaPlanificacionInput.daterangepicker({
+            autoUpdateInput: true,
+            startDate: today,
+            endDate: today,
+            locale: {
+                format: 'YYYY-MM-DD',
+                separator: ' - ',
+                applyLabel: 'Aplicar',
+                cancelLabel: 'Cancelar',
+                fromLabel: 'Desde',
+                toLabel: 'Hasta',
+                customRangeLabel: 'Personalizado',
+            },
+        });
+
+        // Configurar valor inicial para el quick filter
+        quickFechaPlanificacionInput.val(`${today} - ${today}`);
+
+        quickFechaPlanificacionInput.on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(`${picker.startDate.format('YYYY-MM-DD')} - ${picker.endDate.format('YYYY-MM-DD')}`);
+            quickFilterSelectedDates = [picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD')];
+            applyQuickFilters(); // Aplica el filtro rápido
+        });
+
+        quickFechaPlanificacionInput.on('cancel.daterangepicker', function () {
+            $(this).val('');
+            quickFilterSelectedDates = [];
+            applyQuickFilters();
+        });
+
+
+        // Inicialización para el campo del formulario (Filter Form)
+        const formFechaPlanificacionInput = $('#filter-fecha-planificacion');
+
+        formFechaPlanificacionInput.daterangepicker({
+            autoUpdateInput: true,
+            startDate: today,
+            endDate: today,
+            locale: {
+                format: 'YYYY-MM-DD',
+                separator: ' - ',
+                applyLabel: 'Aplicar',
+                cancelLabel: 'Cancelar',
+                fromLabel: 'Desde',
+                toLabel: 'Hasta',
+                customRangeLabel: 'Personalizado',
+            },
+            drops: 'up', // Mostrar por encima
+        });
+
+        // Configurar valor inicial para el formulario
+        formFechaPlanificacionInput.val(`${today} - ${today}`);
+
+        formFechaPlanificacionInput.on('apply.daterangepicker', function (ev, picker) {
+            ev.stopPropagation(); // Evitar que el formulario se cierre
+            $(this).val(`${picker.startDate.format('YYYY-MM-DD')} - ${picker.endDate.format('YYYY-MM-DD')}`);
+            // Las fechas seleccionadas ya se reflejan en el campo input del formulario
+
+
+
+
+        });
+
+        formFechaPlanificacionInput.on('cancel.daterangepicker', function () {
+            $(this).val(''); // Limpiar el campo si se cancela la selección
+        });
+
     });
+
 
     // Seleccionar automáticamente el usuario en sesión
     if (sessionUserCheckboxQuick) {
@@ -521,7 +606,7 @@ document.addEventListener('DOMContentLoaded', function () {
         quickFilterSelectedUsers.push({ id: sessionUserId, name: sessionUserName });
         updateQuickFilterSelectedUsersDisplay();
         updateQuickFilterUserIdsInput();
-        applyQuickFilters();
+        // applyQuickFilters();
     }
 
 
@@ -546,7 +631,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (selectedDate) {
-            fechaImputacionInput.value = selectedDate;
+            fechaPlanificacionInput.value = selectedDate;
             quickFilterSelectedDates = [selectedDate];
         }
 
@@ -560,7 +645,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Actualizar el campo oculto con la fecha seleccionada en el filtro rápido
     function updateQuickFilterDateInput() {
-        fechaImputacionInput.value = quickFilterSelectedDates.length > 0 ? quickFilterSelectedDates[0] : '';
+        fechaPlanificacionInput.value = quickFilterSelectedDates.length > 0 ? quickFilterSelectedDates[0] : '';
     }
 
     // Mostrar/ocultar la lista de usuarios al hacer clic
@@ -622,21 +707,24 @@ document.addEventListener('DOMContentLoaded', function () {
             cliente: document.getElementById('filter-cliente-id-input')?.value || '', // Usar el ID del cliente
             asunto: document.getElementById('filter-asunto-input')?.value || '',
             tipo: document.getElementById('filter-tipo-input')?.value || '',
-            subtipo: document.getElementById('filter-subtipo')?.value || '',
-            estado: document.getElementById('filter-estado')?.value || '',
+            subtipo: document.getElementById('filter-subtipo-ids').value || '', // Usar el campo oculto con los valores seleccionados
+            estado: document.getElementById('filter-estado-ids').value || '',
             archivo: document.getElementById('filter-archivo')?.value || '',
-            facturable: document.getElementById('filter-facturable')?.value || '',
-            facturado: document.getElementById('filter-facturado')?.value || '',
+            facturable: document.getElementById('filter-facturable-ids').value || '', // Usar el campo oculto con los valores seleccionados
+            facturado: document.getElementById('filter-facturado-ids').value || '', // Usar el campo oculto con los valores seleccionados
             precio: document.getElementById('filter-precio')?.value || '',
             suplido: document.getElementById('filter-suplido')?.value || '',
             coste: document.getElementById('filter-coste')?.value || '',
             fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
             fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
-            fecha_imputacion: fechaImputacionInput.value,
+            fecha_planificacion_inicio: quickFilterSelectedDates[0] || '', // Fecha de inicio
+            fecha_planificacion_fin: quickFilterSelectedDates[1] || '', // Fecha de fin
             tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
             tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
             usuario: quickFilterUserIdsInput.value // Usar el ID(s) de los usuarios seleccionados en el filtro rápido
         };
+        window.currentFilters = filterData; // Actualiza los filtros activos en la variable global
+
         // Actualizar el panel con los filtros actuales
         updateFilterInfoPanel(filterData);
 
@@ -698,6 +786,123 @@ document.addEventListener('DOMContentLoaded', function () {
             console.warn("Elemento 'total-tiempo-real' no encontrado en el DOM.");
         }
     }
+
+
+
+
+    // Checklists de los campos Estado, Subtipo, facturable y Facturado
+
+    function initializeChecklistFilter(fieldName, isBoolean = false) {
+        const selectElement = document.getElementById(`filter-${fieldName}-select`);
+        const listElement = document.getElementById(`filter-${fieldName}-list`);
+        const hiddenInput = document.getElementById(`filter-${fieldName}-ids`);
+        const selectedContainer = document.getElementById(`filter-selected-${fieldName}s`);
+        let selectedItems = [];
+        let currentFocus = -1;
+
+        // Alternar visibilidad de la lista desplegable
+        selectElement.addEventListener('click', function (event) {
+            event.stopPropagation(); // Evitar que se cierre inmediatamente
+            toggleListVisibility();
+        });
+
+        // Manejar selección de checkboxes
+        const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]')); // Convertir NodeList a Array
+        checkboxes.forEach((checkbox, index) => {
+            checkbox.dataset.index = index; // Asignar índice único al checkbox
+
+            checkbox.addEventListener('change', function () {
+                const value = isBoolean ? this.value === "1" : this.value;
+
+                if (this.checked) {
+                    selectedItems.push(value);
+                } else {
+                    selectedItems = selectedItems.filter(item => item !== value);
+                }
+
+                hiddenInput.value = selectedItems.join(',');
+                updateSelectedDisplay(selectedContainer, selectedItems, isBoolean);
+            });
+
+            // Manejar el foco de los checkboxes
+            checkbox.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    focusNextCheckbox(1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    focusNextCheckbox(-1);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    checkboxes[currentFocus].click(); // Simular clic para seleccionar/deseleccionar
+                } else if (e.key === 'Escape') {
+                    listElement.style.display = 'none';
+                    selectElement.focus(); // Devolver el foco al select principal
+                }
+            });
+        });
+
+        // Alternar visibilidad de la lista
+        function toggleListVisibility() {
+            if (listElement.style.display === 'block') {
+                listElement.style.display = 'none';
+            } else {
+                listElement.style.display = 'block';
+                currentFocus = -1; // Reiniciar la selección cuando se vuelve a abrir
+                focusNextCheckbox(1); // Foco en el primer checkbox al abrir
+            }
+        }
+
+        // Actualizar visualización de ítems seleccionados
+        function updateSelectedDisplay(container, items, isBoolean) {
+            container.innerHTML = '';
+            if (items.length === 0) {
+                const placeholder = document.createElement('span');
+                placeholder.textContent = 'Cualquiera...';
+                placeholder.style.color = '#aaa';
+                placeholder.style.fontStyle = 'italic';
+                container.appendChild(placeholder);
+            } else {
+                items.forEach(item => {
+                    const span = document.createElement('span');
+                    span.textContent = isBoolean ? (item === true ? 'Sí' : 'No') : item;
+                    span.style.backgroundColor = '#f0f0f0';
+                    span.style.color = '#333';
+                    span.style.padding = '3px 8px';
+                    span.style.borderRadius = '15px';
+                    span.style.fontSize = '12px';
+                    span.style.lineHeight = '1.5';
+                    span.style.border = '1px solid #ddd';
+                    container.appendChild(span);
+                });
+            }
+        }
+
+        // Función para manejar el enfoque de los checkboxes
+        function focusNextCheckbox(direction) {
+            const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]'));
+            currentFocus = (currentFocus + direction + checkboxes.length) % checkboxes.length; // Calcular el índice
+            checkboxes[currentFocus].focus();
+        }
+
+        // Cerrar la lista al hacer clic fuera
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest(`#filter-${fieldName}-list`) && e.target !== selectElement) {
+                listElement.style.display = 'none';
+            }
+        });
+    }
+
+    // Inicializar checklists
+    ['estado', 'subtipo', 'facturado'].forEach(field => {
+        initializeChecklistFilter(field);
+    });
+
+    // Inicializar el campo booleano "facturable"
+    initializeChecklistFilter('facturable', true);
+
+
+
 
 
 

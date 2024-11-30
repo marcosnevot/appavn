@@ -33,7 +33,7 @@ class TaskController extends Controller
 
         // Obtener todas las tareas de la base de datos, ordenadas por las más recientes
         $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
-            ->orderBy('created_at', 'desc') // Ordenar por la fecha de creación, de más reciente a más antigua
+            ->orderBy('fecha_planificacion', 'asc') // Ordenar por la fecha de creación, de más reciente a más antigua
             ->get();
 
         // Obtener datos adicionales necesarios para el formulario
@@ -48,10 +48,14 @@ class TaskController extends Controller
     public function getTasks(Request $request)
     {
         try {
+            Log::debug('Parámetros recibidos:', $request->all());
+
             $userId = $request->query('user_id'); // Usuario actual
-            $sortKey = $request->query('sortKey', 'tareas.created_at'); // Campo por defecto
-            $sortDirection = $request->query('sortDirection', 'desc'); // Dirección por defecto
             $filters = $request->all(); // Capturar todos los filtros enviados
+
+            // Determinar los criterios de ordenación
+            $sortKey = $request->query('sortKey', 'fecha_planificacion'); // Usar 'fecha_planificacion' por defecto
+            $sortDirection = $request->query('sortDirection', 'asc'); // Dirección predeterminada
 
             $query = Tarea::query()->select('tareas.*');
 
@@ -73,8 +77,30 @@ class TaskController extends Controller
             }
 
 
-            // Filtros dinámicos
-            foreach (['subtipo', 'facturado', 'estado', 'precio', 'tiempo_previsto', 'tiempo_real', 'facturable'] as $filter) {
+
+
+            // Filtros dinámicos para múltiples valores
+            foreach (['subtipo', 'facturado', 'estado'] as $filter) {
+                if (!empty($filters[$filter])) {
+                    $values = explode(',', $filters[$filter]); // Dividir la cadena en un array
+                    $query->whereIn($filter, $values); // Usar whereIn para múltiples valores
+                }
+            }
+
+            // Filtros dinámicos para booleanos
+            foreach (['facturable'] as $booleanField) {
+                if (!empty($filters[$booleanField])) {
+                    // Convertir el valor recibido en booleano estricto
+                    $values = array_map(function ($value) {
+                        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                    }, explode(',', $filters[$booleanField]));
+
+                    $query->whereIn($booleanField, $values);
+                }
+            }
+
+            // Filtros dinámicos para valores únicos
+            foreach (['precio', 'tiempo_previsto', 'tiempo_real'] as $filter) {
                 if (!empty($filters[$filter])) {
                     $query->where($filter, $filters[$filter]);
                 }
@@ -116,7 +142,20 @@ class TaskController extends Controller
 
 
             // Filtros específicos de planificación
-            if (!empty($filters['fecha_planificacion'])) {
+            if (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar por rango si ambas fechas están definidas
+                $query->whereBetween('fecha_planificacion', [
+                    $filters['fecha_planificacion_inicio'],
+                    $filters['fecha_planificacion_fin']
+                ]);
+            } elseif (!empty($filters['fecha_planificacion_inicio'])) {
+                // Filtrar desde una fecha de inicio
+                $query->whereDate('fecha_planificacion', '>=', $filters['fecha_planificacion_inicio']);
+            } elseif (!empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar hasta una fecha de fin
+                $query->whereDate('fecha_planificacion', '<=', $filters['fecha_planificacion_fin']);
+            } elseif (!empty($filters['fecha_planificacion'])) {
+                // Filtrar por un día en específico
                 if ($filters['fecha_planificacion'] === 'past') {
                     $query->whereDate('fecha_planificacion', '<', now()->toDateString())
                         ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
@@ -130,16 +169,27 @@ class TaskController extends Controller
                 $query->where('cliente_id', $filters['cliente']);
             }
 
+            DB::enableQueryLog();
 
-            // Evitar duplicados y ordenar
-            $query->distinct()->orderBy($sortKey, $sortDirection);
+
+
 
             // Incluir relaciones necesarias
             $query->with(['cliente', 'asunto', 'tipo', 'users']);
 
+            // Evitar duplicados y ordenar
+            $query->distinct()->orderBy('fecha_planificacion', 'asc');
+
+
+
+
+            // Orden terciario: desempatador por id
+
             // Paginación
             $tasks = $query->paginate(50);
 
+            Log::debug('Parámetros de ordenación:', ['sortKey' => $sortKey, 'sortDirection' => $sortDirection]);
+            Log::debug('SQL generado:', DB::getQueryLog());
             return response()->json([
                 'success' => true,
                 'tasks' => $tasks->items(),
@@ -187,8 +237,8 @@ class TaskController extends Controller
     {
         try {
             $userId = $request->query('user_id'); // Usuario actual
-            $sortKey = $request->query('sortKey', 'tareas.created_at'); // Campo por defecto
-            $sortDirection = $request->query('sortDirection', 'desc'); // Dirección por defecto
+            $sortKey = $request->query('sortKey', 'tareas.fecha_planificacion'); // Campo por defecto
+            $sortDirection = $request->query('sortDirection', 'asc'); // Dirección por defecto
             $filters = $request->all(); // Capturar todos los filtros enviados
 
             // Crear la consulta base
@@ -209,12 +259,21 @@ class TaskController extends Controller
                 $sortKey = 'tipos.nombre';
             }
 
-            // Filtros dinámicos
-            foreach (['subtipo', 'estado', 'precio', 'tiempo_previsto', 'tiempo_real'] as $filter) {
+            // Filtros dinámicos para múltiples valores
+            foreach (['subtipo', 'estado'] as $filter) {
+                if (!empty($filters[$filter])) {
+                    $values = explode(',', $filters[$filter]); // Dividir la cadena en un array
+                    $query->whereIn($filter, $values); // Usar whereIn para múltiples valores
+                }
+            }
+
+            // Filtros dinámicos para valores únicos
+            foreach (['precio', 'tiempo_previsto', 'tiempo_real'] as $filter) {
                 if (!empty($filters[$filter])) {
                     $query->where($filter, $filters[$filter]);
                 }
             }
+
 
             // Filtros con búsqueda en relaciones
             if (!empty($filters['asunto'])) {
@@ -251,7 +310,20 @@ class TaskController extends Controller
             }
 
             // Filtros específicos de planificación
-            if (!empty($filters['fecha_planificacion'])) {
+            if (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar por rango si ambas fechas están definidas
+                $query->whereBetween('fecha_planificacion', [
+                    $filters['fecha_planificacion_inicio'],
+                    $filters['fecha_planificacion_fin']
+                ]);
+            } elseif (!empty($filters['fecha_planificacion_inicio'])) {
+                // Filtrar desde una fecha de inicio
+                $query->whereDate('fecha_planificacion', '>=', $filters['fecha_planificacion_inicio']);
+            } elseif (!empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar hasta una fecha de fin
+                $query->whereDate('fecha_planificacion', '<=', $filters['fecha_planificacion_fin']);
+            } elseif (!empty($filters['fecha_planificacion'])) {
+                // Filtrar por un día en específico
                 if ($filters['fecha_planificacion'] === 'past') {
                     $query->whereDate('fecha_planificacion', '<', now()->toDateString())
                         ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
@@ -260,15 +332,49 @@ class TaskController extends Controller
                 }
             }
 
+
             // Filtro por cliente
             if (!empty($filters['cliente'])) {
                 $query->where('cliente_id', $filters['cliente']);
             }
 
 
-            // Filtrar por facturable y no facturado
-            $query->where('facturable', true)
-                ->where('facturado', 'NO');
+            // Filtro por usuario asignado
+            if (!empty($filters['usuario'])) {
+                // Si se filtra explícitamente por usuario desde el frontend
+                $userIds = explode(',', $filters['usuario']);
+                $query->whereHas('users', function ($q) use ($userIds) {
+                    $q->whereIn('users.id', $userIds);
+                });
+            } elseif ($userId) {
+                // Si no hay un filtro explícito de usuario, aplicar el usuario logueado
+                $query->whereHas('users', function ($q) use ($userId) {
+                    $q->where('users.id', $userId);
+                });
+            }
+
+            // Filtro por facturable
+            if (!empty($filters['facturable'])) {
+                // Si se filtra explícitamente por facturable desde el frontend
+                $facturableValues = explode(',', $filters['facturable']);
+                $query->whereIn('facturable', $facturableValues);
+            } else {
+                // Si no hay un filtro explícito, aplicar el valor predeterminado (facturable = true)
+                $query->where('facturable', true);
+            }
+
+            // Filtro por facturado
+            if (!empty($filters['facturado'])) {
+                // Si se filtra explícitamente por facturado desde el frontend
+                $facturadoValues = explode(',', $filters['facturado']);
+                $query->whereIn('facturado', $facturadoValues);
+            } else {
+                // Si no hay un filtro explícito, aplicar el valor predeterminado (facturado = 'NO')
+                $query->where('facturado', 'NO');
+            }
+
+
+
 
             // Evitar duplicados y ordenar
             $query->distinct()->orderBy($sortKey, $sortDirection);
@@ -308,7 +414,7 @@ class TaskController extends Controller
 
         // Obtener todas las tareas de la base de datos, ordenadas por las más recientes
         $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
-            ->orderBy('created_at', 'desc') // Ordenar por la fecha de creación, de más reciente a más antigua
+            ->orderBy('fecha_planificacion', 'asc') // Ordenar por la fecha de creación, de más reciente a más antigua
             ->get();
 
         // Obtener datos adicionales necesarios para el formulario
@@ -320,6 +426,163 @@ class TaskController extends Controller
         // Pasar las tareas y los datos adicionales a la vista
         return view('times.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
     }
+
+    public function getTimes(Request $request)
+    {
+        try {
+            $userId = $request->query('user_id'); // Usuario actual
+            $filters = $request->all(); // Capturar todos los filtros enviados
+
+            // Determinar los criterios de ordenación
+            $sortKey = $request->query('sortKey', 'fecha_planificacion'); // Usar 'fecha_planificacion' por defecto
+            $sortDirection = $request->query('sortDirection', 'asc'); // Dirección predeterminada
+
+            $query = Tarea::query()->select('tareas.*');
+
+            // Ordenación en relaciones
+            if ($sortKey === 'asunto.nombre') {
+                $query->leftJoin('asuntos', 'tareas.asunto_id', '=', 'asuntos.id');
+                $query->addSelect('asuntos.nombre as asunto_nombre'); // Alias para asunto
+                $sortKey = 'asuntos.nombre';
+            }
+            if ($sortKey === 'cliente.nombre_fiscal') {
+                $query->leftJoin('clientes', 'tareas.cliente_id', '=', 'clientes.id');
+                $query->addSelect('clientes.nombre_fiscal as cliente_nombre_fiscal'); // Alias para cliente
+                $sortKey = 'clientes.nombre_fiscal';
+            }
+            if ($sortKey === 'tipo.nombre') {
+                $query->leftJoin('tipos', 'tareas.tipo_id', '=', 'tipos.id');
+                $query->addSelect('tipos.nombre as tipo_nombre'); // Alias para tipo
+                $sortKey = 'tipos.nombre';
+            }
+
+
+
+
+            // Filtros dinámicos para múltiples valores
+            foreach (['subtipo', 'facturado', 'estado'] as $filter) {
+                if (!empty($filters[$filter])) {
+                    $values = explode(',', $filters[$filter]); // Dividir la cadena en un array
+                    $query->whereIn($filter, $values); // Usar whereIn para múltiples valores
+                }
+            }
+
+            // Filtros dinámicos para booleanos
+            foreach (['facturable'] as $booleanField) {
+                if (!empty($filters[$booleanField])) {
+                    // Convertir el valor recibido en booleano estricto
+                    $values = array_map(function ($value) {
+                        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                    }, explode(',', $filters[$booleanField]));
+
+                    $query->whereIn($booleanField, $values);
+                }
+            }
+
+            // Filtros dinámicos para valores únicos
+            foreach (['precio', 'tiempo_previsto', 'tiempo_real'] as $filter) {
+                if (!empty($filters[$filter])) {
+                    $query->where($filter, $filters[$filter]);
+                }
+            }
+
+            // Filtros con búsqueda en relaciones
+            if (!empty($filters['asunto'])) {
+                $query->whereHas('asunto', function ($q) use ($filters) {
+                    $q->where('nombre', 'like', '%' . $filters['asunto'] . '%');
+                });
+            }
+
+            if (!empty($filters['tipo'])) {
+                $query->whereHas('tipo', function ($q) use ($filters) {
+                    $q->where('nombre', 'like', '%' . $filters['tipo'] . '%');
+                });
+            }
+
+            // Filtro por usuario asignado
+            if (!empty($filters['usuario'])) {
+                // Si se filtra explícitamente por usuario desde el frontend
+                $userIds = explode(',', $filters['usuario']);
+                $query->whereHas('users', function ($q) use ($userIds) {
+                    $q->whereIn('users.id', $userIds);
+                });
+            } elseif ($userId) {
+                // Si no hay un filtro explícito de usuario, aplicar el usuario logueado
+                $query->whereHas('users', function ($q) use ($userId) {
+                    $q->where('users.id', $userId);
+                });
+            }
+
+            // Filtros de rangos de fechas
+            foreach (['fecha_inicio' => '>=', 'fecha_vencimiento' => '<=', 'fecha_imputacion' => '='] as $field => $operator) {
+                if (!empty($filters[$field])) {
+                    $query->whereDate($field, $operator, $filters[$field]);
+                }
+            }
+
+
+            // Filtros específicos de planificación
+            if (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar por rango si ambas fechas están definidas
+                $query->whereBetween('fecha_planificacion', [
+                    $filters['fecha_planificacion_inicio'],
+                    $filters['fecha_planificacion_fin']
+                ]);
+            } elseif (!empty($filters['fecha_planificacion_inicio'])) {
+                // Filtrar desde una fecha de inicio
+                $query->whereDate('fecha_planificacion', '>=', $filters['fecha_planificacion_inicio']);
+            } elseif (!empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar hasta una fecha de fin
+                $query->whereDate('fecha_planificacion', '<=', $filters['fecha_planificacion_fin']);
+            } elseif (!empty($filters['fecha_planificacion'])) {
+                // Filtrar por un día en específico
+                if ($filters['fecha_planificacion'] === 'past') {
+                    $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                        ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
+                } else {
+                    $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+                }
+            }
+
+            // Filtro por cliente
+            if (!empty($filters['cliente'])) {
+                $query->where('cliente_id', $filters['cliente']);
+            }
+
+            DB::enableQueryLog();
+
+            // Evitar duplicados y ordenar
+            $query->distinct()->orderBy('fecha_planificacion', 'asc');
+            // Orden terciario: desempatador por id
+
+
+            // Incluir relaciones necesarias
+            $query->with(['cliente', 'asunto', 'tipo', 'users']);
+
+            // Paginación
+            $tasks = $query->paginate(50);
+            Log::debug('Parámetros de ordenación:', ['sortKey' => $sortKey, 'sortDirection' => $sortDirection]);
+            Log::debug('SQL generado:', DB::getQueryLog());
+            return response()->json([
+                'success' => true,
+                'tasks' => $tasks->items(),
+                'pagination' => [
+                    'current_page' => $tasks->currentPage(),
+                    'last_page' => $tasks->lastPage(),
+                    'per_page' => $tasks->perPage(),
+                    'total' => $tasks->total(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener tareas: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor.',
+            ], 500);
+        }
+    }
+
+
 
 
     public function show($id)
@@ -342,11 +605,8 @@ class TaskController extends Controller
         }
     }
 
-
-
     public function store(Request $request)
     {
-
         try {
             // Inicia una transacción de base de datos
             DB::beginTransaction();
@@ -354,105 +614,101 @@ class TaskController extends Controller
             // Validar la solicitud
             $validated = $request->validate([
                 'cliente_id' => 'nullable',
-                'cliente_nombre' => 'nullable|string|max:255', // Permitir nulo o string
-                'cliente_nif' => 'nullable|string|max:20', // Validación para NIF
-                'cliente_email' => 'nullable|email|max:255', // Validación para email
+                'cliente_nombre' => 'nullable|string|max:255',
+                'cliente_nif' => 'nullable|string|max:20',
+                'cliente_email' => 'nullable|email|max:255',
                 'cliente_telefono' => 'nullable|string|max:15',
                 'asunto_id' => 'nullable',
-                'asunto_nombre' => 'nullable|string|max:255', // Permitir nulo o string
+                'asunto_nombre' => 'nullable|string|max:255',
                 'tipo_id' => 'nullable',
-                'tipo_nombre' => 'nullable|string|max:255',   // Permitir nulo o string
+                'tipo_nombre' => 'nullable|string|max:255',
                 'subtipo' => 'nullable|string',
                 'estado' => 'nullable|string',
                 'archivo' => 'nullable|string',
                 'descripcion' => 'nullable|string',
                 'observaciones' => 'nullable|string',
                 'facturable' => 'nullable|boolean',
-                'facturado' => 'nullable|string', // Añadir validación para facturado
-                'precio' => 'nullable|numeric', // Añadir validación para precio
-                'suplido' => 'nullable|numeric', // Añadir validación para suplido
-                'coste' => 'nullable|numeric', // Añadir validación para coste
+                'facturado' => 'nullable|string',
+                'precio' => 'nullable|numeric',
+                'suplido' => 'nullable|numeric',
+                'coste' => 'nullable|numeric',
                 'fecha_inicio' => 'nullable|date',
                 'fecha_vencimiento' => 'nullable|date',
                 'fecha_imputacion' => 'nullable|date',
                 'tiempo_previsto' => 'nullable|numeric',
                 'tiempo_real' => 'nullable|numeric',
                 'planificacion' => 'nullable|date',
-                'users' => 'nullable|array', // Validar que sea un array de usuarios
-                'users.*' => 'exists:users,id' // Validar que cada usuario exista en la tabla 'users'
+                'users' => 'nullable|array',
+                'users.*' => 'exists:users,id'
             ]);
-            Log::debug('Datos validados:', $validated);
 
+            Log::debug('Datos validados:', $validated);
 
             // Verificar si se debe crear un nuevo cliente
             if (!$validated['cliente_id'] && !empty($validated['cliente_nombre'])) {
-                // Buscar si el cliente ya existe antes de crear uno nuevo
-                $clienteExistente = Cliente::where('nombre_fiscal', strtoupper($validated['cliente_nombre']))->first();
+                // Buscar bajo un bloqueo para evitar condiciones de carrera
+                $clienteExistente = Cliente::where('nombre_fiscal', strtoupper($validated['cliente_nombre']))
+                    ->lockForUpdate()
+                    ->first();
 
                 if ($clienteExistente) {
                     // Si ya existe, asignar el ID del cliente existente
                     $validated['cliente_id'] = $clienteExistente->id;
                 } else {
-                    // Si no existe, crear un nuevo cliente con los datos adicionales
+                    // Crear un nuevo cliente
                     $cliente = Cliente::create([
                         'nombre_fiscal' => strtoupper($validated['cliente_nombre']),
-                        'nif' => $validated['cliente_nif'] ?? null, // Añadir NIF si está presente
-                        'email' => $validated['cliente_email'] ?? null, // Añadir email si está presente
-                        'telefono' => $validated['cliente_telefono'] ?? null // Añadir teléfono si está presente
+                        'nif' => $validated['cliente_nif'] ?? null,
+                        'email' => $validated['cliente_email'] ?? null,
+                        'telefono' => $validated['cliente_telefono'] ?? null
                     ]);
                     $validated['cliente_id'] = $cliente->id;
                 }
             }
 
-
             // Verificar si se debe crear un nuevo asunto
             if (!$validated['asunto_id'] && !empty($validated['asunto_nombre'])) {
-                // Buscar si el asunto ya existe antes de crear uno nuevo
-                $asuntoExistente = Asunto::where('nombre', strtoupper($validated['asunto_nombre']))->first();
+                $asuntoExistente = Asunto::where('nombre', strtoupper($validated['asunto_nombre']))
+                    ->lockForUpdate()
+                    ->first();
 
                 if ($asuntoExistente) {
-                    // Si ya existe, asignar el ID del asunto existente
                     $validated['asunto_id'] = $asuntoExistente->id;
                 } else {
-                    // Si no existe, crear un nuevo asunto
                     $asunto = Asunto::create(['nombre' => strtoupper($validated['asunto_nombre'])]);
                     $validated['asunto_id'] = $asunto->id;
                 }
             }
 
-            /// Verificar si se debe crear un nuevo tipo
+            // Verificar si se debe crear un nuevo tipo
             if (!$validated['tipo_id'] && !empty($validated['tipo_nombre'])) {
-                // Buscar si el tipo ya existe antes de crear uno nuevo
-                $tipoExistente = Tipo::where('nombre', strtoupper($validated['tipo_nombre']))->first();
+                $tipoExistente = Tipo::where('nombre', strtoupper($validated['tipo_nombre']))
+                    ->lockForUpdate()
+                    ->first();
 
                 if ($tipoExistente) {
-                    // Si ya existe, asignar el ID del tipo existente
                     $validated['tipo_id'] = $tipoExistente->id;
                 } else {
-                    // Si no existe, crear un nuevo tipo
                     $tipo = Tipo::create(['nombre' => strtoupper($validated['tipo_nombre'])]);
                     $validated['tipo_id'] = $tipo->id;
                 }
             }
 
-
-            Log::debug('Cliente Nombre: ' . $validated['cliente_nombre']);
-
             // Crear la tarea
             $task = Tarea::create([
                 'cliente_id' => $validated['cliente_id'],
-                'asunto_id' => $validated['asunto_id'], // Asunto existente o recién creado
-                'tipo_id' => $validated['tipo_id'], // Tipo existente o recién creado
+                'asunto_id' => $validated['asunto_id'],
+                'tipo_id' => $validated['tipo_id'],
                 'subtipo' => $validated['subtipo'] ?? null,
                 'estado' => $validated['estado'] ?? 'PENDIENTE',
                 'archivo' => $validated['archivo'] ?? null,
                 'descripcion' => $validated['descripcion'] ?? null,
                 'observaciones' => $validated['observaciones'] ?? null,
                 'facturable' => $validated['facturable'] ?? false,
-                'facturado' => $validated['facturado'] ?? 'No', // Crear el campo facturado
-                'precio' => $validated['precio'] ?? null, // Crear el campo precio
-                'suplido' => $validated['suplido'] ?? null, // Crear el campo suplido
-                'coste' => $validated['coste'] ?? null, // Crear el campo coste
+                'facturado' => $validated['facturado'] ?? 'No',
+                'precio' => $validated['precio'] ?? null,
+                'suplido' => $validated['suplido'] ?? null,
+                'coste' => $validated['coste'] ?? null,
                 'fecha_inicio' => isset($validated['fecha_inicio'])
                     ? Carbon::parse($validated['fecha_inicio'])->format('Y-m-d')
                     : null,
@@ -469,21 +725,9 @@ class TaskController extends Controller
                 'tiempo_real' => $validated['tiempo_real'] ?? null,
             ]);
 
-            // 1. Asignar usuarios a la tarea en la base de datos
-            $assignedUserIds = [];
+            // Asignar usuarios a la tarea
             if (!empty($validated['users'])) {
-                $task->users()->sync($validated['users']); // Asociar los usuarios a la tarea
-                $assignedUserIds = $validated['users'];    // Guardar los IDs para notificaciones
-            }
-
-            // 2. Enviar notificaciones a los usuarios asignados
-            foreach ($assignedUserIds as $userId) {
-                if ($userId != auth()->id()) { // Evitar notificar al usuario que asigna la tarea
-                    $user = User::find($userId);
-                    if ($user) {
-                        $user->notify(new TaskAssignedNotification($task)); // Enviar notificación
-                    }
-                }
+                $task->users()->sync($validated['users']);
             }
 
             // Emitir el evento para otros usuarios
@@ -492,21 +736,13 @@ class TaskController extends Controller
             // Confirma la transacción
             DB::commit();
 
-            // Si la tarea se crea correctamente, devolver success: true
             return response()->json([
                 'success' => true,
-                'task' => $task->load(['cliente', 'asunto', 'tipo', 'users']) // Cargar relaciones
+                'task' => $task->load(['cliente', 'asunto', 'tipo', 'users'])
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack(); // Deshacer la transacción en caso de error de validación
-            Log::error('Errores de validación:', $e->errors());
-            return response()->json([
-                'success' => false,
-                'errors' => $e->errors()  // Devuelve todos los errores de validación
-            ], 400);
         } catch (\Exception $e) {
-            DB::rollBack(); // Deshacer la transacción en caso de otro error
-            Log::error($e); // Agregar esto para capturar el error detallado
+            DB::rollBack();
+            Log::error($e);
             return response()->json(['success' => false, 'message' => 'Error al crear la tarea'], 500);
         }
     }
@@ -545,18 +781,21 @@ class TaskController extends Controller
 
             // Filtrar por subtipo
             if (!empty($filters['subtipo'])) {
-                $query->where('subtipo', $filters['subtipo']);
+                $subtipoValues = explode(',', $filters['subtipo']);
+                $query->whereIn('subtipo', $subtipoValues);
             }
 
 
-            // Filtrar por subtipo
+            // Filtrar por facturado
             if (!empty($filters['facturado'])) {
-                $query->where('facturado', $filters['facturado']);
+                $facturadoValues = explode(',', $filters['facturado']);
+                $query->whereIn('facturado', $facturadoValues);
             }
 
             // Filtrar por estado
             if (!empty($filters['estado'])) {
-                $query->where('estado', $filters['estado']);
+                $estados = explode(',', $filters['estado']);
+                $query->whereIn('estado', $estados);
             }
 
             // Filtrar por usuario asignado
@@ -577,10 +816,19 @@ class TaskController extends Controller
                 $query->where('archivo', 'like', '%' . $filters['archivo'] . '%');
             }
 
-            // Filtrar por facturable
-            if (isset($filters['facturable'])) {
-                $query->where('facturable', $filters['facturable']);
+            // Filtros dinámicos para booleanos
+            foreach (['facturable'] as $booleanField) {
+                if (!empty($filters[$booleanField])) {
+                    // Convertir el valor recibido en booleano estricto
+                    $values = array_map(function ($value) {
+                        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                    }, explode(',', $filters[$booleanField]));
+
+                    $query->whereIn($booleanField, $values);
+                }
             }
+
+
 
             // Filtrar por fechas
             if (!empty($filters['fecha_inicio'])) {
@@ -611,17 +859,29 @@ class TaskController extends Controller
                 $query->where('tiempo_real', '=', $filters['tiempo_real']);
             }
 
-            // Filtrar por fecha de planificación
-            if (!empty($filters['fecha_planificacion'])) {
+            // Filtros específicos de planificación
+            if (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar por rango si ambas fechas están definidas
+                $query->whereBetween('fecha_planificacion', [
+                    $filters['fecha_planificacion_inicio'],
+                    $filters['fecha_planificacion_fin']
+                ]);
+            } elseif (!empty($filters['fecha_planificacion_inicio'])) {
+                // Filtrar desde una fecha de inicio
+                $query->whereDate('fecha_planificacion', '>=', $filters['fecha_planificacion_inicio']);
+            } elseif (!empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar hasta una fecha de fin
+                $query->whereDate('fecha_planificacion', '<=', $filters['fecha_planificacion_fin']);
+            } elseif (!empty($filters['fecha_planificacion'])) {
+                // Filtrar por un día en específico
                 if ($filters['fecha_planificacion'] === 'past') {
-                    // Filtrar por fechas anteriores a hoy y que no estén completadas
                     $query->whereDate('fecha_planificacion', '<', now()->toDateString())
-                        ->whereIn('estado', ['PENDIENTE', 'ENESPERA']); // Asegúrate de que estos valores coincidan con tu ENUM de estado
+                        ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
                 } else {
-                    // Filtrar por una fecha específica
                     $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
                 }
             }
+
 
             // Añadir el orden por fecha de creación, de más reciente a más antigua
             $query->orderBy('created_at', 'desc');

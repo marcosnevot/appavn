@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         const descripcionTextarea = document.querySelector('textarea[name="descripcionEdit"]');
                         const observacionesTextarea = document.querySelector('textarea[name="observacionesEdit"]');
                         const facturableCheckbox = document.querySelector('input[name="facturableEdit"]');
-                        const facturadoInput = document.querySelector('input[name="facturadoEdit"]');
+                        const facturadoInput = document.querySelector('select[name="facturadoEdit"]');
                         const precioInput = document.querySelector('input[name="precioEdit"]');
                         const suplidoInput = document.querySelector('input[name="suplidoEdit"]');
                         const costeInput = document.querySelector('input[name="costeEdit"]');

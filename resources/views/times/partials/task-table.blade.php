@@ -18,9 +18,9 @@
                 <th data-sort-key="estado" style="cursor: pointer;">Estado</th>
                 <th data-sort-key="fecha_inicio" style="cursor: pointer;">Fecha Inicio</th>
                 <th data-sort-key="fecha_vencimiento" style="cursor: pointer;">Fecha Vencimiento</th>
-                <th data-sort-key="fecha_imputacion" style="cursor: pointer;">Fecha Imputación</th>
                 <th data-sort-key="fecha_planificacion" style="cursor: pointer;">Planificación</th>
                 <th data-sort-key="users" style="cursor: pointer;">Asignado a</th>
+                <th data-sort-key="fecha_imputacion" style="display: none;">Fecha Imputación</th>
                 <th style="display: none;">Archivo</th>
                 <th style="display: none;">Precio</th>
                 <th style="display: none;">Suplido</th>

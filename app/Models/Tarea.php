@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\TaskUpdated;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,7 +11,7 @@ class Tarea extends Model
 {
     use HasFactory;
 
-    protected $table = 'tareas'; 
+    protected $table = 'tareas';
     protected $fillable = [
         'asunto_id',
         'tipo_id',
@@ -57,6 +58,4 @@ class Tarea extends Model
     {
         return $this->belongsToMany(User::class, 'tarea_user', 'tarea_id', 'user_id');
     }
-
-   
 }

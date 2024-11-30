@@ -5,27 +5,35 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentPage = 1;
     let globalTasksArray = []; // Definir una variable global para las tareas
 
-    
-    let currentSortKey = null; // Almacena la clave de ordenación actual
+
+    let currentSortKey = 'fecha_planificacion'; // Almacena la clave de ordenación actual
     let currentSortDirection = 'none'; // Dirección de orden actual
     const sessionUserId = document.getElementById('user-session-id').value;
 
     // Cargar tareas inicialmente
-    loadTasks();
+    loadTasks(1, 'fecha_planificacion', 'asc');
+
 
     // Función para cargar las tareas mediante AJAX con paginación
-    function loadTasks(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
+    function loadTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
         const tableBody = document.querySelector('table tbody');
+
+        // Oculta la tabla mientras se cargan las tareas
+        const table = document.querySelector('table');
+        table.style.visibility = 'hidden'; // Ocultar tabla temporalmente
+
         tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
 
         // Construir los parámetros de la URL
         const params = new URLSearchParams({
             ...window.currentFilters, // Usar filtros activos de la variable global
             page, // Página actual
-            sortKey, // Clave de ordenación
-            sortDirection, // Dirección de ordenación
-            user_id: sessionUserId // Usuario actual
+            sortKey: sortKey || 'fecha_planificacion', // Predeterminado
+            sortDirection: sortDirection || 'asc',
+            user_id: sessionUserId, // Usuario actual
+
         });
+        console.log(params.toString()); // Verifica qué se está enviando al servidor
 
         fetch(`/tareas/getTasks?${params.toString()}`, {
             method: 'GET',
@@ -37,7 +45,31 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // console.log(data.tasks); // Verifica si las tareas están ordenadas correctamente en los datos recibidos
+
+                    data.tasks.sort((a, b) => {
+                        const dateA = a.fecha_planificacion ? new Date(a.fecha_planificacion) : null;
+                        const dateB = b.fecha_planificacion ? new Date(b.fecha_planificacion) : null;
+
+                        // Manejo de valores nulos
+                        if (!dateA && !dateB) return a.id - b.id; // Si ambas fechas son nulas, ordenar por ID
+                        if (!dateA) return 1; // NULL al final
+                        if (!dateB) return -1;
+
+                        // Ordenar por fecha en orden ascendente
+                        const dateComparison = dateA - dateB;
+                        if (dateComparison !== 0) return dateComparison;
+
+                        // Ordenar por ID como criterio secundario
+                        return a.id - b.id;
+                    });
+
+
                     loadInitialTasks(data.tasks);
+
+                    // Vuelve a mostrar la tabla
+                    table.style.visibility = 'visible';
+
                     updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
                 } else {
                     console.error('Error al cargar tareas:', data.message);
@@ -49,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    
+
 
     document.querySelectorAll('th[data-sort-key]').forEach(header => {
         header.addEventListener('click', function () {
@@ -80,8 +112,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Si el estado es "none", reestablecer al orden original
-            const sortKeyToSend = currentSortDirection === 'none' ? 'created_at' : currentSortKey;
-            const sortDirectionToSend = currentSortDirection === 'none' ? 'desc' : currentSortDirection;
+            const sortKeyToSend = currentSortDirection === 'none' ? 'fecha_planificacion' : currentSortKey;
+            const sortDirectionToSend = currentSortDirection === 'none' ? 'asc' : currentSortDirection;
 
             // Recargar tareas con la nueva ordenación y filtros activos
             loadTasks(1, sortKeyToSend, sortDirectionToSend);
@@ -91,9 +123,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función para cargar y actualizar la tabla de tareas inicialmente
     function loadInitialTasks(tasks) {
         globalTasksArray = tasks;  // Almacenar las tareas cargadas globalmente
+        // console.log('Tareas ordenadas antes de renderizar:', tasks);
 
         const tableBody = document.querySelector('table tbody');
         tableBody.innerHTML = ''; // Limpiar la tabla existente
+
 
         tasks.forEach(task => {
             const row = document.createElement('tr');

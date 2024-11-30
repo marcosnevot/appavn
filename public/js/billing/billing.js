@@ -116,6 +116,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 });
+
+
  // Función para cargar las tareas mediante AJAX con paginación
  function loadTasks(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
     const tableBody = document.querySelector('table tbody');
@@ -127,9 +129,10 @@ document.addEventListener('DOMContentLoaded', function () {
         page, // Página actual
         sortKey, // Clave de ordenación
         sortDirection, // Dirección de ordenación
-        user_id: sessionUserId // Usuario actual
+        user_id: sessionUserId, // Usuario actual
+        facturable: '1', // Usar el filtro activo o el valor predeterminado
+        facturado: 'NO', // Usar el filtro activo o el valor predeterminado
     });
-
     fetch(`/billing/getBilling?${params.toString()}`, {
         method: 'GET',
         headers: {
@@ -188,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Añadir el evento de doble clic a las filas de la tabla
             addDoubleClickEventToRows();
             // Inicializar el evento de clic derecho en las celdas de "Facturado"
-            initializeFacturadoContextMenu(loadTasks);
+            initializeFacturadoContextMenu();
         });
     }
 

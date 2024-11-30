@@ -30,13 +30,15 @@ document.addEventListener('DOMContentLoaded', function () {
         closeFilterTaskForm();
     });
 
+
     // Ocultar el formulario cuando se hace clic fuera de él
     document.addEventListener('click', function (event) {
         const isInsideForm = filterTaskForm.contains(event.target); // Verifica si el clic fue dentro del formulario
         const isfilterTaskButton = document.getElementById('filter-task-button').contains(event.target);
+        const isDateRangePicker = event.target.closest('.daterangepicker'); // Verifica si el clic fue dentro del Date Range Picker
 
-        // Verifica si el clic no es dentro del formulario o dentro del botón de abrir el formulario
-        if (!isInsideForm && !isfilterTaskButton) {
+        // Verifica si el clic no es dentro del formulario, del botón o del Date Range Picker
+        if (!isInsideForm && !isfilterTaskButton && !isDateRangePicker) {
             if (filterTaskForm.classList.contains('show')) {
                 closeFilterTaskForm();
             }
@@ -56,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Lógica para limpiar los campos del formulario de filtros
     clearFilterButton.addEventListener('click', function (e) {
-        e.preventDefault(); // Evitar que se envíe el formulario al hacer clic en "Limpiar"
+        e.preventDefault(); // Evitar el comportamiento predeterminado del botón
 
         // Usar el método reset() para limpiar todos los campos del formulario
         filterTaskFormContent.reset();
@@ -80,29 +82,75 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('filter-asunto-list').style.display = 'none';
         document.getElementById('filter-tipo-list').style.display = 'none';
         document.getElementById('filter-user-list').style.display = 'none';
+
+        // Limpiar los checklists dinámicos (Estado, Subtipo, Facturable, Facturado)
+        ['estado', 'subtipo', 'facturable', 'facturado'].forEach(field => {
+            resetChecklistFilter(field);
+        });
+
+        // Opcional: Cerrar todas las listas desplegables
+        document.querySelectorAll('.dropdown-list').forEach(list => {
+            list.style.display = 'none';
+        });
+
+
     });
 
+    // Función para limpiar un checklist dinámico
+    function resetChecklistFilter(fieldName) {
+        const hiddenInput = document.getElementById(`filter-${fieldName}-ids`);
+        const selectedContainer = document.getElementById(`filter-selected-${fieldName}s`);
+        const checkboxes = document.querySelectorAll(`#filter-${fieldName}-list input[type="checkbox"]`);
 
-    function loadFilteredTasks(page = 1) {
+        // Limpiar el campo oculto
+        hiddenInput.value = '';
+
+        // Desmarcar todos los checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Restablecer la visualización del checklist a su estado inicial
+        selectedContainer.innerHTML = '';
+        const placeholder = document.createElement('span');
+        placeholder.textContent = 'Seleccionar...';
+        placeholder.style.color = '#aaa';
+        placeholder.style.fontStyle = 'italic';
+        selectedContainer.appendChild(placeholder);
+    }
+
+
+    function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
+
+        // Extraer fechas del rango de planificación desde el formulario
+        const fechaPlanificacionInput = document.getElementById('filter-fecha-planificacion').value || '';
+        const [fechaPlanificacionInicio, fechaPlanificacionFin] = fechaPlanificacionInput
+            ? fechaPlanificacionInput.split(' - ')
+            : ['', ''];
 
         const filterData = {
             cliente: document.getElementById('filter-cliente-id-input').value || '', // Usar el ID del cliente
             asunto: document.getElementById('filter-asunto-input').value || '',
             tipo: document.getElementById('filter-tipo-input').value || '',
-            subtipo: document.getElementById('filter-subtipo').value || '',
-            estado: document.getElementById('filter-estado').value || '',
+            subtipo: document.getElementById('filter-subtipo-ids').value || '', // Usar el campo oculto con los valores seleccionados
+            estado: document.getElementById('filter-estado-ids').value || '', // <-- Usar el campo oculto con los valores seleccionados
             usuario: document.getElementById('filter-user-ids').value || '',
             archivo: document.getElementById('filter-archivo').value || '',
-            facturable: document.getElementById('filter-facturable').value || '',
-            facturado: document.getElementById('filter-facturado').value || '',
+            facturable: document.getElementById('filter-facturable-ids').value || '', // Usar el campo oculto con los valores seleccionados
+            facturado: document.getElementById('filter-facturado-ids').value || '', // Usar el campo oculto con los valores seleccionados
             precio: document.getElementById('filter-precio').value || '',
             suplido: document.getElementById('filter-suplido').value || '',
             coste: document.getElementById('filter-coste').value || '',
             fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
             fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
-            fecha_imputacion: document.getElementById('filter-fecha-imputacion').value || '',
+            // fecha_imputacion: document.getElementById('filter-fecha-imputacion').value || '',
             tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
-            tiempo_real: document.getElementById('filter-tiempo-real').value || ''
+            tiempo_real: document.getElementById('filter-tiempo-real').value || '',
+            // Enviar las fechas de planificación como valores separados
+            fecha_planificacion_inicio: fechaPlanificacionInicio || '',
+            fecha_planificacion_fin: fechaPlanificacionFin || '',
+            sortKey: sortKey, // Agregar el criterio de orden
+            sortDirection: sortDirection // Agregar la dirección de orden
         };
 
         console.log('Datos de filtro:', filterData);
@@ -124,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.success) {
                     updateTaskTable(data.filteredTasks);
-                    updatePagination(data.pagination, (newPage) => loadFilteredTasks(newPage)); // Paginación con filtros
+                    updatePagination(data.pagination, (newPage) => loadFilteredTasks(newPage, sortKey, sortDirection)); // Paginación con filtros y orden
                     resetFiltroRapidoPlanificacion();
                     updateSelectedUserNamesFromFilterForm();
                     closeFilterTaskForm();
@@ -215,6 +263,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 filterInfoContent.appendChild(p);
             });
+
+            // Mostrar el criterio y dirección de ordenación
+            const sortInfo = document.createElement('p');
+            const sortKey = filters.sortKey || 'fecha_planificacion'; // Predeterminado
+            const sortDirection = filters.sortDirection || 'asc'; // Predeterminado
+
+            sortInfo.textContent = `Orden: ${capitalizeFirstLetter(sortKey)} (${capitalizeFirstLetter(sortDirection)})`;
+            filterInfoContent.appendChild(sortInfo);
 
             // Mostrar el panel si hay filtros
             filterInfoPanel.classList.remove('hide');
@@ -508,6 +564,176 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+    // Checklists de los campos Estado, Subtipo, facturable y Facturado
+
+    function initializeChecklistFilter(fieldName, isBoolean = false) {
+        const selectElement = document.getElementById(`filter-${fieldName}-select`);
+        const listElement = document.getElementById(`filter-${fieldName}-list`);
+        const hiddenInput = document.getElementById(`filter-${fieldName}-ids`);
+        const selectedContainer = document.getElementById(`filter-selected-${fieldName}s`);
+        let selectedItems = [];
+        let currentFocus = -1;
+
+        // Alternar visibilidad de la lista desplegable
+        selectElement.addEventListener('click', function (event) {
+            event.stopPropagation(); // Evitar que se cierre inmediatamente
+            toggleListVisibility();
+        });
+
+        // Manejar selección de checkboxes
+        const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]')); // Convertir NodeList a Array
+        checkboxes.forEach((checkbox, index) => {
+            checkbox.dataset.index = index; // Asignar índice único al checkbox
+
+            checkbox.addEventListener('change', function () {
+                const value = isBoolean ? this.value === "1" : this.value;
+
+                if (this.checked) {
+                    selectedItems.push(value);
+                } else {
+                    selectedItems = selectedItems.filter(item => item !== value);
+                }
+
+                hiddenInput.value = selectedItems.join(',');
+                updateSelectedDisplay(selectedContainer, selectedItems, isBoolean);
+            });
+
+            // Manejar el foco de los checkboxes
+            checkbox.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    focusNextCheckbox(1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    focusNextCheckbox(-1);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    checkboxes[currentFocus].click(); // Simular clic para seleccionar/deseleccionar
+                } else if (e.key === 'Escape') {
+                    listElement.style.display = 'none';
+                    selectElement.focus(); // Devolver el foco al select principal
+                }
+            });
+        });
+
+        // Alternar visibilidad de la lista
+        function toggleListVisibility() {
+            if (listElement.style.display === 'block') {
+                listElement.style.display = 'none';
+            } else {
+                listElement.style.display = 'block';
+                currentFocus = -1; // Reiniciar la selección cuando se vuelve a abrir
+                focusNextCheckbox(1); // Foco en el primer checkbox al abrir
+            }
+        }
+
+        // Actualizar visualización de ítems seleccionados
+        function updateSelectedDisplay(container, items, isBoolean) {
+            container.innerHTML = '';
+            if (items.length === 0) {
+                const placeholder = document.createElement('span');
+                placeholder.textContent = 'Cualquiera...';
+                placeholder.style.color = '#aaa';
+                placeholder.style.fontStyle = 'italic';
+                container.appendChild(placeholder);
+            } else {
+                items.forEach(item => {
+                    const span = document.createElement('span');
+                    span.textContent = isBoolean ? (item === true ? 'Sí' : 'No') : item;
+                    span.style.backgroundColor = '#f0f0f0';
+                    span.style.color = '#333';
+                    span.style.padding = '3px 8px';
+                    span.style.borderRadius = '15px';
+                    span.style.fontSize = '12px';
+                    span.style.lineHeight = '1.5';
+                    span.style.border = '1px solid #ddd';
+                    container.appendChild(span);
+                });
+            }
+        }
+
+        // Función para manejar el enfoque de los checkboxes
+        function focusNextCheckbox(direction) {
+            const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]'));
+            currentFocus = (currentFocus + direction + checkboxes.length) % checkboxes.length; // Calcular el índice
+            checkboxes[currentFocus].focus();
+        }
+
+        // Cerrar la lista al hacer clic fuera
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest(`#filter-${fieldName}-list`) && e.target !== selectElement) {
+                listElement.style.display = 'none';
+            }
+        });
+    }
+
+    // Inicializar checklists
+    ['estado', 'subtipo', 'facturado'].forEach(field => {
+        initializeChecklistFilter(field);
+    });
+
+    // Inicializar el campo booleano "facturable"
+    initializeChecklistFilter('facturable', true);
+
+
+
+
+
+
+    $(document).ready(function () {
+        const today = new Date().toISOString().split('T')[0];
+
+        // Inicialización para el campo del formulario (Filter Form)
+        const formFechaPlanificacionInput = $('#filter-fecha-planificacion');
+
+        formFechaPlanificacionInput.daterangepicker({
+            autoUpdateInput: true,
+            startDate: today,
+            endDate: today,
+            locale: {
+                format: 'YYYY-MM-DD',
+                separator: ' - ',
+                applyLabel: 'Aplicar',
+                cancelLabel: 'Cancelar',
+                fromLabel: 'Desde',
+                toLabel: 'Hasta',
+                customRangeLabel: 'Personalizado',
+            },
+            drops: 'up', // Mostrar por encima
+        });
+
+
+
+        formFechaPlanificacionInput.on('apply.daterangepicker', function (ev, picker) {
+            ev.stopPropagation(); // Evitar que el formulario se cierre
+            $(this).val(`${picker.startDate.format('YYYY-MM-DD')} - ${picker.endDate.format('YYYY-MM-DD')}`);
+            // Las fechas seleccionadas ya se reflejan en el campo input del formulario
+
+        });
+
+        formFechaPlanificacionInput.on('cancel.daterangepicker', function () {
+            $(this).val(''); // Limpiar el campo si se cancela la selección
+        });
+
+        // Inicializar el campo vacío
+        formFechaPlanificacionInput.val(''); // Campo sin valor inicial (null en términos funcionales)
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Filtro según la planificación
     const planificacionFilterContainer = document.getElementById('planificacion-filter-buttons');
 
@@ -573,7 +799,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Función para gestionar el filtrado de tareas
-    function filtrarTareasPorPlanificacion(fecha) {
+    function filtrarTareasPorPlanificacion(fecha, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
         // Actualizar la interfaz de botones
         document.querySelectorAll('.btn-filter-planificacion').forEach(btn => {
             btn.classList.remove('active', 'active-red'); // Limpiar clases activas y rojas
@@ -593,12 +819,12 @@ document.addEventListener('DOMContentLoaded', function () {
             cliente: document.getElementById('filter-cliente-id-input')?.value || '', // Usar el ID del cliente
             asunto: document.getElementById('filter-asunto-input')?.value || '',
             tipo: document.getElementById('filter-tipo-input')?.value || '',
-            subtipo: document.getElementById('filter-subtipo')?.value || '',
-            estado: document.getElementById('filter-estado')?.value || '',
+            subtipo: document.getElementById('filter-subtipo-ids').value || '', // Usar el campo oculto con los valores seleccionados
+            estado: document.getElementById('filter-estado-ids').value || '', // <-- Usar el campo oculto con los valores seleccionados
             usuario: document.getElementById('filter-user-ids')?.value || '',
             archivo: document.getElementById('filter-archivo')?.value || '',
-            facturable: document.getElementById('filter-facturable')?.value || '',
-            facturado: document.getElementById('filter-facturado')?.value || '',
+            facturable: document.getElementById('filter-facturable-ids').value || '', // Usar el campo oculto con los valores seleccionados
+            facturado: document.getElementById('filter-facturado-ids').value || '', // Usar el campo oculto con los valores seleccionados
             precio: document.getElementById('filter-precio')?.value || '',
             suplido: document.getElementById('filter-suplido')?.value || '',
             coste: document.getElementById('filter-coste')?.value || '',
@@ -607,13 +833,20 @@ document.addEventListener('DOMContentLoaded', function () {
             fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
             fecha_planificacion: fecha === "past" ? "past" : fecha, // Este valor viene del filtro rápido de planificación
             tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
-            tiempo_real: document.getElementById('filter-tiempo-real')?.value || ''
+            tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
+            sortKey: sortKey, // Clave para ordenar
+            sortDirection: sortDirection // Dirección de orden
         };
 
         // console.log('Datos de filtro:', filterData);
-
+        window.currentFilters = filterData;
         // Actualizar el panel con los filtros actuales
         updateFilterInfoPanel(filterData);
+        console.log('Parámetros enviados al servidor:', {
+            ...filterData,
+            sortKey: 'fecha_planificacion',
+            sortDirection: 'asc'
+        });
 
         // Realizar la solicitud al servidor para filtrar las tareas
         fetch(`/tareas/filtrar`, {
@@ -639,6 +872,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error en la solicitud:', error.message);
             });
     }
+
+
 
 
 

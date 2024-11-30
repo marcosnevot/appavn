@@ -67,44 +67,89 @@
                 <input type="text" name="filter_archivo" id="filter-archivo">
             </div>
 
+            <!-- Facturable -->
             <div class="form-group grow">
                 <label for="filter-facturable">Facturable:</label>
-                <select name="filter_facturable" id="filter-facturable">
-                    <option value="">Cualquiera</option>
-                    <option value="1">Sí</option>
-                    <option value="0">No</option>
-                </select>
+                <div class="custom-select" id="filter-facturable-select">
+                    <div id="filter-selected-facturables" class="selected-facturables">
+                    </div>
+                    <div id="filter-facturable-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-facturable-1" value="1">
+                                <label for="filter-facturable-1">Sí</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-facturable-0" value="0">
+                                <label for="filter-facturable-0">No</label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_facturable" id="filter-facturable-ids"> <!-- Campo oculto -->
             </div>
 
+
+            <!-- Facturado -->
             <div class="form-group grow">
                 <label for="filter-facturado">Facturado:</label>
-                <select name="filter_facturado" id="filter-facturado">
-                    <option value="">Cualquiera</option>
-                    <option value="NO">No</option>
-                    <option value="SI">Sí</option>
-                    <option value="NUNCA">Nunca</option>
-                </select>
+                <div class="custom-select" id="filter-facturado-select">
+                    <div id="filter-selected-facturados" class="selected-items">
+                    </div>
+                    <div id="filter-facturado-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-si" value="SI"><label for="filter-facturado-si">Sí</label></li>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-no" value="NO"><label for="filter-facturado-no">No</label></li>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-nunca" value="NUNCA"><label for="filter-facturado-nunca">Nunca</label></li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_facturado" id="filter-facturado-ids">
             </div>
 
 
+            <!-- Subtipo -->
             <div class="form-group grow">
                 <label for="filter-subtipo">Subtipo:</label>
-                <select name="filter_subtipo" id="filter-subtipo">
-                    <option value="">Cualquiera</option>
-                    <option value="ORDINARIA">Ordinaria</option>
-                    <option value="EXTRAORDINARIA">Extraordinaria</option>
-                </select>
+                <div class="custom-select" id="filter-subtipo-select">
+                    <div id="filter-selected-subtipos" class="selected-items"></div>
+                    <div id="filter-subtipo-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-subtipo-ordinaria" value="ORDINARIA"><label for="filter-subtipo-ordinaria">Ordinaria</label></li>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-subtipo-extraordinaria" value="EXTRAORDINARIA"><label for="filter-subtipo-extraordinaria">Extraordinaria</label></li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_subtipo" id="filter-subtipo-ids">
             </div>
 
             <div class="form-group grow">
                 <label for="filter-estado">Estado:</label>
-                <select name="filter_estado" id="filter-estado">
-                    <option value="">Cualquiera</option>
-                    <option value="PENDIENTE">Pendiente</option>
-                    <option value="ENPROGRESO">En Espera</option>
-                    <option value="COMPLETADA">Completada</option>
-                </select>
+                <div class="custom-select" id="filter-estado-select">
+                    <div id="filter-selected-estados" class="selected-estados">
+                        <!-- Aquí se mostrarán las selecciones -->
+                    </div>
+                    <div id="filter-estado-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-pendiente" value="PENDIENTE">
+                                <label for="filter-estado-pendiente">Pendiente</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-enespera" value="ENESPERA">
+                                <label for="filter-estado-enespera">En Espera</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-completada" value="COMPLETADA">
+                                <label for="filter-estado-completada">Completada</label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_estado" id="filter-estado-ids"> <!-- Campo oculto -->
             </div>
+
+
         </div>
 
         <!-- Fila 3: Precio, Suplido, Coste -->
@@ -127,6 +172,16 @@
 
         <!-- Fila 4: Fechas, Tiempo Previsto, Tiempo Real -->
         <div class="form-row" style="margin-bottom:30px">
+        <div class="form-group grow">
+                <label for="filter-fecha-planificacion">Fecha de Planificación:</label>
+                <input type="text"
+                    id="filter-fecha-planificacion"
+                    name="filter_fecha_planificacion"
+                    class="form-control"
+                    readonly
+                    placeholder="Seleccionar rango de fechas">
+            </div>
+
             <div class="form-group grow">
                 <label for="filter-fecha-inicio">Fecha de Inicio:</label>
                 <input type="date" name="filter_fecha_inicio" id="filter-fecha-inicio">
@@ -137,7 +192,7 @@
                 <input type="date" name="filter_fecha_vencimiento" id="filter-fecha-vencimiento">
             </div>
 
-            <div class="form-group grow">
+            <div class="form-group grow" style="display:none">
                 <label for="filter-fecha-imputacion">Fecha de Imputación:</label>
                 <input type="date" name="filter_fecha_imputacion" id="filter-fecha-imputacion">
             </div>

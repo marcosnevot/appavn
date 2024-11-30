@@ -14,7 +14,8 @@
 
         <!-- Navigation Links -->
         <div class="menu-links">
-            <a href="{{ route('tasks.index') }}" class="menu-link {{ request()->routeIs('tasks.index') ? 'active' : '' }}">
+            <a href="{{ route('tasks.index', ['sortKey' => 'fecha_planificacion', 'sortDirection' => 'asc']) }}"
+                class="menu-link {{ request()->routeIs('tasks.index') ? 'active' : '' }}">
                 <span class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m-7-8h8M7 20h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -41,7 +42,7 @@
 
             <hr class="border-gray-700">
 
-      
+
             <a href="{{ route('times.index') }}" class="menu-link {{ request()->routeIs('times.index') ? 'active' : '' }}">
                 <span class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -60,7 +61,7 @@
                 {{ __('Control de Tiempos') }}
             </a>
             <hr class="border-gray-700">
-    
+
 
 
             <a href="{{ route('client.index') }}" class="menu-link {{ request()->routeIs('client.index') ? 'active' : '' }}">
@@ -746,7 +747,7 @@
         /* Alinea los elementos a los extremos */
         align-items: center;
         /* Alinea los elementos en la parte inferior */
-        
+
     }
 
     .mark-as-read-btn {
@@ -780,7 +781,7 @@
         margin-top: 5px;
         padding: 0px;
         text-align: left;
-        
+
     }
 
 

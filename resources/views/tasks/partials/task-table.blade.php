@@ -25,7 +25,6 @@
                 <th data-sort-key="precio" style="cursor: pointer; display: none;">Precio</th>
                 <th data-sort-key="suplido" style="cursor: pointer; display: none;">Suplido</th>
                 <th data-sort-key="coste" style="cursor: pointer; display: none;">Coste</th>
-                <th data-sort-key="created_at" style="cursor: pointer; display: none;">Fecha de Creación</th>
             </tr>
 
         </thead>

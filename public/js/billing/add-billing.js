@@ -946,6 +946,7 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             // Si no coincide con los filtros actuales, no la mostramos
             return;
         }
+        console.log('Tarea procesada para la tabla:', task);
 
         const row = document.createElement('tr');
         row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
@@ -981,7 +982,7 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
         // Añadir el evento de doble clic a las filas de la tabla
         addDoubleClickEventToRows();
         // Inicializar el evento de clic derecho en las celdas de "Facturado"
-        initializeFacturadoContextMenu(loadTasks());
+        initializeFacturadoContextMenu();
     });
 
 
@@ -1021,7 +1022,7 @@ function updateSingleTaskRow(task) {
     // Añadir el evento de doble clic a la fila actualizada (si es necesario)
     addDoubleClickEventToRows();
     // Inicializar el evento de clic derecho en las celdas de "Facturado"
-    initializeFacturadoContextMenu(loadTasks());
+    initializeFacturadoContextMenu();
 }
 
 
@@ -1046,7 +1047,8 @@ function taskMatchesFilters(task, filters) {
         return false;
     }
 
-    if (filters.estado && task.estado !== filters.estado) {
+    // Verificar estado (manejo de múltiples valores)
+    if (filters.estado && !filters.estado.split(',').includes(task.estado)) {
         return false;
     }
 
@@ -1054,11 +1056,13 @@ function taskMatchesFilters(task, filters) {
         return false;
     }
 
-    if (filters.facturable !== '' && task.facturable !== Boolean(Number(filters.facturable))) {
+    // Verificar facturable (booleano)
+    if (filters.facturable && !filters.facturable.split(',').includes(String(task.facturable))) {
         return false;
     }
 
-    if (filters.facturado && task.facturado !== filters.facturado) {
+    // Verificar facturado (manejo de múltiples valores)
+    if (filters.facturado && !filters.facturado.split(',').includes(task.facturado)) {
         return false;
     }
 
@@ -1103,27 +1107,36 @@ function taskMatchesFilters(task, filters) {
 }
 
 
+
+
 function getCurrentFilters() {
+    // Helper para obtener valores seleccionados de un checklist
+    function getChecklistValues(fieldName, isBoolean = false) {
+        const checkboxes = document.querySelectorAll(`#filter-${fieldName}-list input[type="checkbox"]:checked`);
+        return Array.from(checkboxes).map(checkbox => isBoolean ? checkbox.value === "1" : checkbox.value);
+    }
+
     return {
-        cliente: document.getElementById('filter-cliente-input') ? document.getElementById('filter-cliente-input').value : '',
-        asunto: document.getElementById('filter-asunto-input') ? document.getElementById('filter-asunto-input').value : '',
-        tipo: document.getElementById('filter-tipo-input') ? document.getElementById('filter-tipo-input').value : '',
-        subtipo: document.getElementById('filter-subtipo') ? document.getElementById('filter-subtipo').value : '',
+        cliente: document.getElementById('filter-cliente-input')?.value || '',
+        asunto: document.getElementById('filter-asunto-input')?.value || '',
+        tipo: document.getElementById('filter-tipo-input')?.value || '',
+        subtipo: document.getElementById('filter-subtipo')?.value || '',
         estado: document.getElementById('filter-estado') ? document.getElementById('filter-estado').value : '',
-        usuario: document.getElementById('filter-user-input') ? document.getElementById('filter-user-input').value : '',
-        archivo: document.getElementById('filter-archivo') ? document.getElementById('filter-archivo').value : '',
-        facturable: document.getElementById('filter-facturable') ? document.getElementById('filter-facturable').value : '',
-        facturado: document.getElementById('filter-facturado') ? document.getElementById('filter-facturado').value : '',
-        precio: document.getElementById('filter-precio') ? document.getElementById('filter-precio').value : '',
-        suplido: document.getElementById('filter-suplido') ? document.getElementById('filter-suplido').value : '',
-        coste: document.getElementById('filter-coste') ? document.getElementById('filter-coste').value : '',
-        fecha_inicio: document.getElementById('filter-fecha-inicio') ? document.getElementById('filter-fecha-inicio').value : '',
-        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento') ? document.getElementById('filter-fecha-vencimiento').value : '',
-        fecha_imputacion: document.getElementById('filter-fecha-imputacion') ? document.getElementById('filter-fecha-imputacion').value : '',
-        tiempo_previsto: document.getElementById('filter-tiempo-previsto') ? document.getElementById('filter-tiempo-previsto').value : '',
-        tiempo_real: document.getElementById('filter-tiempo-real') ? document.getElementById('filter-tiempo-real').value : ''
+        usuario: document.getElementById('filter-user-input')?.value || '',
+        archivo: document.getElementById('filter-archivo')?.value || '',
+        facturable: getChecklistValues('facturable', true).join(','), // Convierte a booleano
+        facturado: getChecklistValues('facturado').join(','), // Recoge valores seleccionados de "facturado"
+        precio: document.getElementById('filter-precio')?.value || '',
+        suplido: document.getElementById('filter-suplido')?.value || '',
+        coste: document.getElementById('filter-coste')?.value || '',
+        fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
+        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
+        fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
+        tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
+        tiempo_real: document.getElementById('filter-tiempo-real')?.value || ''
     };
 }
+
 
 
 

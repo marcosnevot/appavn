@@ -14,48 +14,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // Cargar tareas inicialmente
-    loadTasks();
-
-    // Función para cargar las tareas mediante AJAX con paginación
-    function loadTasks(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
-        const tableBody = document.querySelector('table tbody');
-        tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
-
-        // Construir los parámetros de la URL
-        const params = new URLSearchParams({
-            ...window.currentFilters, // Usar filtros activos de la variable global
-            page, // Página actual
-            sortKey, // Clave de ordenación
-            sortDirection, // Dirección de ordenación
-            fecha_imputacion: today ,
-            user_id: sessionUserId // Usuario actual
-        });
-
-        fetch(`/tareas/getTasks?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-
-                    loadInitialTasks(data.tasks);
-                    updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
-                } else {
-                    console.error('Error al cargar tareas:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error en la solicitud:', error.message);
-                tableBody.innerHTML = '<tr><td colspan="21" class="text-center text-red-500">Error al cargar las tareas.</td></tr>';
-            });
-    }
+    loadTasks(1, 'fecha_planificacion', 'asc');
 
 
-    let currentSortKey = null; // Almacena la clave de ordenación actual
+    let currentSortKey = 'fecha_planificacion'; // Almacena la clave de ordenación actual
     let currentSortDirection = 'none'; // Dirección de orden actual
 
     document.querySelectorAll('th[data-sort-key]').forEach(header => {
@@ -120,12 +82,12 @@ document.addEventListener('DOMContentLoaded', function () {
             <td>${task.estado}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             
             <td>
             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
             </td> 
            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+           <td style="display:none;">${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             <td style="display: none;">${task.archivo || 'No disponible'}</td>
             <td style="display: none;">${task.precio || 'N/A'}</td>
             <td style="display: none;">${task.suplido || 'N/A'}</td>
@@ -141,6 +103,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Actualizar el resumen de horas
         updateHoursSummary(tasks);
+    }
+
+    // Función para cargar las tareas mediante AJAX con paginación
+    function loadTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
+        const tableBody = document.querySelector('table tbody');
+        tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
+
+
+
+        // Construir los parámetros de la URL
+        const params = new URLSearchParams({
+            ...window.currentFilters, // Usar filtros activos de la variable global
+            page, // Página actual
+            sortKey, // Clave de ordenación
+            sortDirection, // Dirección de ordenación
+            fecha_planificacion: today,
+            user_id: sessionUserId // Usuario actual
+        });
+
+        fetch(`/times/getTimes?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+
+                    data.tasks.sort((a, b) => {
+                        const dateA = a.fecha_planificacion ? new Date(a.fecha_planificacion) : null;
+                        const dateB = b.fecha_planificacion ? new Date(b.fecha_planificacion) : null;
+
+                        // Manejo de valores nulos
+                        if (!dateA && !dateB) return a.id - b.id; // Si ambas fechas son nulas, ordenar por ID
+                        if (!dateA) return 1; // NULL al final
+                        if (!dateB) return -1;
+
+                        // Ordenar por fecha en orden ascendente
+                        const dateComparison = dateA - dateB;
+                        if (dateComparison !== 0) return dateComparison;
+
+                        // Ordenar por ID como criterio secundario
+                        return a.id - b.id;
+                    });
+
+                    loadInitialTasks(data.tasks);
+                    updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
+                } else {
+                    console.error('Error al cargar tareas:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud:', error.message);
+                tableBody.innerHTML = '<tr><td colspan="21" class="text-center text-red-500">Error al cargar las tareas.</td></tr>';
+            });
     }
 
     // Función para actualizar el resumen de horas
@@ -172,58 +191,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    function formatFechaPlanificacion(fecha) {
-        const hoy = new Date();
-        const manana = new Date();
-        manana.setDate(hoy.getDate() + 1);
-        const fechaPlanificacion = new Date(fecha);
-
-        // Array con los nombres de los días de la semana
-        const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-
-        // Verificar si la fecha es hoy
-        if (
-            fechaPlanificacion.getDate() === hoy.getDate() &&
-            fechaPlanificacion.getMonth() === hoy.getMonth() &&
-            fechaPlanificacion.getFullYear() === hoy.getFullYear()
-        ) {
-            return "HOY";
-        }
-
-        // Verificar si la fecha es mañana
-        if (
-            fechaPlanificacion.getDate() === manana.getDate() &&
-            fechaPlanificacion.getMonth() === manana.getMonth() &&
-            fechaPlanificacion.getFullYear() === manana.getFullYear()
-        ) {
-            return "MAÑANA";
-        }
-
-        // Calcular el último día laborable de esta semana (viernes)
-        const diaHoy = hoy.getDay();
-        const diasHastaViernes = 5 - diaHoy; // 5 es viernes
-        const viernesDeEstaSemana = new Date(hoy);
-        viernesDeEstaSemana.setDate(hoy.getDate() + diasHastaViernes);
-
-        // Excluir sábado y domingo
-        const diaSemanaPlanificacion = fechaPlanificacion.getDay();
-        if (diaSemanaPlanificacion === 0 || diaSemanaPlanificacion === 6) {
-            return fechaPlanificacion.toLocaleDateString();
-        }
-
-        // Verificar si la fecha está en esta semana y es entre lunes y viernes
-        if (fechaPlanificacion <= viernesDeEstaSemana && fechaPlanificacion > hoy) {
-            return diasSemana[diaSemanaPlanificacion];
-        }
-
-        // Si la fecha es anterior a hoy, formatearla en rojo
-        if (fechaPlanificacion < hoy) {
-            return `<span style="color: red;">${fechaPlanificacion.toLocaleDateString()}</span>`;
-        }
-
-        // Mostrar la fecha en formato normal para cualquier otra condición
-        return fechaPlanificacion.toLocaleDateString();
-    }
 
 
     document.getElementById('export-tasks-button').addEventListener('click', async function () {

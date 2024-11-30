@@ -742,7 +742,6 @@ th::after {
 
 
 /* Seleccionar usuarios asignados a la tarea*/
-/* Seleccionar usuarios asignados a la tarea */
 .custom-select {
     border: 1px solid #ccc;
     padding: 5px;
@@ -823,6 +822,41 @@ th::after {
     text-overflow: ellipsis;
 }
 
+.selected-estados,
+.selected-subtipos,
+.selected-facturados,
+.selected-facturables {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.selected-estados .chip,
+.selected-subtipos .chip,
+.selected-facturados .chip,
+.selected-facturables .chip {
+    display: inline-block;
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    line-height: 1.5;
+    border: 1px solid #ddd;
+}
+
+.selected-estados .chip:hover,
+.selected-subtipos .chip:hover,
+.selected-facturados .chip:hover,
+.selected-facturables .chip:hover {
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+.placeholder {
+    color: #aaa;
+    font-style: italic;
+}
 
 
 /* Contenedor general para la paginación */

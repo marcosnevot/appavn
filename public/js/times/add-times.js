@@ -921,6 +921,23 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
     // Convertir el parámetro `tasks` a un array si es un solo objeto
     const tasksArray = isSingleTask ? [tasks] : tasks;
 
+    tasks.sort((a, b) => {
+        const dateA = a.fecha_planificacion ? new Date(a.fecha_planificacion) : null;
+        const dateB = b.fecha_planificacion ? new Date(b.fecha_planificacion) : null;
+
+        // Manejo de valores nulos
+        if (!dateA && !dateB) return a.id - b.id; // Si ambas fechas son nulas, ordenar por ID
+        if (!dateA) return 1; // NULL al final
+        if (!dateB) return -1;
+
+        // Ordenar por fecha en orden ascendente
+        const dateComparison = dateA - dateB;
+        if (dateComparison !== 0) return dateComparison;
+
+        // Ordenar por ID como criterio secundario
+        return a.id - b.id;
+    });
+
     tasksArray.forEach(task => {
         // Verificar si la tarea coincide con los filtros actuales (si es que hay filtros)
         if (currentFilters && !taskMatchesFilters(task, currentFilters)) {
@@ -945,18 +962,17 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.estado}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
             
             <td>
             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
             </td>             
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
-            
-            <td style="display: none;>${task.archivo || 'No disponible'}</td>
-            <td style="display: none;>${task.precio || 'N/A'}</td>
-            <td style="display: none;>${task.suplido || 'N/A'}</td>
-            <td style="display: none;>${task.coste || 'N/A'}</td>
-            <td style="display: none;">${task.created_at || 'Sin fecha'}</td> <!-- Campo oculto para created_at -->
+            <td style="display: none;">${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
+            <td style="display: none";>${task.archivo || 'No disponible'}</td>
+            <td style="display: none";>${task.precio || 'N/A'}</td>
+            <td style="display: none";>${task.suplido || 'N/A'}</td>
+            <td style="display: none";>${task.coste || 'N/A'}</td>
+            <td style="display: none";">${task.created_at || 'Sin fecha'}</td> <!-- Campo oculto para created_at -->
         `;
 
         // Insertar la nueva fila al principio si es una tarea única (añadir tarea)
@@ -1000,8 +1016,8 @@ function updateSingleTaskRow(task) {
             <td style="display: none;">${task.coste || 'N/A'}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-     
+            <td style="display: none;">${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
+
             <td>
             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
             </td>             
@@ -1083,6 +1099,14 @@ function taskMatchesFilters(task, filters) {
         return false;
     }
 
+    // Verificar rango de fechas de planificación
+    if (filters.fecha_planificacion_inicio && filters.fecha_planificacion_fin) {
+        const taskDate = new Date(task.fecha_planificacion).toISOString().split('T')[0];
+        if (taskDate < filters.fecha_planificacion_inicio || taskDate > filters.fecha_planificacion_fin) {
+            return false;
+        }
+    }
+
     if (filters.tiempo_previsto && parseFloat(task.tiempo_previsto) !== parseFloat(filters.tiempo_previsto)) {
         return false;
     }
@@ -1094,28 +1118,36 @@ function taskMatchesFilters(task, filters) {
     return true;
 }
 
-
 function getCurrentFilters() {
+    // Extraer rango de fechas de planificación
+    const fechaPlanificacionInput = document.getElementById('filter-fecha-planificacion').value || '';
+    const [fechaPlanificacionInicio, fechaPlanificacionFin] = fechaPlanificacionInput
+        ? fechaPlanificacionInput.split(' - ')
+        : ['', ''];
+
     return {
-        cliente: document.getElementById('filter-cliente-input') ? document.getElementById('filter-cliente-input').value : '',
-        asunto: document.getElementById('filter-asunto-input') ? document.getElementById('filter-asunto-input').value : '',
-        tipo: document.getElementById('filter-tipo-input') ? document.getElementById('filter-tipo-input').value : '',
-        subtipo: document.getElementById('filter-subtipo') ? document.getElementById('filter-subtipo').value : '',
-        estado: document.getElementById('filter-estado') ? document.getElementById('filter-estado').value : '',
-        usuario: document.getElementById('filter-user-input') ? document.getElementById('filter-user-input').value : '',
-        archivo: document.getElementById('filter-archivo') ? document.getElementById('filter-archivo').value : '',
-        facturable: document.getElementById('filter-facturable') ? document.getElementById('filter-facturable').value : '',
-        facturado: document.getElementById('filter-facturado') ? document.getElementById('filter-facturado').value : '',
-        precio: document.getElementById('filter-precio') ? document.getElementById('filter-precio').value : '',
-        suplido: document.getElementById('filter-suplido') ? document.getElementById('filter-suplido').value : '',
-        coste: document.getElementById('filter-coste') ? document.getElementById('filter-coste').value : '',
-        fecha_inicio: document.getElementById('filter-fecha-inicio') ? document.getElementById('filter-fecha-inicio').value : '',
-        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento') ? document.getElementById('filter-fecha-vencimiento').value : '',
-        fecha_imputacion: document.getElementById('filter-fecha-imputacion') ? document.getElementById('filter-fecha-imputacion').value : '',
-        tiempo_previsto: document.getElementById('filter-tiempo-previsto') ? document.getElementById('filter-tiempo-previsto').value : '',
-        tiempo_real: document.getElementById('filter-tiempo-real') ? document.getElementById('filter-tiempo-real').value : ''
+        cliente: document.getElementById('filter-cliente-input')?.value || '',
+        asunto: document.getElementById('filter-asunto-input')?.value || '',
+        tipo: document.getElementById('filter-tipo-input')?.value || '',
+        subtipo: document.getElementById('filter-subtipo')?.value || '',
+        estado: document.getElementById('filter-estado')?.value || '',
+        usuario: document.getElementById('filter-user-input')?.value || '',
+        archivo: document.getElementById('filter-archivo')?.value || '',
+        facturable: document.getElementById('filter-facturable')?.value || '',
+        facturado: document.getElementById('filter-facturado')?.value || '',
+        precio: document.getElementById('filter-precio')?.value || '',
+        suplido: document.getElementById('filter-suplido')?.value || '',
+        coste: document.getElementById('filter-coste')?.value || '',
+        fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
+        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
+        fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
+        fecha_planificacion_inicio: fechaPlanificacionInicio,
+        fecha_planificacion_fin: fechaPlanificacionFin,
+        tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
+        tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
     };
 }
+
 
 
 
