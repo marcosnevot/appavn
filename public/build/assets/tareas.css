@@ -336,6 +336,36 @@ th::after {
     /* Permite ajuste de texto dentro de la celda */
 }
 
+.col-descripcion, .col-observaciones {
+    max-width: 300px; /* Define el ancho máximo */
+    width: 20%; /* Establece un ancho proporcional para evitar que se fusionen */
+    max-height: 4.5em; /* Limita la altura máxima */
+    overflow: hidden; /* Oculta contenido excedente */
+    text-overflow: ellipsis; /* Añade puntos suspensivos */
+    -webkit-line-clamp: 3; /* Limita a 3 líneas */
+    -webkit-box-orient: vertical; /* Configura orientación en vertical */
+    line-height: 1.5em; /* Establece el interlineado */
+    word-wrap: break-word; /* Ajusta palabras largas */
+}
+
+.estado-pendiente {
+    background-color: rgba(255, 248, 225, 0.8) !important; /* Amarillo con opacidad */
+}
+
+.estado-enespera {
+    background-color: rgba(227, 242, 253, 0.8) !important; /* Azul con opacidad */
+}
+
+.estado-completada {
+    background-color: rgba(232, 245, 233, 0.8) !important; /* Verde con opacidad */
+}
+
+.estado-default {
+    background-color: rgba(249, 249, 249, 0.8) !important; /* Gris claro */
+}
+
+
+
 /* Estilos del formulario de tarea */
 .task-form {
     position: absolute;
@@ -857,6 +887,7 @@ th::after {
     color: #aaa;
     font-style: italic;
 }
+
 
 
 /* Contenedor general para la paginación */

@@ -145,9 +145,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     showNotification("Tarea creada exitosamente", "success");
                     // Resetear determinados campos
-                    resetSelectedUsers();
-                    generarBotonesPlanificacion();
+
                     document.getElementById('add-task-form').reset(); // Resetear el formulario
+                    generarBotonesPlanificacion();
+                    resetSelectedUsers();
                 } else {
                     console.error('Errores de validación:', data.errors);
                 }
@@ -912,34 +913,20 @@ function setupPaginationListeners() {
 
 // Función para actualizar la tabla con la nueva tarea
 function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pagination = null) {
+    console.log('updateTaskTable llamada por:', new Error().stack);
+
     const tableBody = document.querySelector('table tbody');
+    console.log('Evento recibido:');
 
     // Si no es una tarea única (por ejemplo, en filtrado), limpiamos la tabla
     if (!isSingleTask) {
         tableBody.innerHTML = ''; // Limpiar la tabla existente
     }
-    console.log('Filtros actuales en window.currentFilters:', window.currentFilters);
-
+    // Usar los filtros globales si no se pasan como argumento
+    const filtersToApply = currentFilters || window.currentFilters;
+    console.log('Filtros actuales a aplicar:', filtersToApply);
     // Convertir el parámetro `tasks` a un array si es un solo objeto
     const tasksArray = isSingleTask ? [tasks] : tasks;
-
-    tasks.sort((a, b) => {
-        const dateA = a.fecha_planificacion ? new Date(a.fecha_planificacion) : null;
-        const dateB = b.fecha_planificacion ? new Date(b.fecha_planificacion) : null;
-    
-        // Manejo de valores nulos
-        if (!dateA && !dateB) return a.id - b.id; // Si ambas fechas son nulas, ordenar por ID
-        if (!dateA) return 1; // NULL al final
-        if (!dateB) return -1;
-    
-        // Ordenar por fecha en orden ascendente
-        const dateComparison = dateA - dateB;
-        if (dateComparison !== 0) return dateComparison;
-    
-        // Ordenar por ID como criterio secundario
-        return a.id - b.id;
-    });
-    
 
     tasksArray.forEach(task => {
         // Verificar si la tarea coincide con los filtros actuales (si es que hay filtros)
@@ -950,26 +937,32 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
 
         const row = document.createElement('tr');
         row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
+
+        // Añade una clase según el estado de la tarea
+        const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
+        row.classList.add(estadoClass);
+        
         row.innerHTML = `
             <td>${task.id}</td>
-            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
-            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
-            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            <td>${task.descripcion || ''}</td>
-            <td>${task.observaciones || ''}</td>
-            <td>${task.facturable ? 'Sí' : 'No'}</td>
-            <td>${task.facturado || 'No'}</td>
-            <td>${task.subtipo || ''}</td>
-            <td>${task.estado}</td>
-            <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.tiempo_previsto || 'N/A'}</td>
-            <td>${task.tiempo_real || 'N/A'}</td>
             <td>
             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
             </td>             
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
+                        <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
+            <td>${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+            <td>${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
+            <td>${task.facturable ? 'Sí' : 'No'}</td>
+            <td>${task.facturado || 'No'}</td>
+            <td>${task.estado}</td>
+            <td>${task.tiempo_previsto || 'N/A'}</td>
+            <td>${task.tiempo_real || 'N/A'}</td>
+            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+            <td>${task.subtipo || ''}</td>
+            <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
+            
+            
             
         `;
 
@@ -1000,8 +993,8 @@ function updateSingleTaskRow(task) {
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            <td>${task.descripcion || ''}</td>
-            <td>${task.observaciones || ''}</td>
+            <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+            <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
             <td>${task.facturado || 'No'}</td>
             <td>${task.subtipo || ''}</td>
@@ -1105,24 +1098,30 @@ function taskMatchesFilters(task, filters) {
 
 
 function getCurrentFilters() {
+
+     // Helper para obtener valores seleccionados de un checklist
+    function getChecklistValues(fieldName, isBoolean = false) {
+        const checkboxes = document.querySelectorAll(`#filter-${fieldName}-list input[type="checkbox"]:checked`);
+        return Array.from(checkboxes).map(checkbox => isBoolean ? checkbox.value === "1" : checkbox.value);
+    }
     return {
-        cliente: document.getElementById('filter-cliente-input') ? document.getElementById('filter-cliente-input').value : '',
-        asunto: document.getElementById('filter-asunto-input') ? document.getElementById('filter-asunto-input').value : '',
-        tipo: document.getElementById('filter-tipo-input') ? document.getElementById('filter-tipo-input').value : '',
-        subtipo: document.getElementById('filter-subtipo') ? document.getElementById('filter-subtipo').value : '',
+        cliente: document.getElementById('filter-cliente-input')?.value || '',
+        asunto: document.getElementById('filter-asunto-input')?.value || '',
+        tipo: document.getElementById('filter-tipo-input')?.value || '',
+        subtipo: document.getElementById('filter-subtipo')?.value || '',
         estado: document.getElementById('filter-estado') ? document.getElementById('filter-estado').value : '',
-        usuario: document.getElementById('filter-user-input') ? document.getElementById('filter-user-input').value : '',
-        archivo: document.getElementById('filter-archivo') ? document.getElementById('filter-archivo').value : '',
-        facturable: document.getElementById('filter-facturable') ? document.getElementById('filter-facturable').value : '',
-        facturado: document.getElementById('filter-facturado') ? document.getElementById('filter-facturado').value : '',
-        precio: document.getElementById('filter-precio') ? document.getElementById('filter-precio').value : '',
-        suplido: document.getElementById('filter-suplido') ? document.getElementById('filter-suplido').value : '',
-        coste: document.getElementById('filter-coste') ? document.getElementById('filter-coste').value : '',
-        fecha_inicio: document.getElementById('filter-fecha-inicio') ? document.getElementById('filter-fecha-inicio').value : '',
-        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento') ? document.getElementById('filter-fecha-vencimiento').value : '',
-        fecha_imputacion: document.getElementById('filter-fecha-imputacion') ? document.getElementById('filter-fecha-imputacion').value : '',
-        tiempo_previsto: document.getElementById('filter-tiempo-previsto') ? document.getElementById('filter-tiempo-previsto').value : '',
-        tiempo_real: document.getElementById('filter-tiempo-real') ? document.getElementById('filter-tiempo-real').value : ''
+        usuario: document.getElementById('filter-user-input')?.value || '',
+        archivo: document.getElementById('filter-archivo')?.value || '',
+        facturable: getChecklistValues('facturable', true).join(','), // Convierte a booleano
+        facturado: getChecklistValues('facturado').join(','), // Recoge valores seleccionados de "facturado"
+        precio: document.getElementById('filter-precio')?.value || '',
+        suplido: document.getElementById('filter-suplido')?.value || '',
+        coste: document.getElementById('filter-coste')?.value || '',
+        fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
+        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
+        fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
+        tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
+        tiempo_real: document.getElementById('filter-tiempo-real')?.value || ''
     };
 }
 

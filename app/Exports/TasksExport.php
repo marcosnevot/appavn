@@ -16,22 +16,21 @@ class TasksExport implements FromCollection, WithHeadings
         $this->tasks = $tasks->map(function ($task) {
             return [
                 'ID' => $task->id,
-                'Asunto' => $task->asunto ? $task->asunto->nombre : 'Sin asunto',
+                'Fecha de Vencimiento' => $task->fecha_vencimiento,
+                'Fecha de Planificación' => $task->fecha_planificacion,
+                'Usuarios Asignados' => $task->users->pluck('name')->join(', '),  // Concatenar nombres de usuarios
                 'Cliente' => $task->cliente ? $task->cliente->nombre_fiscal : 'Sin cliente',
-                'Tipo' => $task->tipo ? $task->tipo->nombre : 'Sin tipo',
+                'Asunto' => $task->asunto ? $task->asunto->nombre : 'Sin asunto',
                 'Descripción' => $task->descripcion,
                 'Observaciones' => $task->observaciones,
                 'Facturable' => $task->facturable ? 'Sí' : 'No',
                 'Facturado' => $task->facturado,
-                'Subtipo' => $task->subtipo,
                 'Estado' => $task->estado,
-                'Fecha de Inicio' => $task->fecha_inicio,
-                'Fecha de Vencimiento' => $task->fecha_vencimiento,
-                'Fecha de Imputación' => $task->fecha_imputacion,
                 'Tiempo Previsto' => $task->tiempo_previsto,
                 'Tiempo Real' => $task->tiempo_real,
-                'Fecha de Planificación' => $task->fecha_planificacion,
-                'Usuarios Asignados' => $task->users->pluck('name')->join(', '),  // Concatenar nombres de usuarios
+                'Tipo' => $task->tipo ? $task->tipo->nombre : 'Sin tipo',
+                'Subtipo' => $task->subtipo,
+                'Fecha de Inicio' => $task->fecha_inicio,
                 'Fecha de Creación' => $task->created_at,
             ];
         });
@@ -45,10 +44,23 @@ class TasksExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'ID', 'Asunto', 'Cliente', 'Tipo', 'Descripción', 'Observaciones', 'Facturable',
-            'Facturado', 'Subtipo', 'Estado', 'Fecha de Inicio', 'Fecha de Vencimiento',
-            'Fecha de Imputación', 'Tiempo Previsto', 'Tiempo Real', 'Fecha de Planificación',
-            'Usuarios Asignados', 'Fecha de Creación'
+            'ID',
+            'Fecha de Vencimiento',
+            'Fecha de Planificación',
+            'Usuarios Asignados',
+            'Cliente',
+            'Asunto',
+            'Descripción',
+            'Observaciones',
+            'Facturable',
+            'Facturado',
+            'Estado',
+            'Tiempo Previsto',
+            'Tiempo Real',
+            'Tipo',
+            'Subtipo',
+            'Fecha de Inicio',
+            'Fecha de Creación',
         ];
     }
 }

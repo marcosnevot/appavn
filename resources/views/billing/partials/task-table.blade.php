@@ -9,8 +9,8 @@
                 <th data-sort-key="cliente.nombre_fiscal" class="col-cliente" id="header-client" style="cursor: pointer;">Cliente</th>
                 <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
 
-                <th data-sort-key="descripcion" style="cursor: pointer;">Descripción</th>
-                <th data-sort-key="observaciones" style="cursor: pointer;">Observaciones</th>
+                <th data-sort-key="descripcion" style="cursor: pointer;" class="col-descripcion">Descripción</th>
+                <th data-sort-key="observaciones" style="cursor: pointer;" class="col-descripcion">Observaciones</th>
 
                 <th data-sort-key="facturable" style="cursor: pointer;">Facturable</th>
                 <th data-sort-key="facturado" style="cursor: pointer;">Facturado</th>

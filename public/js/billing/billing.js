@@ -118,8 +118,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
- // Función para cargar las tareas mediante AJAX con paginación
- function loadTasks(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
+// Función para cargar las tareas mediante AJAX con paginación
+function loadTasks(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
     const tableBody = document.querySelector('table tbody');
     tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
 
@@ -155,26 +155,32 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 }
 
+function truncateText(text, maxLength) {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
 
+// Función para cargar y actualizar la tabla de tareas inicialmente
+function loadInitialTasks(tasks) {
+    globalTasksArray = tasks;  // Almacenar las tareas cargadas globalmente
 
-    // Función para cargar y actualizar la tabla de tareas inicialmente
-    function loadInitialTasks(tasks) {
-        globalTasksArray = tasks;  // Almacenar las tareas cargadas globalmente
+    const tableBody = document.querySelector('table tbody');
+    tableBody.innerHTML = ''; // Limpiar la tabla existente
 
-        const tableBody = document.querySelector('table tbody');
-        tableBody.innerHTML = ''; // Limpiar la tabla existente
+    tasks.forEach(task => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
 
-        tasks.forEach(task => {
-            const row = document.createElement('tr');
-            row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
-            row.innerHTML = `
+        // Añade una clase según el estado de la tarea
+        const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
+        row.classList.add(estadoClass);
+        
+        row.innerHTML = `
             <td>${task.id}</td>
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
-            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
+            <td class="col-cliente">${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            
-            <td>${task.descripcion || ''}</td>
-            <td>${task.observaciones || ''}</td>
+            <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+            <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
             <td>${task.facturable ? 'SI' : 'NO'}</td>
             <td class="facturado-cell" 
             data-facturado="${task.facturado || 'NO'}" 
@@ -186,17 +192,17 @@ document.addEventListener('DOMContentLoaded', function () {
             <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
            
         `;
-            tableBody.appendChild(row);
+        tableBody.appendChild(row);
 
-            // Añadir el evento de doble clic a las filas de la tabla
-            addDoubleClickEventToRows();
-            // Inicializar el evento de clic derecho en las celdas de "Facturado"
-            initializeFacturadoContextMenu();
-        });
-    }
+        // Añadir el evento de doble clic a las filas de la tabla
+        addDoubleClickEventToRows();
+        // Inicializar el evento de clic derecho en las celdas de "Facturado"
+        initializeFacturadoContextMenu();
+    });
+}
 
 
-    
+
 function initializeFacturadoContextMenu() {
     const tableBody = document.querySelector('table tbody');
 
@@ -276,7 +282,7 @@ function updateTaskFacturado(taskId, newValue, targetCell, select) {
                 targetCell.setAttribute('data-facturado', newValue);
                 targetCell.textContent = newValue;
 
-                loadTasks();            
+                loadTasks();
                 // Mostrar notificación de éxito
                 showNotification('Columna Facturado actualizada correctamente', 'info');
             } else {

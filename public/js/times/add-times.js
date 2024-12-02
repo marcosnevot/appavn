@@ -947,15 +947,20 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
 
         const row = document.createElement('tr');
         row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
+
+        // Añade una clase según el estado de la tarea
+        const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
+        row.classList.add(estadoClass);
+        
         row.innerHTML = `
             <td>${task.id}</td>
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
-            <td>${task.tiempo_real || 'N/A'}</td>
-            <td>${task.descripcion || ''}</td>
-            <td>${task.observaciones || ''}</td>
+            <td>${task.tiempo_real || 'N/A'}</td> 
+            <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+            <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
             <td>${task.facturado || 'No'}</td>
             <td>${task.subtipo || ''}</td>
@@ -1004,8 +1009,8 @@ function updateSingleTaskRow(task) {
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>
-            <td>${task.descripcion || ''}</td>
-            <td>${task.observaciones || ''}</td>
+            <td>${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+            <td>${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
             <td style="display: none;">${task.archivo || 'No disponible'}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
             <td>${task.facturado || 'No'}</td>

@@ -222,6 +222,34 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Inicializar estados predeterminados
+    const estadoDefault = ['PENDIENTE', 'ENESPERA']; // Valores predeterminados
+    const hiddenEstadoInput = document.getElementById('filter-estado-ids');
+    hiddenEstadoInput.value = estadoDefault.join(',');
+
+    // Marcar las casillas de los estados predeterminados
+    estadoDefault.forEach(estado => {
+        const checkbox = document.getElementById(`filter-estado-${estado.toLowerCase()}`);
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+    });
+
+    // Inicializar visualización de estados seleccionados
+    const selectedEstadosContainer = document.getElementById('filter-selected-estados');
+    estadoDefault.forEach(estado => {
+        const span = document.createElement('span');
+        span.textContent = estado;
+        span.style.backgroundColor = '#f0f0f0';
+        span.style.color = '#333';
+        span.style.padding = '3px 8px';
+        span.style.borderRadius = '15px';
+        span.style.fontSize = '12px';
+        span.style.lineHeight = '1.5';
+        span.style.border = '1px solid #ddd';
+        selectedEstadosContainer.appendChild(span);
+    });
+
 
     let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
@@ -765,6 +793,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return diasRestantes;
     }
+    // Bandera para evitar ejecución automática al generar botones
+    let filtroInicializado = false;
 
     // Función para generar los botones de filtro de planificación
     function generarBotonesFiltroPlanificacion() {
@@ -781,12 +811,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             planificacionFilterContainer.appendChild(button);
 
-            // Marcar "Todas" como activa al inicio
-            if (dia.nombre === "Todas") {
+            // Marcar "Todas" como activa al inicio si no está inicializado
+            if (dia.nombre === "Todas" && !filtroInicializado) {
                 button.classList.add('active');
-                filtrarTareasPorPlanificacion(dia.fecha);
+                filtroInicializado = true; // Evitar que se llame de nuevo
+                // filtrarTareasPorPlanificacion(dia.fecha); // Ejecutar solo una vez al inicio
             }
         });
+
         // Crear el botón de "Pasadas"
         const botonPasadas = document.createElement('button');
         botonPasadas.type = 'button';
@@ -795,11 +827,13 @@ document.addEventListener('DOMContentLoaded', function () {
         botonPasadas.setAttribute('data-fecha', 'past');
         botonPasadas.onclick = () => filtrarTareasPorPlanificacion('past');
         planificacionFilterContainer.appendChild(botonPasadas);
-
     }
+
 
     // Función para gestionar el filtrado de tareas
     function filtrarTareasPorPlanificacion(fecha, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
+        console.log('filtrarTareasPorPlanificacion llamada desde:', new Error().stack);
+
         // Actualizar la interfaz de botones
         document.querySelectorAll('.btn-filter-planificacion').forEach(btn => {
             btn.classList.remove('active', 'active-red'); // Limpiar clases activas y rojas
@@ -811,6 +845,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectedButton.classList.add('active-red'); // Usar una clase especial para "Pasadas"
             } else {
                 selectedButton.classList.add('active');
+
             }
         }
 
@@ -820,7 +855,7 @@ document.addEventListener('DOMContentLoaded', function () {
             asunto: document.getElementById('filter-asunto-input')?.value || '',
             tipo: document.getElementById('filter-tipo-input')?.value || '',
             subtipo: document.getElementById('filter-subtipo-ids').value || '', // Usar el campo oculto con los valores seleccionados
-            estado: document.getElementById('filter-estado-ids').value || '', // <-- Usar el campo oculto con los valores seleccionados
+            estado: document.getElementById('filter-estado-ids').value || '', // Predeterminar a "PENDIENTE, ENESPERA"
             usuario: document.getElementById('filter-user-ids')?.value || '',
             archivo: document.getElementById('filter-archivo')?.value || '',
             facturable: document.getElementById('filter-facturable-ids').value || '', // Usar el campo oculto con los valores seleccionados
@@ -830,7 +865,6 @@ document.addEventListener('DOMContentLoaded', function () {
             coste: document.getElementById('filter-coste')?.value || '',
             fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
             fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
-            fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
             fecha_planificacion: fecha === "past" ? "past" : fecha, // Este valor viene del filtro rápido de planificación
             tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
             tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',

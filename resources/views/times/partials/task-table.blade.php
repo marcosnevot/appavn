@@ -10,8 +10,8 @@
                 <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
                 <th data-sort-key="tiempo_previsto" style="cursor: pointer;">Tiempo Previsto</th>
                 <th data-sort-key="tiempo_real" style="cursor: pointer;">Tiempo Real</th>
-                <th data-sort-key="descripcion" style="cursor: pointer;">Descripción</th>
-                <th data-sort-key="observaciones" style="cursor: pointer;">Observaciones</th>
+                <th data-sort-key="descripcion" style="cursor: pointer;" class="col-descripcion">Descripción</th>
+                <th data-sort-key="observaciones" style="cursor: pointer;" class="col-descripcion">Observaciones</th>
                 <th data-sort-key="facturable" style="cursor: pointer;">Facturable</th>
                 <th data-sort-key="facturado" style="cursor: pointer;">Facturado</th>
                 <th data-sort-key="subtipo" style="cursor: pointer;">Subtipo</th>

@@ -220,7 +220,7 @@ class TaskController extends Controller
 
         // Obtener todas las tareas de la base de datos, ordenadas por las más recientes
         $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
-            ->orderBy('created_at', 'desc') // Ordenar por la fecha de creación, de más reciente a más antigua
+            ->orderBy('fecha_planificacion', 'asc') // Ordenar por la fecha de creación, de más reciente a más antigua
             ->get();
 
         // Obtener datos adicionales necesarios para el formulario
@@ -376,11 +376,11 @@ class TaskController extends Controller
 
 
 
-            // Evitar duplicados y ordenar
-            $query->distinct()->orderBy($sortKey, $sortDirection);
 
             // Incluir relaciones necesarias
             $query->with(['cliente', 'asunto', 'tipo', 'users']);
+
+            $query->distinct()->orderBy('fecha_planificacion', 'asc');
 
             // Paginación
             $tasks = $query->paginate(50);
@@ -883,8 +883,8 @@ class TaskController extends Controller
             }
 
 
-            // Añadir el orden por fecha de creación, de más reciente a más antigua
-            $query->orderBy('created_at', 'desc');
+            // Añadir el orden por fecha de planificacion, de más antigua a más reciente
+            $query->distinct()->orderBy('fecha_planificacion', 'asc');
 
             // Ejecutar la consulta y obtener las tareas filtradas
             $filteredTasks = $query->paginate(50);
@@ -918,21 +918,20 @@ class TaskController extends Controller
         // Aplica los filtros a la consulta de tareas
         $query = Tarea::select([
             'id',
-            'asunto_id',
+            'fecha_vencimiento',
+            'fecha_planificacion',
             'cliente_id',
-            'tipo_id',
+            'asunto_id',
             'descripcion',
             'observaciones',
             'facturable',
             'facturado',
-            'subtipo',
             'estado',
-            'fecha_inicio',
-            'fecha_vencimiento',
-            'fecha_imputacion',
             'tiempo_previsto',
             'tiempo_real',
-            'fecha_planificacion',
+            'tipo_id',
+            'subtipo',
+            'fecha_inicio',
             'created_at'
         ])->with(['cliente', 'asunto', 'tipo', 'users']);
         // Filtrar por cliente
@@ -960,18 +959,21 @@ class TaskController extends Controller
 
         // Filtrar por subtipo
         if (!empty($filters['subtipo'])) {
-            $query->where('subtipo', $filters['subtipo']);
+            $subtipoValues = explode(',', $filters['subtipo']);
+            $query->whereIn('subtipo', $subtipoValues);
         }
 
 
-        // Filtrar por subtipo
+        // Filtrar por facturado
         if (!empty($filters['facturado'])) {
-            $query->where('facturado', $filters['facturado']);
+            $facturadoValues = explode(',', $filters['facturado']);
+            $query->whereIn('facturado', $facturadoValues);
         }
 
         // Filtrar por estado
         if (!empty($filters['estado'])) {
-            $query->where('estado', $filters['estado']);
+            $estados = explode(',', $filters['estado']);
+            $query->whereIn('estado', $estados);
         }
 
         // Filtrar por usuario asignado
@@ -992,10 +994,19 @@ class TaskController extends Controller
             $query->where('archivo', 'like', '%' . $filters['archivo'] . '%');
         }
 
-        // Filtrar por facturable
-        if (isset($filters['facturable'])) {
-            $query->where('facturable', $filters['facturable']);
+        // Filtros dinámicos para booleanos
+        foreach (['facturable'] as $booleanField) {
+            if (!empty($filters[$booleanField])) {
+                // Convertir el valor recibido en booleano estricto
+                $values = array_map(function ($value) {
+                    return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                }, explode(',', $filters[$booleanField]));
+
+                $query->whereIn($booleanField, $values);
+            }
         }
+
+
 
         // Filtrar por fechas
         if (!empty($filters['fecha_inicio'])) {
@@ -1005,6 +1016,12 @@ class TaskController extends Controller
         if (!empty($filters['fecha_vencimiento'])) {
             $query->whereDate('fecha_vencimiento', '<=', $filters['fecha_vencimiento']);
         }
+
+        // Filtrar por fecha_imputacion
+        if (!empty($filters['fecha_imputacion'])) {
+            $query->whereDate('fecha_imputacion', '=', $filters['fecha_imputacion']);
+        }
+
 
         // Filtrar por precio
         if (!empty($filters['precio'])) {
@@ -1020,19 +1037,31 @@ class TaskController extends Controller
             $query->where('tiempo_real', '=', $filters['tiempo_real']);
         }
 
-        // Filtrar por fecha de planificación
-        if (!empty($filters['fecha_planificacion'])) {
+        // Filtros específicos de planificación
+        if (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+            // Filtrar por rango si ambas fechas están definidas
+            $query->whereBetween('fecha_planificacion', [
+                $filters['fecha_planificacion_inicio'],
+                $filters['fecha_planificacion_fin']
+            ]);
+        } elseif (!empty($filters['fecha_planificacion_inicio'])) {
+            // Filtrar desde una fecha de inicio
+            $query->whereDate('fecha_planificacion', '>=', $filters['fecha_planificacion_inicio']);
+        } elseif (!empty($filters['fecha_planificacion_fin'])) {
+            // Filtrar hasta una fecha de fin
+            $query->whereDate('fecha_planificacion', '<=', $filters['fecha_planificacion_fin']);
+        } elseif (!empty($filters['fecha_planificacion'])) {
+            // Filtrar por un día en específico
             if ($filters['fecha_planificacion'] === 'past') {
-                // Filtrar por fechas anteriores a hoy
-                $query->whereDate('fecha_planificacion', '<', now()->toDateString());
+                $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                    ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
             } else {
-                // Filtrar por una fecha específica
                 $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
             }
         }
 
         // Añadir el orden por fecha de creación, de más reciente a más antigua
-        $query->orderBy('created_at', 'desc');
+        $query->distinct()->orderBy('fecha_planificacion', 'asc');
 
 
 

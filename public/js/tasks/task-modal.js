@@ -403,28 +403,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
             rowToUpdate.innerHTML = `
                     <td>${task.id}</td>
-                    <td>${asunto}</td>
+                    <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+                    <td>
+                      ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+                     </td> 
+                    <td>${task.users && task.users.length > 0 ? task.users.join(', ') : 'Sin asignación'}</td>
                     <td>${cliente}</td>
-                    <td>${tipo}</td>
-                 
+                    <td>${asunto}</td>
                     <td>${task.descripcion || ''}</td>
                     <td>${task.observaciones || ''}</td>
                     <td>${task.facturable ? 'Sí' : 'No'}</td>
                     <td>${task.facturado || 'No facturado'}</td>
-                       <td>${task.subtipo || ''}</td>
                     <td>${task.estado}</td>
-                   
-                    <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-                    <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-                    <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
                     <td>${task.tiempo_previsto || 'N/A'}</td>
                     <td>${task.tiempo_real || 'N/A'}</td>
-                    <td>
-                      ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-                     </td>   
-                    <td>${task.users && task.users.length > 0 ? task.users.join(', ') : 'Sin asignación'}</td>
+                    <td>${tipo}</td>
+                    <td>${task.subtipo || ''}</td>
+                    <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
+                    
+                      
+                    
 
-                     <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
                 `;
         } else {
             console.warn('No se encontró la fila correspondiente a la tarea actualizada');

@@ -57,141 +57,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Función para cargar y actualizar la tabla de tareas inicialmente
-    function loadInitialTasks(tasks) {
-        globalTasksArray = tasks;  // Almacenar las tareas cargadas globalmente
-
-        const tableBody = document.querySelector('table tbody');
-        tableBody.innerHTML = ''; // Limpiar la tabla existente
-
-        tasks.forEach(task => {
-            const row = document.createElement('tr');
-            row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
-            row.innerHTML = `
-            <td>${task.id}</td>
-            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
-            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
-            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            <td>${task.tiempo_previsto || 'N/A'}</td>
-            <td>${task.tiempo_real || 'N/A'}</td>
-            <td>${task.descripcion || ''}</td>
-            <td>${task.observaciones || ''}</td>
-            <td>${task.facturable ? 'Sí' : 'No'}</td>
-            <td>${task.facturado || 'No facturado'}</td>
-            <td>${task.subtipo || ''}</td>
-            <td>${task.estado}</td>
-            <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            
-            <td>
-            ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-            </td> 
-           <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
-           <td style="display:none;">${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-            <td style="display: none;">${task.archivo || 'No disponible'}</td>
-            <td style="display: none;">${task.precio || 'N/A'}</td>
-            <td style="display: none;">${task.suplido || 'N/A'}</td>
-            <td style="display: none;">${task.coste || 'N/A'}</td>
-            <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
-        `;
-            tableBody.appendChild(row);
-
-            // Añadir el evento de doble clic a las filas de la tabla
-            addDoubleClickEventToRows();
-
-        });
-
-        // Actualizar el resumen de horas
-        updateHoursSummary(tasks);
-    }
-
-    // Función para cargar las tareas mediante AJAX con paginación
-    function loadTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
-        const tableBody = document.querySelector('table tbody');
-        tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
-
-
-
-        // Construir los parámetros de la URL
-        const params = new URLSearchParams({
-            ...window.currentFilters, // Usar filtros activos de la variable global
-            page, // Página actual
-            sortKey, // Clave de ordenación
-            sortDirection, // Dirección de ordenación
-            fecha_planificacion: today,
-            user_id: sessionUserId // Usuario actual
-        });
-
-        fetch(`/times/getTimes?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-
-                    data.tasks.sort((a, b) => {
-                        const dateA = a.fecha_planificacion ? new Date(a.fecha_planificacion) : null;
-                        const dateB = b.fecha_planificacion ? new Date(b.fecha_planificacion) : null;
-
-                        // Manejo de valores nulos
-                        if (!dateA && !dateB) return a.id - b.id; // Si ambas fechas son nulas, ordenar por ID
-                        if (!dateA) return 1; // NULL al final
-                        if (!dateB) return -1;
-
-                        // Ordenar por fecha en orden ascendente
-                        const dateComparison = dateA - dateB;
-                        if (dateComparison !== 0) return dateComparison;
-
-                        // Ordenar por ID como criterio secundario
-                        return a.id - b.id;
-                    });
-
-                    loadInitialTasks(data.tasks);
-                    updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
-                } else {
-                    console.error('Error al cargar tareas:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error en la solicitud:', error.message);
-                tableBody.innerHTML = '<tr><td colspan="21" class="text-center text-red-500">Error al cargar las tareas.</td></tr>';
-            });
-    }
-
-    // Función para actualizar el resumen de horas
-    function updateHoursSummary(tasks) {
-        let totalTiempoPrevisto = 0;
-        let totalTiempoReal = 0;
-
-        // Iterar sobre las tareas y sumar los valores
-        tasks.forEach(task => {
-            totalTiempoPrevisto += parseFloat(task.tiempo_previsto || 0);
-            totalTiempoReal += parseFloat(task.tiempo_real || 0);
-        });
-
-        // Actualizar los valores en el panel, verificando la existencia de los elementos
-        const tiempoPrevistoElement = document.getElementById('total-tiempo-previsto');
-        const tiempoRealElement = document.getElementById('total-tiempo-real');
-
-        if (tiempoPrevistoElement) {
-            tiempoPrevistoElement.textContent = totalTiempoPrevisto.toFixed(2);
-        } else {
-            console.warn("Elemento 'total-tiempo-previsto' no encontrado en el DOM.");
-        }
-
-        if (tiempoRealElement) {
-            tiempoRealElement.textContent = totalTiempoReal.toFixed(2);
-        } else {
-            console.warn("Elemento 'total-tiempo-real' no encontrado en el DOM.");
-        }
-    }
-
-
-
 
     document.getElementById('export-tasks-button').addEventListener('click', async function () {
 
@@ -254,3 +119,148 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 });
+
+const sessionUserId = document.getElementById('user-session-id').value;
+
+// Definir la fecha actual
+const today = new Date().toISOString().split('T')[0];
+
+
+function truncateText(text, maxLength) {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+// Función para cargar y actualizar la tabla de tareas inicialmente
+function loadInitialTasks(tasks) {
+    globalTasksArray = tasks;  // Almacenar las tareas cargadas globalmente
+
+    const tableBody = document.querySelector('table tbody');
+    tableBody.innerHTML = ''; // Limpiar la tabla existente
+
+    tasks.forEach(task => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
+
+        // Añade una clase según el estado de la tarea
+        const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
+        row.classList.add(estadoClass);
+
+        row.innerHTML = `
+        <td>${task.id}</td>
+        <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
+        <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
+        <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+        <td>${task.tiempo_previsto || 'N/A'}</td>
+        <td>${task.tiempo_real || 'N/A'}</td>
+        <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+        <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
+        <td>${task.facturable ? 'Sí' : 'No'}</td>
+        <td>${task.facturado || 'No facturado'}</td>
+        <td>${task.subtipo || ''}</td>
+        <td>${task.estado}</td>
+        <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
+        <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+        
+        <td>
+        ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+        </td> 
+       <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+ 
+    `;
+        tableBody.appendChild(row);
+
+        // Añadir el evento de doble clic a las filas de la tabla
+        addDoubleClickEventToRows();
+
+    });
+
+    // Actualizar el resumen de horas
+    updateHoursSummary(tasks);
+}
+
+// Función para cargar las tareas mediante AJAX con paginación
+function loadTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
+    const tableBody = document.querySelector('table tbody');
+    tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
+
+
+
+    // Construir los parámetros de la URL
+    const params = new URLSearchParams({
+        ...window.currentFilters, // Usar filtros activos de la variable global
+        page, // Página actual
+        sortKey, // Clave de ordenación
+        sortDirection, // Dirección de ordenación
+        fecha_planificacion: today,
+        user_id: sessionUserId // Usuario actual
+    });
+
+    fetch(`/times/getTimes?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+
+                data.tasks.sort((a, b) => {
+                    const dateA = a.fecha_planificacion ? new Date(a.fecha_planificacion) : null;
+                    const dateB = b.fecha_planificacion ? new Date(b.fecha_planificacion) : null;
+
+                    // Manejo de valores nulos
+                    if (!dateA && !dateB) return a.id - b.id; // Si ambas fechas son nulas, ordenar por ID
+                    if (!dateA) return 1; // NULL al final
+                    if (!dateB) return -1;
+
+                    // Ordenar por fecha en orden ascendente
+                    const dateComparison = dateA - dateB;
+                    if (dateComparison !== 0) return dateComparison;
+
+                    // Ordenar por ID como criterio secundario
+                    return a.id - b.id;
+                });
+
+                loadInitialTasks(data.tasks);
+                updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
+            } else {
+                console.error('Error al cargar tareas:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error en la solicitud:', error.message);
+            tableBody.innerHTML = '<tr><td colspan="21" class="text-center text-red-500">Error al cargar las tareas.</td></tr>';
+        });
+}
+
+
+    // Función para actualizar el resumen de horas
+    function updateHoursSummary(tasks) {
+        let totalTiempoPrevisto = 0;
+        let totalTiempoReal = 0;
+
+        // Iterar sobre las tareas y sumar los valores
+        tasks.forEach(task => {
+            totalTiempoPrevisto += parseFloat(task.tiempo_previsto || 0);
+            totalTiempoReal += parseFloat(task.tiempo_real || 0);
+        });
+
+        // Actualizar los valores en el panel, verificando la existencia de los elementos
+        const tiempoPrevistoElement = document.getElementById('total-tiempo-previsto');
+        const tiempoRealElement = document.getElementById('total-tiempo-real');
+
+        if (tiempoPrevistoElement) {
+            tiempoPrevistoElement.textContent = totalTiempoPrevisto.toFixed(2);
+        } else {
+            console.warn("Elemento 'total-tiempo-previsto' no encontrado en el DOM.");
+        }
+
+        if (tiempoRealElement) {
+            tiempoRealElement.textContent = totalTiempoReal.toFixed(2);
+        } else {
+            console.warn("Elemento 'total-tiempo-real' no encontrado en el DOM.");
+        }
+    }
+

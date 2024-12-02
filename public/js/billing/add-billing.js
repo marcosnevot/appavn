@@ -143,9 +143,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     showNotification("Tarea creada exitosamente", "success");
                     // Resetear determinados campos
+                    document.getElementById('add-task-form').reset(); // Resetear el formulario
                     resetSelectedUsers();
                     generarBotonesPlanificacion();
-                    document.getElementById('add-task-form').reset(); // Resetear el formulario
+
                 } else {
                     console.error('Errores de validación:', data.errors);
                 }
@@ -790,58 +791,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // Ordenar la tabla
-    const tableBody = document.querySelector('table tbody');
-    const sortSelect = document.getElementById('sort-select');
-
-    // Función para ordenar la tabla
-    function sortTableBy(attribute) {
-        // Obtener las filas actuales de la tabla
-        let rows = Array.from(tableBody.querySelectorAll('tr'));
-
-        // Definir la lógica de ordenación según el atributo seleccionado
-        rows.sort((a, b) => {
-            let valA, valB;
-
-            switch (attribute) {
-                case 'cliente':
-                    valA = a.children[2].textContent.trim().toLowerCase();
-                    valB = b.children[2].textContent.trim().toLowerCase();
-                    break;
-                case 'asunto':
-                    valA = a.children[1].textContent.trim().toLowerCase();
-                    valB = b.children[1].textContent.trim().toLowerCase();
-                    break;
-                case 'estado':
-                    valA = a.children[5].textContent.trim().toLowerCase();
-                    valB = b.children[5].textContent.trim().toLowerCase();
-                    break;
-                case 'fecha_creacion':
-                default:
-                    // Utilizar created_at (última columna oculta)
-                    valA = new Date(a.children[20].textContent); // Índice de created_at
-                    valB = new Date(b.children[20].textContent);
-                    return valB - valA; // Orden descendente por fecha de creación
-            }
-
-            // Ordenar alfabéticamente para otros atributos
-            return valA > valB ? 1 : (valA < valB ? -1 : 0);
-        });
-
-        // Vaciar el contenido de la tabla y agregar las filas ordenadas
-        tableBody.innerHTML = '';
-        rows.forEach(row => tableBody.appendChild(row));
-    }
-
-    // Evento para cambiar la ordenación cuando se selecciona un nuevo atributo
-    sortSelect.addEventListener('change', function () {
-        const selectedAttribute = this.value;
-        sortTableBy(selectedAttribute);
-    });
-
-    // Ordenar inicialmente por fecha de creación (ID)
-    sortTableBy('fecha_creacion');
-
     // Definir referencias globales a los elementos de la planificación
     const planificacionContainer = document.getElementById('planificacion-buttons');
     const planificacionInput = document.getElementById('planificacion');
@@ -931,12 +880,14 @@ function setupPaginationListeners() {
 // Función para actualizar la tabla con la nueva tarea
 function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pagination = null) {
     const tableBody = document.querySelector('table tbody');
+    console.log('Filtros aplicados:', getCurrentFilters());
 
     // Si no es una tarea única (por ejemplo, en filtrado), limpiamos la tabla
     if (!isSingleTask) {
         tableBody.innerHTML = ''; // Limpiar la tabla existente
     }
-
+    // Usar los filtros globales si no se pasan como argumento
+    const filtersToApply = currentFilters || window.currentFilters;
     // Convertir el parámetro `tasks` a un array si es un solo objeto
     const tasksArray = isSingleTask ? [tasks] : tasks;
 
@@ -946,17 +897,28 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             // Si no coincide con los filtros actuales, no la mostramos
             return;
         }
-        console.log('Tarea procesada para la tabla:', task);
+        console.log('Valores de filtros recogidos:', {
+            cliente: document.getElementById('filter-cliente-input')?.value,
+            asunto: document.getElementById('filter-asunto-input')?.value,
+            facturable: getChecklistValues('facturable', true),
+            facturado: getChecklistValues('facturado')
+        });
+
 
         const row = document.createElement('tr');
         row.setAttribute('data-task-id', task.id); // Asignar el id de la tarea
+
+        // Añade una clase según el estado de la tarea
+        const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
+        row.classList.add(estadoClass);
+
         row.innerHTML = `
             <td>${task.id}</td>
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            <td>${task.descripcion || ''}</td>
-            <td>${task.observaciones || ''}</td>
+            <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+            <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
             <td>${task.facturable ? 'SI' : 'NO'}</td>
             <td class="facturado-cell" 
             data-facturado="${task.facturado || 'NO'}" 
@@ -1047,8 +1009,7 @@ function taskMatchesFilters(task, filters) {
         return false;
     }
 
-    // Verificar estado (manejo de múltiples valores)
-    if (filters.estado && !filters.estado.split(',').includes(task.estado)) {
+    if (filters.estado && task.estado !== filters.estado) {
         return false;
     }
 
@@ -1056,13 +1017,14 @@ function taskMatchesFilters(task, filters) {
         return false;
     }
 
-    // Verificar facturable (booleano)
-    if (filters.facturable && !filters.facturable.split(',').includes(String(task.facturable))) {
+    if (filters.facturable !== '' && String(Boolean(Number(task.facturable))) !== filters.facturable) {
+        console.log(`Facturable no coincide: task.facturable=${task.facturable}, filters.facturable=${filters.facturable}`);
         return false;
     }
 
-    // Verificar facturado (manejo de múltiples valores)
-    if (filters.facturado && !filters.facturado.split(',').includes(task.facturado)) {
+
+    if (filters.facturado && task.facturado !== filters.facturado) {
+        console.log(`Facturado no coincide: task.facturado=${task.facturado}, filters.facturado=${filters.facturado}`);
         return false;
     }
 
@@ -1108,13 +1070,14 @@ function taskMatchesFilters(task, filters) {
 
 
 
+// Helper para obtener valores seleccionados de un checklist
+function getChecklistValues(fieldName, isBoolean = false) {
+    const checkboxes = document.querySelectorAll(`#filter-${fieldName}-list input[type="checkbox"]:checked`);
+    return Array.from(checkboxes).map(checkbox => isBoolean ? checkbox.value === "1" : checkbox.value);
+}
 
 function getCurrentFilters() {
-    // Helper para obtener valores seleccionados de un checklist
-    function getChecklistValues(fieldName, isBoolean = false) {
-        const checkboxes = document.querySelectorAll(`#filter-${fieldName}-list input[type="checkbox"]:checked`);
-        return Array.from(checkboxes).map(checkbox => isBoolean ? checkbox.value === "1" : checkbox.value);
-    }
+
 
     return {
         cliente: document.getElementById('filter-cliente-input')?.value || '',

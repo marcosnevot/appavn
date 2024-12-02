@@ -690,7 +690,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Marcar "Todas" como activa al inicio
             if (dia.nombre === "Todas") {
                 button.classList.add('active');
-                filtrarTareasPorPlanificacion(dia.fecha);
+                // filtrarTareasPorPlanificacion(dia.fecha);
             }
         });
         // Crear el botón de "Pasadas"
@@ -783,3 +783,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 });
+

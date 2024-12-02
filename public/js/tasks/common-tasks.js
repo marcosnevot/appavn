@@ -60,6 +60,7 @@ function handleError(message) {
 
 window.currentFilters = {
     ...window.currentFilters,
+    estado: 'PENDIENTE,ENESPERA', // Estados predeterminados
     sortKey: 'fecha_planificacion',
     sortDirection: 'asc',
 };

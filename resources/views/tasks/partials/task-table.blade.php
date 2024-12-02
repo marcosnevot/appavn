@@ -5,27 +5,23 @@
         <thead>
             <tr>
                 <th data-sort-key="id" style="cursor: pointer;">ID</th>
-                <th data-sort-key="asunto.nombre" style="cursor: pointer;">Asunto</th>
-                <th data-sort-key="cliente.nombre_fiscal" class="col-cliente" id="header-client" style="cursor: pointer;">Cliente</th>
-                <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
-                <th data-sort-key="descripcion" style="cursor: pointer;">Descripción</th>
-                <th data-sort-key="observaciones" style="cursor: pointer;">Observaciones</th>
-                <th data-sort-key="facturable" style="cursor: pointer;">Facturable</th>
-                <th data-sort-key="facturado" style="cursor: pointer;">Facturado</th>
-                <th data-sort-key="subtipo" style="cursor: pointer;">Subtipo</th>
-                <th data-sort-key="estado" style="cursor: pointer;">Estado</th>
-                <th data-sort-key="fecha_inicio" style="cursor: pointer;">Fecha Inicio</th>
                 <th data-sort-key="fecha_vencimiento" style="cursor: pointer;">Fecha Vencimiento</th>
-                <th data-sort-key="fecha_imputacion" style="cursor: pointer;">Fecha Imputación</th>
-                <th data-sort-key="tiempo_previsto" style="cursor: pointer;">Tiempo Previsto</th>
-                <th data-sort-key="tiempo_real" style="cursor: pointer;">Tiempo Real</th>
                 <th data-sort-key="fecha_planificacion" style="cursor: pointer;">Planificación</th>
                 <th data-sort-key="users" style="cursor: pointer;">Asignado a</th>
-                <th data-sort-key="archivo" style="cursor: pointer; display: none;">Archivo</th>
-                <th data-sort-key="precio" style="cursor: pointer; display: none;">Precio</th>
-                <th data-sort-key="suplido" style="cursor: pointer; display: none;">Suplido</th>
-                <th data-sort-key="coste" style="cursor: pointer; display: none;">Coste</th>
-            </tr>
+                <th data-sort-key="cliente.nombre_fiscal" class="col-cliente" id="header-client" style="cursor: pointer;">Cliente</th>
+                <th data-sort-key="asunto.nombre" style="cursor: pointer;">Asunto</th>
+                <th data-sort-key="descripcion" style="cursor: pointer;" class="col-descripcion">Descripción</th>
+                <th data-sort-key="observaciones" style="cursor: pointer;" class="col-descripcion">Observaciones</th>
+                <th data-sort-key="facturable" style="cursor: pointer;">Facturable</th>
+                <th data-sort-key="facturado" style="cursor: pointer;">Facturado</th>
+                <th data-sort-key="estado" style="cursor: pointer;">Estado</th>
+                <th data-sort-key="tiempo_previsto" style="cursor: pointer;">Tiempo Previsto</th>
+                <th data-sort-key="tiempo_real" style="cursor: pointer;">Tiempo Real</th>
+                <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
+                <th data-sort-key="subtipo" style="cursor: pointer;">Subtipo</th>
+                <th data-sort-key="fecha_inicio" style="cursor: pointer;">Fecha Inicio</th>
+                
+           
 
         </thead>
         <tbody>
