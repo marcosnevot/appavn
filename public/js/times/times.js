@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', function () {
     loadTasks(1, 'fecha_planificacion', 'asc');
 
 
-    let currentSortKey = 'fecha_planificacion'; // Almacena la clave de ordenación actual
-    let currentSortDirection = 'none'; // Dirección de orden actual
+    let currentSortKey = ''; // Almacena la clave de ordenación actual
+    let currentSortDirection = ''; // Dirección de orden actual
 
     document.querySelectorAll('th[data-sort-key]').forEach(header => {
         header.addEventListener('click', function () {
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Si el estado es "none", reestablecer al orden original
-            const sortKeyToSend = currentSortDirection === 'none' ? 'created_at' : currentSortKey;
-            const sortDirectionToSend = currentSortDirection === 'none' ? 'desc' : currentSortDirection;
+            const sortKeyToSend = currentSortDirection === 'none' ? '' : currentSortKey;
+            const sortDirectionToSend = currentSortDirection === 'none' ? '' : currentSortDirection;
 
             // Recargar tareas con la nueva ordenación
             loadTasks(1, sortKeyToSend, sortDirectionToSend);
@@ -147,25 +147,24 @@ function loadInitialTasks(tasks) {
 
         row.innerHTML = `
         <td>${task.id}</td>
-        <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
+         <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+          <td>
+        ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+        </td>             
+        <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
         <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
-        <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+        <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
         <td>${task.tiempo_previsto || 'N/A'}</td>
-        <td>${task.tiempo_real || 'N/A'}</td>
+        <td>${task.tiempo_real || 'N/A'}</td> 
         <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
         <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
         <td>${task.facturable ? 'Sí' : 'No'}</td>
-        <td>${task.facturado || 'No facturado'}</td>
-        <td>${task.subtipo || ''}</td>
+        <td>${task.facturado || 'No'}</td>
         <td>${task.estado}</td>
+        <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+        <td>${task.subtipo || ''}</td>
         <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-        <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-        
-        <td>
-        ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-        </td> 
-       <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
- 
+
     `;
         tableBody.appendChild(row);
 
@@ -179,7 +178,7 @@ function loadInitialTasks(tasks) {
 }
 
 // Función para cargar las tareas mediante AJAX con paginación
-function loadTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
+function loadTasks(page = 1, sortKey , sortDirection ) {
     const tableBody = document.querySelector('table tbody');
     tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
 
@@ -205,23 +204,6 @@ function loadTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'a
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-
-                data.tasks.sort((a, b) => {
-                    const dateA = a.fecha_planificacion ? new Date(a.fecha_planificacion) : null;
-                    const dateB = b.fecha_planificacion ? new Date(b.fecha_planificacion) : null;
-
-                    // Manejo de valores nulos
-                    if (!dateA && !dateB) return a.id - b.id; // Si ambas fechas son nulas, ordenar por ID
-                    if (!dateA) return 1; // NULL al final
-                    if (!dateB) return -1;
-
-                    // Ordenar por fecha en orden ascendente
-                    const dateComparison = dateA - dateB;
-                    if (dateComparison !== 0) return dateComparison;
-
-                    // Ordenar por ID como criterio secundario
-                    return a.id - b.id;
-                });
 
                 loadInitialTasks(data.tasks);
                 updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));

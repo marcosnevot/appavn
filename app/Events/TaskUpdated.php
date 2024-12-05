@@ -53,10 +53,14 @@ class TaskUpdated implements ShouldBroadcast
                 'coste' => $this->task->coste,
                 'fecha_inicio' => $this->task->fecha_inicio,
                 'fecha_vencimiento' => $this->task->fecha_vencimiento,
-                'fecha_imputacion' => $this->task->fecha_imputacion,
+                'fecha_planificacion' => $this->task->fecha_planificacion,
                 'tiempo_previsto' => $this->task->tiempo_previsto,
                 'tiempo_real' => $this->task->tiempo_real,
-            ]
+                'asunto' => $this->task->asunto ? $this->task->asunto->nombre : null,
+                'tipo' => $this->task->tipo ? $this->task->tipo->nombre : null,
+                'cliente' => $this->task->cliente ? $this->task->cliente->nombre_fiscal : null, // Devuelve el nombre directamente
+
+            ],
         ];
     }
 }

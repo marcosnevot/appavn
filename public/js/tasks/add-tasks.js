@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const taskForm = document.getElementById('task-form');
     const addTaskForm = document.getElementById('add-task-form'); // El propio formulario
 
-    let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
+     clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
 
-    let asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
+     asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
 
-    let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+     tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
 
     let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
@@ -306,344 +306,159 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // Buscador de clientes
-
-    // Obtener los datos de clientes desde el atributo data-clientes
+    /**
+   * Configura el autocompletado para un campo.
+   * @param {Object} options - Configuración del campo.
+   * @param {string} options.inputId - ID del input visible.
+   * @param {string} options.hiddenId - ID del input oculto.
+   * @param {string} options.listId - ID de la lista de sugerencias.
+   * @param {Array} options.data - Datos para autocompletar (array de objetos con `nombre` e `id`).
+   * @param {Function} [options.formatItem] - Función opcional para formatear los elementos de la lista.
+   */
 
     const clienteInput = document.getElementById('cliente-input');
-    const clienteIdInput = document.getElementById('cliente-id-input'); // Campo oculto para el ID del cliente
-    const clienteList = document.getElementById('cliente-list');
-    const clienteInfo = document.getElementById('cliente-info'); // Span para mostrar email y teléfono
-    let selectedClienteIndex = -1;
-
-    // Función para mostrar la lista filtrada
-    function filterClientes(query) {
-        const filtered = clientesData.filter(cliente => {
-            const nombreFiscal = cliente.nombre_fiscal ? cliente.nombre_fiscal.toLowerCase() : '';
-            const nif = cliente.nif ? cliente.nif.toLowerCase() : ''; // Verificar si NIF no es null
-
-            return nombreFiscal.includes(query.toLowerCase()) || nif.includes(query.toLowerCase());
-        });
-        renderList(filtered);
-    }
-
-
-
-    // Función para renderizar la lista
-    function renderList(filtered) {
-        clienteList.innerHTML = '';
-        if (filtered.length === 0) {
-            clienteList.style.display = 'none';
-            return;
-        }
-        clienteList.style.display = 'block';
-        filtered.forEach((cliente, index) => {
-            const li = document.createElement('li');
-            li.textContent = `${cliente.nombre_fiscal} (${cliente.nif})`; // Mostrar nombre y NIF
-            li.setAttribute('data-id', cliente.id);
-            li.classList.add('autocomplete-item');
-            if (index === selectedClienteIndex) {
-                li.classList.add('active');
-            }
-            li.addEventListener('click', () => selectCliente(cliente));
-            clienteList.appendChild(li);
-        });
-    }
-
-    // Función para seleccionar un cliente y autocompletar el input
-    function selectCliente(cliente) {
-        clienteInput.value = cliente.nombre_fiscal; // Asignar solo el nombre al campo de entrada
-        clienteIdInput.value = cliente.id; // Almacenar el ID en el campo oculto
-        clienteList.style.display = 'none';
-        selectedClienteIndex = -1; // Reiniciar el índice seleccionado
-
-        // Mostrar email y teléfono en el label si existen
-        if (cliente.email || cliente.movil) {
-            clienteInfo.style.display = 'inline'; // Mostrar el span
-            clienteInfo.textContent = `${cliente.email || 'N/A'} | ${cliente.movil || 'N/A'}`;
-        } else {
-            clienteInfo.style.display = 'none'; // Ocultar si no hay info
-        }
-    }
-
-    // Mostrar la lista de clientes al ganar el foco, ya sea con clic o tabulador
-    clienteInput.addEventListener('focus', function () {
-        selectedClienteIndex = -1;
-        filterClientes(clienteInput.value);
-        asuntoList.style.display = 'none';
-        tipoList.style.display = 'none';
-
-
-    });
-
-    // Manejador del evento input para filtrar clientes
-    clienteInput.addEventListener('input', function () {
-        this.value = this.value.toUpperCase();  // Convertir el texto a mayúsculas
-        filterClientes(this.value);
-        selectedClienteIndex = -1; // Reiniciar el índice seleccionado
-        clienteIdInput.value = '';  // Limpiar el campo oculto
-
-        // Ocultar la información adicional del cliente cuando no se selecciona de la lista
-        clienteInfo.style.display = 'none';
-    });
-
-    // Función para manejar la navegación por teclado
-    clienteInput.addEventListener('keydown', function (e) {
-        const items = document.querySelectorAll('#cliente-list .autocomplete-item'); // Específicamente para la lista de clientes
-        if (items.length > 0) {
-            if (e.key === 'ArrowDown') {
-                e.preventDefault(); // Prevenir el scroll default
-                selectedClienteIndex = Math.min(selectedClienteIndex + 1, items.length - 1); // Asegura que no exceda el último elemento
-                updateActiveItem(items, selectedClienteIndex);
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault(); // Prevenir el scroll default
-                selectedClienteIndex = Math.max(selectedClienteIndex - 1, 0); // Asegura que no baje de 0
-                updateActiveItem(items, selectedClienteIndex);
-            } else if (e.key === 'Enter') {
-                e.preventDefault(); // Prevenir el comportamiento por defecto de 'Enter'
-                if (selectedClienteIndex >= 0 && selectedClienteIndex < items.length) {
-                    const selectedCliente = clientesData.find(cliente =>
-                        `${cliente.nombre_fiscal} (${cliente.nif})` === items[selectedClienteIndex].textContent
-                    );
-                    selectCliente(selectedCliente); // Seleccionar el cliente
-                }
-            }
-        }
-    });
-
-    // Función para actualizar el ítem activo en la lista de clientes
-    function updateActiveItem(items, index) {
-        items.forEach(item => item.classList.remove('active'));
-        if (items[index]) {
-            items[index].classList.add('active');
-            items[index].scrollIntoView({ block: "nearest" }); // Asegurar que esté visible
-        }
-    }
-
-
-
-    // Asunto - Autocompletado y creación de nuevos asuntos
-
-    // Obtener los datos de asuntos desde el atributo data-asuntos
+    const clienteIdInput = document.getElementById('cliente-id-input');
     const asuntoInput = document.getElementById('asunto-input');
-    const asuntoIdInput = document.getElementById('asunto-id-input'); // Campo oculto para el ID del asunto
-    const asuntoList = document.getElementById('asunto-list');
-    let selectedAsuntoIndex = -1; // Inicializar correctamente
-
-    // Función para mostrar la lista filtrada de asuntos
-    function filterAsuntos(query) {
-        const filtered = asuntosData.filter(asunto =>
-            asunto.nombre.toLowerCase().includes(query.toLowerCase())
-        );
-        renderAsuntoList(filtered);
-        return filtered;  // Devolver los asuntos filtrados para que puedan ser utilizados
-    }
-
-    // Función para renderizar la lista de asuntos
-    function renderAsuntoList(filtered) {
-        asuntoList.innerHTML = '';  // Limpiar la lista previa
-        if (filtered.length === 0) {
-            asuntoList.style.display = 'none';  // Si no hay resultados, oculta la lista
-            return;
-        }
-        asuntoList.style.display = 'block';  // Muestra la lista si hay resultados
-        filtered.forEach((asunto, index) => {
-            const li = document.createElement('li');
-            li.textContent = asunto.nombre;
-            li.setAttribute('data-id', asunto.id);
-            li.classList.add('autocomplete-item');
-            if (index === selectedAsuntoIndex) {
-                li.classList.add('active');
-            }
-            li.addEventListener('click', () => selectAsunto(asunto));  // Permite seleccionar el asunto
-            asuntoList.appendChild(li);  // Añadir el asunto a la lista
-        });
-    }
-
-    // Función para seleccionar un asunto y autocompletar el input
-    function selectAsunto(asunto) {
-        asuntoInput.value = asunto.nombre;
-        asuntoIdInput.value = asunto.id;
-        asuntoList.style.display = 'none';  // Ocultar la lista después de la selección
-        selectedAsuntoIndex = -1; // Reiniciar el índice seleccionado
-    }
-
-
-    // Mostrar la lista de asuntos al ganar el foco, ya sea con clic o tabulador
-    asuntoInput.addEventListener('focus', function () {
-        selectedAsuntoIndex = -1;
-        filterAsuntos(asuntoInput.value);
-        clienteList.style.display = 'none';
-        tipoList.style.display = 'none';
-    });
-
-    // Filtrar asuntos en tiempo real mientras se escribe
-    asuntoInput.addEventListener('input', function () {
-        this.value = this.value.toUpperCase();  // Convertir el texto a mayúsculas
-        const filteredAsuntos = filterAsuntos(this.value);  // Obtener los asuntos filtrados
-        selectedAsuntoIndex = -1; // Reiniciar el índice seleccionado
-
-        // Si no hay coincidencias, se permite crear un nuevo asunto
-        if (filteredAsuntos.length === 0) {
-            asuntoIdInput.value = '';  // Limpiar el campo oculto para nuevos asuntos
-        }
-    });
-
-    // Manejar la navegación por teclado
-    asuntoInput.addEventListener('keydown', function (e) {
-        const items = document.querySelectorAll('#asunto-list .autocomplete-item'); // Específicamente para la lista de asuntos
-        if (items.length > 0) {
-            if (e.key === 'ArrowDown') {
-                e.preventDefault(); // Prevenir el scroll default
-                selectedAsuntoIndex = Math.min(selectedAsuntoIndex + 1, items.length - 1); // Asegura que no exceda el último elemento
-                updateActiveAsuntoItem(items, selectedAsuntoIndex);
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault(); // Prevenir el scroll default
-                selectedAsuntoIndex = Math.max(selectedAsuntoIndex - 1, 0); // Asegura que no baje de 0
-                updateActiveAsuntoItem(items, selectedAsuntoIndex);
-            } else if (e.key === 'Enter') {
-                e.preventDefault(); // Prevenir el comportamiento por defecto de 'Enter'
-                if (selectedAsuntoIndex >= 0 && selectedAsuntoIndex < items.length) {
-                    const selectedAsunto = asuntosData.find(asunto =>
-                        asunto.nombre === items[selectedAsuntoIndex].textContent
-                    );
-                    selectAsunto(selectedAsunto); // Seleccionar el asunto
-                }
-            }
-        }
-    });
-
-    // Función para actualizar el ítem activo de la lista de asuntos
-    function updateActiveAsuntoItem(items, index) {
-        items.forEach(item => item.classList.remove('active'));
-        if (items[index]) {
-            items[index].classList.add('active');
-            items[index].scrollIntoView({ block: "nearest" }); // Asegurar que esté visible
-        }
-    }
-
-
-
-
-
-    // Tipo - Autocompletado y creación de nuevos tipos
-
-    // Obtener los datos de asuntos desde el atributo data-asuntos
+    const asuntoIdInput = document.getElementById('asunto-id-input');
     const tipoInput = document.getElementById('tipo-input');
-    const tipoIdInput = document.getElementById('tipo-id-input'); // Campo oculto para el ID del tipo
-    const tipoList = document.getElementById('tipo-list');
-    let selectedTipoIndex = -1; // Inicializar correctamente
+    const tipoIdInput = document.getElementById('tipo-id-input');
 
-    // Función para mostrar la lista filtrada de tipos
-    function filterTipos(query) {
-        const filtered = tiposData.filter(tipo =>
-            tipo.nombre.toLowerCase().includes(query.toLowerCase())
-        );
-        renderTipoList(filtered);
-        return filtered; // Devolver los tipos filtrados para que puedan ser utilizados
-    }
 
-    // Función para renderizar la lista de tipos
-    function renderTipoList(filtered) {
-        tipoList.innerHTML = '';  // Limpiar la lista previa
-        if (filtered.length === 0) {
-            tipoList.style.display = 'none';  // Si no hay resultados, oculta la lista
-            return;
+
+
+    function setupAutocomplete({ inputId, hiddenId, listId, data, nameKey, formatItem }) {
+        const input = document.getElementById(inputId);
+        const hiddenInput = document.getElementById(hiddenId);
+        const list = document.getElementById(listId);
+        let selectedIndex = -1;
+
+        function filterData(query) {
+            return data.filter(item => {
+                const itemName = item[nameKey] ? item[nameKey].toLowerCase() : ''; // Usar el `nameKey` dinámicamente
+                return itemName.includes(query.toLowerCase());
+            });
         }
-        tipoList.style.display = 'block';  // Muestra la lista si hay resultados
-        filtered.forEach((tipo, index) => {
-            const li = document.createElement('li');
-            li.textContent = tipo.nombre;
-            li.setAttribute('data-id', tipo.id);
-            li.classList.add('autocomplete-item');
-            if (index === selectedTipoIndex) {
-                li.classList.add('active');
+
+        function renderList(filtered) {
+            list.innerHTML = '';
+            if (filtered.length === 0) {
+                list.style.display = 'none';
+                return;
             }
-            li.addEventListener('click', () => selectTipo(tipo));  // Permite seleccionar el tipo
-            tipoList.appendChild(li);  // Añadir el tipo a la lista
+            list.style.display = 'block';
+            filtered.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.textContent = formatItem ? formatItem(item) : item[nameKey] || 'Elemento sin nombre';
+                li.setAttribute('data-id', item.id);
+                li.classList.add('autocomplete-item');
+                if (index === selectedIndex) {
+                    li.classList.add('active');
+                }
+                li.addEventListener('click', () => selectItem(item));
+                list.appendChild(li);
+            });
+        }
+
+        function selectItem(item) {
+            if (!item || !item[nameKey]) {
+                console.error(`El objeto seleccionado no tiene '${nameKey}'.`, item);
+                input.value = 'Elemento no válido';
+                hiddenInput.value = '';
+                return;
+            }
+
+            input.value = item[nameKey]; // Usar la propiedad dinámica para el nombre
+            hiddenInput.value = item.id; // Guardar el ID en el campo oculto
+            list.style.display = 'none';
+            selectedIndex = -1;
+        }
+
+        function handleKeydown(e) {
+            const items = list.querySelectorAll('.autocomplete-item');
+            if (items.length > 0) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    updateActiveItem(items, selectedIndex);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                    updateActiveItem(items, selectedIndex);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && selectedIndex < items.length) {
+                        const selectedItem = data.find(item =>
+                            (formatItem ? formatItem(item) : item[nameKey]) === items[selectedIndex].textContent
+                        );
+                        selectItem(selectedItem);
+                    }
+                }
+            }
+        }
+
+        function updateActiveItem(items, index) {
+            items.forEach(item => item.classList.remove('active')); // Iteración correcta
+            if (items[index]) {
+                items[index].classList.add('active'); // Usar `items[index]` en lugar de `item`
+                items[index].scrollIntoView({ block: 'nearest' }); // Asegurar que el elemento sea visible
+            }
+        }
+
+
+        input.addEventListener('input', function () {
+            const query = this.value.toUpperCase();
+            const filtered = filterData(query);
+            selectedIndex = -1;
+            hiddenInput.value = '';
+            renderList(filtered);
+        });
+
+        input.addEventListener('focus', function () {
+            const query = this.value.toUpperCase();
+            const filtered = filterData(query);
+            renderList(filtered);
+        });
+
+        input.addEventListener('keydown', handleKeydown);
+
+        document.addEventListener('click', function (e) {
+            if (!input.contains(e.target) && !list.contains(e.target)) {
+                list.style.display = 'none';
+            }
         });
     }
 
 
-    // Función para seleccionar un tipo y autocompletar el input
-    function selectTipo(tipo) {
-        tipoInput.value = tipo.nombre;
-        tipoIdInput.value = tipo.id;
-        tipoList.style.display = 'none';  // Ocultar la lista después de la selección
-        selectedTipoIndex = -1; // Reiniciar el índice seleccionado
-
-    }
-
-    // Mostrar la lista de tipos al ganar el foco, ya sea con clic o tabulador
-    tipoInput.addEventListener('focus', function () {
-        selectedTipoIndex = -1;
-        filterTipos(tipoInput.value);
-        clienteList.style.display = 'none';
-        asuntoList.style.display = 'none';
+    // Configurar para clientes
+    setupAutocomplete({
+        inputId: 'cliente-input',
+        hiddenId: 'cliente-id-input',
+        listId: 'cliente-list',
+        data: clientesData,
+        nameKey: 'nombre_fiscal', // Para clientes
+        formatItem: item => `${item.nombre_fiscal} (${item.nif || 'N/A'})`
     });
 
-    // Filtrar tipos en tiempo real mientras se escribe
-    tipoInput.addEventListener('input', function () {
-        this.value = this.value.toUpperCase();  // Convertir el texto a mayúsculas
-        const filteredTipos = filterTipos(this.value);  // Obtener los tipos filtrados
-        selectedTipoIndex = -1; // Reiniciar el índice seleccionado
-
-        // Si no hay coincidencias, se permite crear un nuevo tipo
-        if (filteredTipos.length === 0) {
-            tipoIdInput.value = '';  // Limpiar el campo oculto para nuevos tipos
-        }
+    // Configurar para asuntos
+    setupAutocomplete({
+        inputId: 'asunto-input',
+        hiddenId: 'asunto-id-input',
+        listId: 'asunto-list',
+        data: asuntosData,
+        nameKey: 'nombre', // Para asuntos
+        formatItem: item => item.nombre
     });
 
-    // Manejar la navegación por teclado
-    tipoInput.addEventListener('keydown', function (e) {
-        const items = document.querySelectorAll('#tipo-list .autocomplete-item'); // Específicamente para la lista de tipos
-        if (items.length > 0) {
-            if (e.key === 'ArrowDown') {
-                e.preventDefault(); // Prevenir el scroll default
-                selectedTipoIndex = Math.min(selectedTipoIndex + 1, items.length - 1); // Asegura que no exceda el último elemento
-                updateActiveTipoItem(items, selectedTipoIndex);
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault(); // Prevenir el scroll default
-                selectedTipoIndex = Math.max(selectedTipoIndex - 1, 0); // Asegura que no baje de 0
-                updateActiveTipoItem(items, selectedTipoIndex);
-            } else if (e.key === 'Enter') {
-                e.preventDefault(); // Prevenir el comportamiento por defecto de 'Enter'
-                if (selectedTipoIndex >= 0 && selectedTipoIndex < items.length) {
-                    const selectedTipo = tiposData.find(tipo =>
-                        tipo.nombre === items[selectedTipoIndex].textContent
-                    );
-                    selectTipo(selectedTipo); // Seleccionar el tipo
-                }
-            }
-        }
+    // Configurar para tipos
+    setupAutocomplete({
+        inputId: 'tipo-input',
+        hiddenId: 'tipo-id-input',
+        listId: 'tipo-list',
+        data: tiposData,
+        nameKey: 'nombre', // Para tipos
+        formatItem: item => item.nombre
     });
 
-    // Función para actualizar el ítem activo de la lista de tipos
-    function updateActiveTipoItem(items, index) {
-        items.forEach(item => item.classList.remove('active'));
-        if (items[index]) {
-            items[index].classList.add('active');
-            items[index].scrollIntoView({ block: "nearest" }); // Asegurar que esté visible
-        }
-    }
-
-
-
-    // Cerrar la lista si se hace clic fuera del campo y de la lista correspondiente
-    document.addEventListener('click', function (e) {
-        // Cerrar lista de clientes si el clic no es dentro del input o lista de clientes
-        if (!clienteInput.contains(e.target) && !clienteList.contains(e.target)) {
-            clienteList.style.display = 'none';
-        }
-        // Cerrar lista de asuntos si el clic no es dentro del input o lista de asuntos
-        if (!asuntoInput.contains(e.target) && !asuntoList.contains(e.target)) {
-            asuntoList.style.display = 'none';
-        }
-        // Cerrar lista de tipos si el clic no es dentro del input o lista de tipos
-        if (!tipoInput.contains(e.target) && !tipoList.contains(e.target)) {
-            tipoList.style.display = 'none';
-        }
-    });
 
 
 
@@ -689,17 +504,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('confirm-modal-no').addEventListener('click', function () {
             modal.style.display = 'none';
         });
-    }
-
-    // Predefinir el campo de fecha_imputacion
-
-    // Obtener la fecha actual en formato YYYY-MM-DD
-    const today = new Date().toISOString().split('T')[0];
-
-    // Predefinir la fecha de imputación en el formulario
-    const fechaImputacionInput = document.querySelector('input[name="fecha_imputacion"]');
-    if (fechaImputacionInput) {
-        fechaImputacionInput.value = today;
     }
 
 
@@ -941,7 +745,7 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
         // Añade una clase según el estado de la tarea
         const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
         row.classList.add(estadoClass);
-        
+
         row.innerHTML = `
             <td>${task.id}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
@@ -961,9 +765,6 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.subtipo || ''}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-            
-            
-            
         `;
 
         // Insertar la nueva fila al principio si es una tarea única (añadir tarea)
@@ -1099,7 +900,7 @@ function taskMatchesFilters(task, filters) {
 
 function getCurrentFilters() {
 
-     // Helper para obtener valores seleccionados de un checklist
+    // Helper para obtener valores seleccionados de un checklist
     function getChecklistValues(fieldName, isBoolean = false) {
         const checkboxes = document.querySelectorAll(`#filter-${fieldName}-list input[type="checkbox"]:checked`);
         return Array.from(checkboxes).map(checkbox => isBoolean ? checkbox.value === "1" : checkbox.value);

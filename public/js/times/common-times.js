@@ -60,14 +60,8 @@ function handleError(message) {
 
 window.currentFilters = {
     ...window.currentFilters,
-    estado: 'PENDIENTE,ENESPERA', // Estados predeterminados
 
 };
-
-let clientesData = [];
-let asuntosData = [];
-let tiposData = [];
-
 
 // Función para abrir el modal con los detalles de la tarea
 function openTasksModal(taskId) {

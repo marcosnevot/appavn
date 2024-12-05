@@ -5,21 +5,17 @@
         <thead>
             <tr>
                 <th data-sort-key="id" style="cursor: pointer;">ID</th>
-                <th data-sort-key="asunto.nombre" style="cursor: pointer;">Asunto</th>
+                <th data-sort-key="fecha_vencimiento" style="cursor: pointer;">Fecha Vencimiento</th>
+                <th data-sort-key="fecha_planificacion" style="cursor: pointer;">Planificacion</th>
                 <th data-sort-key="cliente.nombre_fiscal" class="col-cliente" id="header-client" style="cursor: pointer;">Cliente</th>
-                <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
-
+                <th data-sort-key="asunto.nombre" style="cursor: pointer;">Asunto</th>
                 <th data-sort-key="descripcion" style="cursor: pointer;" class="col-descripcion">Descripción</th>
                 <th data-sort-key="observaciones" style="cursor: pointer;" class="col-descripcion">Observaciones</th>
-
                 <th data-sort-key="facturable" style="cursor: pointer;">Facturable</th>
                 <th data-sort-key="facturado" style="cursor: pointer;">Facturado</th>
-
+                <th data-sort-key="estado" style="cursor: pointer;">Estado</th>
+                <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
                 <th data-sort-key="fecha_inicio" style="cursor: pointer;">Fecha Inicio</th>
-                <th data-sort-key="fecha_vencimiento" style="cursor: pointer;">Fecha Vencimiento</th>
-                <th data-sort-key="fecha_imputacion" style="cursor: pointer;">Fecha Imputación</th>
-
-                <th style="display: none;">Fecha de Creación</th> <!-- Columna oculta para created_at -->
             </tr>
         </thead>
         <tbody>

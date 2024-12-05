@@ -11,6 +11,42 @@
         <input type="hidden" name="task_id" id="task_id" value="">
         <input type="hidden" name="_method" value="PUT"> <!-- Asegúrate de incluir este campo -->
 
+        <!-- Fila 1: Cliente, Asunto, Tipo, Subtipo, Estado -->
+        <div class="form-row">
+            <div class="form-group wide">
+                <label for="cliente_idEdit">Cliente:
+                    <span id="cliente-info" style="display: none; font-weight: normal; font-size: 14px;">
+                        <!-- Aquí se mostrará el email y teléfono -->
+                    </span>
+                </label>
+                <div class="autocomplete">
+                    <input type="text" id="cliente-inputEdit" class="autocomplete-input" placeholder="Buscar o crear cliente..." autocomplete="off" required>
+                    <input type="hidden" name="cliente_idEdit" id="cliente-id-inputEdit"> <!-- Campo oculto para el id del cliente -->
+                    <ul id="cliente-listEdit" class="autocomplete-list"></ul>
+                </div>
+            </div>
+
+            <div class="form-group wide">
+                <label for="asunto_idEdit">Asunto:</label>
+                <div class="autocomplete">
+                    <input type="text" id="asunto-inputEdit" class="autocomplete-input" placeholder="Buscar o crear asunto..." autocomplete="off" required>
+                    <input type="hidden" name="asunto_idEdit" id="asunto-id-inputEdit"> <!-- Campo oculto para el id del asunto -->
+                    <ul id="asunto-listEdit" class="autocomplete-list"></ul>
+                </div>
+            </div>
+
+            <div class="form-group medium">
+                <label for="tipo_idEdit">Tipo de Tarea:</label>
+                <div class="autocomplete">
+                    <input type="text" id="tipo-inputEdit" class="autocomplete-input" placeholder="Buscar o crear tipo..." autocomplete="off" required>
+                    <input type="hidden" name="tipo_idEdit" id="tipo-id-inputEdit"> <!-- Campo oculto para el id del tipo -->
+                    <ul id="tipo-listEdit" class="autocomplete-list"></ul>
+                </div>
+            </div>
+
+
+        </div>
+
         <!-- Fila 1: Subtipo, Estado -->
         <div class="form-row ">
             <div class="form-group narrow">
@@ -149,8 +185,6 @@
                 <input type="number" step="0.25" name="tiempo_realEdit" id="tiempo_real">
             </div>
         </div>
-        <input type="hidden" name="cliente_idEdit" id="cliente_id">
-
 
         <!-- Botones del formulario -->
         <div class="form-buttons">
@@ -158,4 +192,32 @@
             <button type="button" id="close-edit-task-form" class="btn-close">Cerrar</button>
         </div>
     </form>
+</div>
+
+
+<!-- Modal de confirmación para crear un asunto nuevo -->
+<div id="confirm-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <!-- Mensajes de confirmación para asunto y tipo -->
+        <p id="modal-message" class="modal-message">
+            <span id="modal-cliente-message"></span><br>
+            <span id="modal-asunto-message"></span><br>
+            <span id="modal-tipo-message"></span>
+        </p>
+        <!-- Campos adicionales para el nuevo cliente -->
+        <div id="new-client-details" style="display: none;">
+            <label for="cliente-nifEdit">NIF:</label>
+            <input type="text" id="cliente-nifEdit" placeholder="NIF del cliente">
+
+            <label for="cliente-emailEdit">Email:</label>
+            <input type="email" id="cliente-emailEdit" placeholder="Email del cliente">
+
+            <label for="cliente-telefonoEdit">Teléfono:</label>
+            <input type="text" id="cliente-telefonoEdit" placeholder="Teléfono del cliente">
+        </div>
+        <div class="modal-actions">
+            <button id="confirm-modal-yes" class="btn btn-confirm">Sí, crear</button>
+            <button id="confirm-modal-no" class="btn btn-cancel">No, cancelar</button>
+        </div>
+    </div>
 </div>

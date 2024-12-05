@@ -7,11 +7,11 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentPage = 1;
     let globalTasksArray = []; // Definir una variable global para las tareas
 
-    let currentSortKey = null; // Almacena la clave de ordenación actual
-    let currentSortDirection = 'none'; // Dirección de orden actual
+    let currentSortKey = ''; // Almacena la clave de ordenación actual
+    let currentSortDirection = ''; // Dirección de orden actual
 
     // Cargar tareas inicialmente
-    loadTasks();
+    loadTasks(1, 'fecha_planificacion', 'asc');
 
 
 
@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Si el estado es "none", reestablecer al orden original
-            const sortKeyToSend = currentSortDirection === 'none' ? 'created_at' : currentSortKey;
-            const sortDirectionToSend = currentSortDirection === 'none' ? 'desc' : currentSortDirection;
+            const sortKeyToSend = currentSortDirection === 'none' ? '' : currentSortKey;
+            const sortDirectionToSend = currentSortDirection === 'none' ? '' : currentSortDirection;
 
             // Recargar tareas con la nueva ordenación y filtros activos
             loadTasks(1, sortKeyToSend, sortDirectionToSend);
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // Función para cargar las tareas mediante AJAX con paginación
-function loadTasks(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
+function loadTasks(page = 1, sortKey, sortDirection) {
     const tableBody = document.querySelector('table tbody');
     tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando tareas...</td></tr>'; // Mensaje de carga
 
@@ -173,24 +173,26 @@ function loadInitialTasks(tasks) {
         // Añade una clase según el estado de la tarea
         const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
         row.classList.add(estadoClass);
-        
+
         row.innerHTML = `
             <td>${task.id}</td>
-            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
+            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>
+             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+             </td> 
             <td class="col-cliente">${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
-            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
             <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
             <td>${task.facturable ? 'SI' : 'NO'}</td>
             <td class="facturado-cell" 
-            data-facturado="${task.facturado || 'NO'}" 
-                 data-task-id="${task.id}">
-                 ${task.facturado || 'NO'}
-             </td>
+                data-facturado="${task.facturado || 'NO'}" 
+                data-task-id="${task.id}">
+                ${task.facturado || 'NO'}
+            </td>
+            <td>${task.estado}</td>
+            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-           
         `;
         tableBody.appendChild(row);
 
@@ -282,7 +284,7 @@ function updateTaskFacturado(taskId, newValue, targetCell, select) {
                 targetCell.setAttribute('data-facturado', newValue);
                 targetCell.textContent = newValue;
 
-                loadTasks();
+                loadTasks(1, 'fecha_planificacion', 'asc');
                 // Mostrar notificación de éxito
                 showNotification('Columna Facturado actualizada correctamente', 'info');
             } else {

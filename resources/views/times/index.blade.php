@@ -117,7 +117,7 @@
 
 @section('scripts')
 
-<script src="{{ asset('js/tasks/common-tasks.js') }}"></script>
+<script src="{{ asset('js/times/common-times.js') }}"></script>
 <script src="{{ asset('js/times/add-times.js') }}"></script>
 <script src="{{ asset('js/times/filter-times.js') }}"></script>
 <script src="{{ asset('js/times/times.js') }}"></script>

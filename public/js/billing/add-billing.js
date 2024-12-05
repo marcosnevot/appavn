@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const taskForm = document.getElementById('task-form');
     const addTaskForm = document.getElementById('add-task-form'); // El propio formulario
 
-    let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
+    clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
 
-    let asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
+    asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
 
-    let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+    tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
 
     let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
@@ -914,23 +914,23 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
 
         row.innerHTML = `
             <td>${task.id}</td>
+            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>
+             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+             </td> 
+            <td class="col-cliente">${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
-            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
-            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
             <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
             <td>${task.facturable ? 'SI' : 'NO'}</td>
             <td class="facturado-cell" 
-            data-facturado="${task.facturado || 'NO'}" 
-                 data-task-id="${task.id}">
-                 ${task.facturado || 'NO'}
-             </td>
- 
+                data-facturado="${task.facturado || 'NO'}" 
+                data-task-id="${task.id}">
+                ${task.facturado || 'NO'}
+            </td>
+            <td>${task.estado}</td>
+            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-    
-            <td style="display: none;">${task.created_at || 'Sin fecha'}</td> <!-- Campo oculto para created_at -->
         `;
 
         // Insertar la nueva fila al principio si es una tarea única (añadir tarea)

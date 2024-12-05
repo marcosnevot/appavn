@@ -921,22 +921,6 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
     // Convertir el parámetro `tasks` a un array si es un solo objeto
     const tasksArray = isSingleTask ? [tasks] : tasks;
 
-    tasks.sort((a, b) => {
-        const dateA = a.fecha_planificacion ? new Date(a.fecha_planificacion) : null;
-        const dateB = b.fecha_planificacion ? new Date(b.fecha_planificacion) : null;
-
-        // Manejo de valores nulos
-        if (!dateA && !dateB) return a.id - b.id; // Si ambas fechas son nulas, ordenar por ID
-        if (!dateA) return 1; // NULL al final
-        if (!dateB) return -1;
-
-        // Ordenar por fecha en orden ascendente
-        const dateComparison = dateA - dateB;
-        if (dateComparison !== 0) return dateComparison;
-
-        // Ordenar por ID como criterio secundario
-        return a.id - b.id;
-    });
 
     tasksArray.forEach(task => {
         // Verificar si la tarea coincide con los filtros actuales (si es que hay filtros)
@@ -951,33 +935,29 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
         // Añade una clase según el estado de la tarea
         const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
         row.classList.add(estadoClass);
-        
+
         row.innerHTML = `
             <td>${task.id}</td>
-            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
+             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+              <td>
+            ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+            </td>             
+            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
-            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td> 
             <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
             <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
             <td>${task.facturado || 'No'}</td>
-            <td>${task.subtipo || ''}</td>
             <td>${task.estado}</td>
+            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+            <td>${task.subtipo || ''}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             
-            <td>
-            ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-            </td>             
-            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
-            <td style="display: none;">${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-            <td style="display: none";>${task.archivo || 'No disponible'}</td>
-            <td style="display: none";>${task.precio || 'N/A'}</td>
-            <td style="display: none";>${task.suplido || 'N/A'}</td>
-            <td style="display: none";>${task.coste || 'N/A'}</td>
-            <td style="display: none";">${task.created_at || 'Sin fecha'}</td> <!-- Campo oculto para created_at -->
+          
+
         `;
 
         // Insertar la nueva fila al principio si es una tarea única (añadir tarea)

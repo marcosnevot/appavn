@@ -4,28 +4,24 @@
     <table class="min-w-full table-auto task-table bg-white dark:bg-gray-800">
         <thead>
             <tr>
-            <th data-sort-key="id" style="cursor: pointer;">ID</th>
-                <th data-sort-key="asunto.nombre" style="cursor: pointer;">Asunto</th>
+                <th data-sort-key="id" style="cursor: pointer;">ID</th>
+                <th data-sort-key="fecha_vencimiento" style="cursor: pointer;">Fecha Vencimiento</th>
+                <th data-sort-key="fecha_planificacion" style="cursor: pointer;">Planificación</th>
+                <th data-sort-key="users" style="cursor: pointer;">Asignado a</th>
                 <th data-sort-key="cliente.nombre_fiscal" class="col-cliente" id="header-client" style="cursor: pointer;">Cliente</th>
-                <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
+                <th data-sort-key="asunto.nombre" style="cursor: pointer;">Asunto</th>
                 <th data-sort-key="tiempo_previsto" style="cursor: pointer;">Tiempo Previsto</th>
                 <th data-sort-key="tiempo_real" style="cursor: pointer;">Tiempo Real</th>
                 <th data-sort-key="descripcion" style="cursor: pointer;" class="col-descripcion">Descripción</th>
                 <th data-sort-key="observaciones" style="cursor: pointer;" class="col-descripcion">Observaciones</th>
                 <th data-sort-key="facturable" style="cursor: pointer;">Facturable</th>
                 <th data-sort-key="facturado" style="cursor: pointer;">Facturado</th>
-                <th data-sort-key="subtipo" style="cursor: pointer;">Subtipo</th>
                 <th data-sort-key="estado" style="cursor: pointer;">Estado</th>
+                <th data-sort-key="tipo.nombre" style="cursor: pointer;">Tipo</th>
+                <th data-sort-key="subtipo" style="cursor: pointer;">Subtipo</th>
                 <th data-sort-key="fecha_inicio" style="cursor: pointer;">Fecha Inicio</th>
-                <th data-sort-key="fecha_vencimiento" style="cursor: pointer;">Fecha Vencimiento</th>
-                <th data-sort-key="fecha_planificacion" style="cursor: pointer;">Planificación</th>
-                <th data-sort-key="users" style="cursor: pointer;">Asignado a</th>
-                <th data-sort-key="fecha_imputacion" style="display: none;">Fecha Imputación</th>
-                <th style="display: none;">Archivo</th>
-                <th style="display: none;">Precio</th>
-                <th style="display: none;">Suplido</th>
-                <th style="display: none;">Coste</th>
-                <th style="display: none;">Fecha de Creación</th> <!-- Columna oculta para created_at -->
+
+
             </tr>
         </thead>
         <tbody>
@@ -46,4 +42,3 @@
     </div>
     <button id="close-task-detail-modal" class="btn-close-task-detail-modal">Cerrar</button>
 </div>
-

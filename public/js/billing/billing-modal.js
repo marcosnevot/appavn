@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const duplicarContainer = document.getElementById('duplicar').closest('.form-group'); // Contenedor del checkbox de duplicar
     const duplicarCheckbox = document.getElementById('duplicar');
 
+    const modal = document.getElementById('confirm-modal'); // Modal de confirmación
+    const modalMessage = document.getElementById('modal-message');
+    const modalAsuntoMessage = document.getElementById('modal-asunto-message');
+    const modalTipoMessage = document.getElementById('modal-tipo-message');
+    const modalClienteMessage = document.getElementById('modal-cliente-message');
+
+
     // Función para mostrar u ocultar el campo "Duplicar"
     function toggleDuplicarVisibility() {
         if (estadoSelect.value === 'COMPLETADA') {
@@ -70,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let selectedUsersEdit = [];
     let currentFocusEdit = -1;
 
+
     if (!modalContent) {
         console.error('Modal content not found!');
         return;
@@ -80,11 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const deleteButton = document.getElementById('delete-task-button');
         const editButton = document.getElementById('edit-task-button');
 
-
-
         const closeEditButton = document.getElementById('close-edit-task-form');
-
-
 
         // Asignar evento al botón de borrar
         if (deleteButton) {
@@ -119,54 +123,53 @@ document.addEventListener('DOMContentLoaded', function () {
                             console.error('Error al cargar los datos de la tarea:', task.error);
                             return;
                         }
+                        observer.disconnect(); // Desconecta el observer para evitar conflictos
+
+                        populateEditForm(task);
+                        observer.observe(modalContent, { childList: true, subtree: true });
+
 
                         // Verificar que los elementos existen en el DOM antes de rellenar
+
                         const subtipoSelect = document.querySelector('select[name="subtipoEdit"]');
                         const estadoSelect = document.querySelector('select[name="estadoEdit"]');
-                        const archivoInput = document.querySelector('input[name="archivoEdit"]');
+
                         const descripcionTextarea = document.querySelector('textarea[name="descripcionEdit"]');
                         const observacionesTextarea = document.querySelector('textarea[name="observacionesEdit"]');
                         const facturableCheckbox = document.querySelector('input[name="facturableEdit"]');
-                        const facturadoInput = document.querySelector('input[name="facturadoEdit"]');
-                        const precioInput = document.querySelector('input[name="precioEdit"]');
-                        const suplidoInput = document.querySelector('input[name="suplidoEdit"]');
-                        const costeInput = document.querySelector('input[name="costeEdit"]');
+                        const facturadoInput = document.querySelector('select[name="facturadoEdit"]');
+
                         const fechaInicioInput = document.querySelector('input[name="fecha_inicioEdit"]');
                         const fechaPlanificacionInput = document.querySelector('input[name="fecha_planificacionEdit"]');
                         const fechaVencimientoInput = document.querySelector('input[name="fecha_vencimientoEdit"]');
-                        const fechaImputacionInput = document.querySelector('input[name="fecha_imputacionEdit"]');
+
                         const tiempoPrevistoInput = document.querySelector('input[name="tiempo_previstoEdit"]');
                         const tiempoRealInput = document.querySelector('input[name="tiempo_realEdit"]');
-                        const clienteIdInput = document.querySelector('input[name="cliente_idEdit"]'); // Campo oculto para cliente_id
+
                         const taskIdInput = document.getElementById('task_id');
 
 
-
-
-
                         // Asignar valores de manera segura
+
+
                         if (subtipoSelect) subtipoSelect.value = task.subtipo || 'ORDINARIA';
                         if (estadoSelect) estadoSelect.value = task.estado || 'PENDIENTE';
-                        if (archivoInput) archivoInput.value = task.archivo || '';
+
                         if (descripcionTextarea) descripcionTextarea.value = task.descripcion || '';
                         if (observacionesTextarea) observacionesTextarea.value = task.observaciones || '';
                         if (facturableCheckbox) facturableCheckbox.checked = !!task.facturable;
                         if (facturadoInput) facturadoInput.value = task.facturado || '';
-                        if (precioInput) precioInput.value = task.precio || '';
-                        if (suplidoInput) suplidoInput.value = task.suplido || '';
-                        if (costeInput) costeInput.value = task.coste || '';
+
                         if (fechaPlanificacionInput) fechaPlanificacionInput.value = task.fecha_planificacion || '';
                         if (fechaInicioInput) fechaInicioInput.value = task.fecha_inicio || '';
                         if (fechaVencimientoInput) fechaVencimientoInput.value = task.fecha_vencimiento || '';
-                        if (fechaImputacionInput) fechaImputacionInput.value = task.fecha_imputacion || '';
+
                         if (tiempoPrevistoInput) tiempoPrevistoInput.value = task.tiempo_previsto || '';
                         if (tiempoRealInput) tiempoRealInput.value = task.tiempo_real || '';
                         if (taskIdInput) {
                             taskIdInput.value = task.id; // Asegúrate de que el ID de la tarea esté disponible
                         }
 
-                        // Asignar cliente_id al campo oculto
-                        if (clienteIdInput) clienteIdInput.value = task.cliente_id || '';
 
                         // Cargar y asignar los usuarios seleccionados
                         if (task.users && task.users.length > 0) {
@@ -304,10 +307,14 @@ document.addEventListener('DOMContentLoaded', function () {
         checkboxes[currentFocusEdit].focus();
     }
 
+    let nuevoCliente = null;
+    let nuevoAsunto = null;
+    let nuevoTipo = null;
 
     // Manejar el envío del formulario de edición
     editTaskForm.addEventListener('submit', function (e) {
         e.preventDefault(); // Prevenir el envío normal del formulario
+        console.log("Evento submit interceptado");
 
         const taskId = document.getElementById('task_id').value;
         const duplicarCheckbox = document.getElementById('duplicar'); // Referencia al checkbox de Duplicar
@@ -315,24 +322,126 @@ document.addEventListener('DOMContentLoaded', function () {
         // Mostrar alerta si Duplicar está marcado
         if (duplicarCheckbox.checked) {
             const confirmDuplicar = confirm("Estás a punto de duplicar la tarea. ¿Deseas continuar?");
-
-            // Si el usuario cancela el duplicado, detenemos el proceso de envío
-            if (!confirmDuplicar) {
-                return;
-            }
+            if (!confirmDuplicar) return;
         }
 
-        // Crear un objeto FormData en lugar de un objeto JSON
+        // Obtener referencias a los inputs
+        const clienteInput = document.getElementById('cliente-inputEdit');
+        const clienteIdInput = document.getElementById('cliente-id-inputEdit');
+        const asuntoInput = document.getElementById('asunto-inputEdit');
+        const asuntoIdInput = document.getElementById('asunto-id-inputEdit');
+        const tipoInput = document.getElementById('tipo-inputEdit');
+        const tipoIdInput = document.getElementById('tipo-id-inputEdit');
+
+        // Validar que todos los inputs existan
+        if (
+            !clienteInput ||
+            !clienteIdInput ||
+            !asuntoInput ||
+            !asuntoIdInput ||
+            !tipoInput ||
+            !tipoIdInput
+        ) {
+            console.error("Uno o más elementos de entrada no se encontraron en el DOM.", {
+                clienteInput: clienteInput || "No encontrado",
+                clienteIdInput: clienteIdInput || "No encontrado",
+                asuntoInput: asuntoInput || "No encontrado",
+                asuntoIdInput: asuntoIdInput || "No encontrado",
+                tipoInput: tipoInput || "No encontrado",
+                tipoIdInput: tipoIdInput || "No encontrado",
+            });
+            return; // Salir del flujo si faltan elementos
+        }
+
+        nuevoAsunto = null; // Limpiar variables de nuevos valores
+        nuevoTipo = null;
+        nuevoCliente = null;
+
+
+        // Validar si el cliente existe o si es nuevo
+        const clienteInputValue = clienteInput.value.trim();
+        const clienteValido = clientesData.some(cliente =>
+            cliente.nombre_fiscal.toUpperCase() === clienteInputValue.toUpperCase()
+        );
+
+        if (!clienteValido) {
+            nuevoCliente = clienteInputValue; // Almacenar el nuevo cliente si no existe
+        }
+
+        // Validar si el asunto existe o si es nuevo
+        const asuntoInputValue = asuntoInput.value.trim();
+        const asuntoValido = asuntosData.some(asunto =>
+            asunto.nombre.toUpperCase() === asuntoInputValue.toUpperCase()
+        );
+
+        if (!asuntoValido) {
+            nuevoAsunto = asuntoInputValue; // Almacenar el nuevo asunto si no existe
+        }
+
+        // Validar si el tipo de tarea existe o si es nuevo
+        const tipoInputValue = tipoInput.value.trim();
+        const tipoValido = tiposData.some(tipo =>
+            tipo.nombre.toUpperCase() === tipoInputValue.toUpperCase()
+        );
+
+        if (!tipoValido) {
+            nuevoTipo = tipoInputValue; // Almacenar el nuevo tipo si no existe
+        }
+
+        // Si hay un nuevo asunto, cliente o un nuevo tipo, mostrar el modal
+        if (nuevoAsunto || nuevoTipo || nuevoCliente) {
+            showModalConfirmEdit(() => {
+                submitEditForm(taskId, duplicarCheckbox, nuevoCliente, nuevoAsunto, nuevoTipo);
+            });
+        } else {
+            // Enviar el formulario directamente si no hay nuevos elementos
+            submitEditForm(taskId, duplicarCheckbox, nuevoCliente, nuevoAsunto, nuevoTipo);
+        }
+
+
+
+    });
+
+
+    function submitEditForm(taskId, duplicarCheckbox, nuevoCliente, nuevoAsunto, nuevoTipo, additionalClientData = {}) {
+        console.log("Entrando en submitEditForm", { taskId, nuevoCliente, nuevoAsunto, nuevoTipo });
+
+        // Asegúrate de declarar todas las referencias necesarias dentro de esta función
+        const clienteInput = document.getElementById('cliente-inputEdit');
+        const asuntoInput = document.getElementById('asunto-inputEdit');
+        const tipoInput = document.getElementById('tipo-inputEdit');
+        const clienteIdInput = document.getElementById('cliente-id-inputEdit');
+        const asuntoIdInput = document.getElementById('asunto-id-inputEdit');
+        const tipoIdInput = document.getElementById('tipo-id-inputEdit');
+
+        const clienteInputValue = clienteInput.value.trim().toUpperCase();
+        nuevoCliente = checkIfNewItem(clienteInputValue, clientesData, clienteIdInput);
+
+        const asuntoInputValue = asuntoInput.value.trim().toUpperCase();
+        nuevoAsunto = checkIfNewItem(asuntoInputValue, asuntosData, asuntoIdInput);
+
+        const tipoInputValue = tipoInput.value.trim().toUpperCase();
+        nuevoTipo = checkIfNewItem(tipoInputValue, tiposData, tipoIdInput);
+
         const formData = new FormData(editTaskForm);
+        formData.append('cliente_nombreEdit', nuevoCliente || '');
+        formData.append('cliente_nifEdit', nuevoCliente ? additionalClientData.clienteNIF : '');
+        formData.append('cliente_emailEdit', nuevoCliente ? additionalClientData.clienteEmail : '');
+        formData.append('cliente_telefonoEdit', nuevoCliente ? additionalClientData.clienteTelefono : '');
+        formData.append('asunto_nombreEdit', nuevoAsunto || '');
+        formData.append('tipo_nombreEdit', nuevoTipo || '');
 
         // Agregar manualmente el campo _method para simular una solicitud PUT
         formData.append('_method', 'PUT');
+        console.log({
+            tipo_id: document.getElementById('tipo-id-inputEdit').value,
+            tipo_nombre: document.getElementById('tipo-inputEdit').value,
+        });
 
         // Obtener los usuarios seleccionados y añadir cada uno al FormData
         const selectedUsersEdit = Array.from(document.querySelectorAll('#user-list-edit input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.value);
 
-        // Asegurarnos de que se añadan correctamente al FormData como array
         selectedUsersEdit.forEach(userId => {
             formData.append('usersEdit[]', userId);
         });
@@ -347,10 +456,9 @@ document.addEventListener('DOMContentLoaded', function () {
             },
         })
             .then(response => {
-                // Verificar si la respuesta es correcta o contiene un error
                 if (!response.ok) {
                     return response.json().then(err => {
-                        console.error("Error en la respuesta:", err); // Mostrar el error detallado en consola
+                        console.error("Error en la respuesta:", err);
                         throw new Error('Error en la respuesta del servidor');
                     });
                 }
@@ -358,14 +466,20 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(data => {
                 if (data.success) {
-                    // Si la tarea se edita con éxito, cerrar el modal y mostrar un mensaje
+                    // Actualizar listas locales si se crearon nuevos elementos
+                    if (data.task.cliente && !clientesData.some(c => c.id === data.task.cliente.id)) {
+                        clientesData.push(data.task.cliente);
+                    }
+                    if (data.task.asunto && !asuntosData.some(a => a.id === data.task.asunto.id)) {
+                        asuntosData.push(data.task.asunto);
+                    }
+                    if (data.task.tipo && !tiposData.some(t => t.id === data.task.tipo.id)) {
+                        tiposData.push(data.task.tipo);
+                    }
+
                     showNotification('Tarea actualizada correctamente', 'info');
                     closeEditCustomerForm(editTaskFormContainer); // Cerrar el formulario de edición
-
-                    // Actualizar solo la fila de la tarea editada
-                    updateSingleTaskRow(data.task);
                 } else {
-                    // Mostrar los errores de validación si los hay
                     showNotification('Error al actualizar la tarea', 'error');
                     console.error('Errores de validación:', data.errors);
                 }
@@ -374,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error al actualizar la tarea:', error);
                 showNotification('Error al actualizar la tarea', 'error');
             });
-    });
+    }
 
     Echo.channel('tasks')
         .listen('.TaskUpdated', (data) => {
@@ -392,41 +506,117 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Conectado al canal de tareas');
         });
 
+    // Mostrar el modal de confirmación
+    function showModalConfirmEdit(callback) {
+        // Actualizar mensajes del modal
+        if (modalClienteMessage) {
+            modalClienteMessage.textContent = nuevoCliente
+                ? `El cliente "${nuevoCliente}" no existe. ¿Deseas crearlo?`
+                : '';
+        }
+
+        if (modalAsuntoMessage) {
+            modalAsuntoMessage.textContent = nuevoAsunto
+                ? `El asunto "${nuevoAsunto}" no existe. ¿Deseas crearlo?`
+                : '';
+        }
+
+        if (modalTipoMessage) {
+            modalTipoMessage.textContent = nuevoTipo
+                ? `El tipo de tarea "${nuevoTipo}" no existe. ¿Deseas crearlo?`
+                : '';
+        }
+
+        // Mostrar campos adicionales solo si el cliente es nuevo
+        const newClientDetails = document.getElementById('new-client-details');
+        newClientDetails.style.display = nuevoCliente ? 'block' : 'none';
+
+        modal.style.display = 'flex'; // Mostrar el modal
+
+        // Confirmación modal
+        document.getElementById('confirm-modal-yes').addEventListener('click', function () {
+            modal.style.display = 'none';
+
+            // Obtener valores adicionales del cliente si es nuevo
+            const clienteNIF = document.getElementById('cliente-nifEdit').value.trim();
+            const clienteEmail = document.getElementById('cliente-emailEdit').value.trim();
+            const clienteTelefono = document.getElementById('cliente-telefonoEdit').value.trim();
+
+            callback({
+                clienteNIF,
+                clienteEmail,
+                clienteTelefono,
+            });
+        });
+
+        document.getElementById('confirm-modal-no').addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+    }
+
+
+
+    function checkIfNewItem(inputValue, data, idInput) {
+        // Verifica que inputValue esté definido y no esté vacío
+        if (inputValue) {
+            const item = data.find(entry => entry.nombre && entry.nombre.toUpperCase() === inputValue.toUpperCase());
+            if (item) {
+                idInput.value = item.id;
+                return null;
+            } else {
+                idInput.value = ''; // Dejar vacío si es nuevo
+                return inputValue;
+            }
+        } else {
+            // Si inputValue es undefined o vacío, simplemente devuelve null
+            idInput.value = ''; // Asegura que el ID esté vacío
+            return null;
+        }
+    }
 
 
     function updateTaskRow(task) {
+
         const rowToUpdate = document.querySelector(`tr[data-task-id="${task.id}"]`);
         if (rowToUpdate) {
-            const asunto = task.asunto ? task.asunto : rowToUpdate.querySelector('td:nth-child(2)').textContent;
-            const cliente = task.cliente ? task.cliente : rowToUpdate.querySelector('td:nth-child(3)').textContent;
-            const tipo = task.tipo ? task.tipo : rowToUpdate.querySelector('td:nth-child(4)').textContent;
+            const asunto = task.asunto ? task.asunto : rowToUpdate.querySelector('td:nth-child(5)').textContent;
+            const cliente = task.cliente ? task.cliente : rowToUpdate.querySelector('td:nth-child(4)').textContent;
+            const tipo = task.tipo ? task.tipo : rowToUpdate.querySelector('td:nth-child(11)').textContent;
+
+            // Añade una clase según el estado de la tarea
+            const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
+            rowToUpdate.classList.add(estadoClass);
+
 
             rowToUpdate.innerHTML = `
                     <td>${task.id}</td>
-                    <td>${asunto}</td>
-                    <td>${cliente}</td>
-                    <td>${tipo}</td>
-                    <td>${task.subtipo || ''}</td>
-                    <td>${task.estado}</td>
-                    <td>${task.users && task.users.length > 0 ? task.users.join(', ') : 'Sin asignación'}</td>
-                    <td>${task.descripcion || ''}</td>
-                    <td>${task.observaciones || ''}</td>
-                    <td>${task.archivo || 'No disponible'}</td>
-                    <td>${task.facturable ? 'Sí' : 'No'}</td>
-                    <td>${task.facturado || 'No facturado'}</td>
-                    <td>${task.precio || 'N/A'}</td>
-                    <td>${task.suplido || 'N/A'}</td>
-                    <td>${task.coste || 'N/A'}</td>
-                    <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
                     <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-                    <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-                    <td>${task.tiempo_previsto || 'N/A'}</td>
-                    <td>${task.tiempo_real || 'N/A'}</td>
-                     <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
+                    <td>
+                      ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+                     </td> 
+                    <td>${cliente}</td>
+                    <td>${asunto}</td>
+                    <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+                     <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
+                    <td>${task.facturable ? 'Sí' : 'No'}</td>
+                    <td class="facturado-cell" 
+                        data-facturado="${task.facturado || 'NO'}" 
+                        data-task-id="${task.id}">
+                        ${task.facturado || 'NO'}
+                    </td>                    
+                    <td>${task.estado}</td>
+                    <td>${tipo}</td>
+                    <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>  
+
                 `;
+
+
         } else {
             console.warn('No se encontró la fila correspondiente a la tarea actualizada');
         }
+
+        // Inicializar el evento de clic derecho en las celdas de "Facturado"
+        initializeFacturadoContextMenu();
     }
 
 
@@ -569,6 +759,184 @@ function closeCustomerModal() {
     if (editTaskFormContainer.classList.contains('show')) {
         closeEditCustomerForm(editTaskFormContainer);
     }
+}
+
+
+
+
+function populateEditForm(task) {
+    console.log('Datos recibidos:', task);
+
+    let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
+    let asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
+    let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+
+
+    // Cliente
+    const clienteInput = document.getElementById('cliente-inputEdit');
+    const clienteIdInput = document.getElementById('cliente-id-inputEdit');
+    if (clienteInput) clienteInput.value = task.cliente?.nombre_fiscal || '';
+    if (clienteIdInput) clienteIdInput.value = task.cliente_id || '';
+
+    // Asunto
+    const asuntoInput = document.getElementById('asunto-inputEdit');
+    const asuntoIdInput = document.getElementById('asunto-id-inputEdit');
+    if (asuntoInput) asuntoInput.value = task.asunto?.nombre || '';
+    if (asuntoIdInput) asuntoIdInput.value = task.asunto_id || '';
+
+    // Tipo
+    const tipoInput = document.getElementById('tipo-inputEdit');
+    const tipoIdInput = document.getElementById('tipo-id-inputEdit');
+    if (tipoInput) tipoInput.value = task.tipo?.nombre || '';
+    if (tipoIdInput) tipoIdInput.value = task.tipo_id || '';
+
+
+    // Aquí asegura que los datos y elementos DOM estén listos antes de configurar autocompletado
+    if (document.getElementById('cliente-inputEdit')) {
+        console.log('Elementos DOM disponibles, inicializando autocompletado');
+        setupAutocomplete({
+            inputId: 'cliente-inputEdit',
+            hiddenId: 'cliente-id-inputEdit',
+            listId: 'cliente-listEdit',
+            data: clientesData,
+            nameKey: 'nombre_fiscal',
+            formatItem: item => `${item.nombre_fiscal} (${item.nif || 'N/A'})`,
+        });
+
+        setupAutocomplete({
+            inputId: 'asunto-inputEdit',
+            hiddenId: 'asunto-id-inputEdit',
+            listId: 'asunto-listEdit',
+            data: asuntosData,
+            nameKey: 'nombre',
+            formatItem: item => item.nombre,
+        });
+
+        setupAutocomplete({
+            inputId: 'tipo-inputEdit',
+            hiddenId: 'tipo-id-inputEdit',
+            listId: 'tipo-listEdit',
+            data: tiposData,
+            nameKey: 'nombre',
+            formatItem: item => item.nombre,
+        });
+
+    } else {
+        console.warn('Elementos DOM aún no disponibles');
+    }
+
+
+}
+
+
+clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
+asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
+tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+
+
+function setupAutocomplete({ inputId, hiddenId, listId, data, nameKey, formatItem }) {
+    const input = document.getElementById(inputId);
+    const hiddenInput = document.getElementById(hiddenId);
+    const list = document.getElementById(listId);
+    let selectedIndex = -1;
+
+
+    function filterData(query) {
+        return data.filter(item => {
+            const itemName = item[nameKey] ? item[nameKey].toLowerCase() : ''; // Usar el `nameKey` dinámicamente
+            return itemName.includes(query.toLowerCase());
+        });
+    }
+
+    function renderList(filtered) {
+        list.innerHTML = '';
+        if (filtered.length === 0) {
+            list.style.display = 'none';
+            return;
+        }
+        list.style.display = 'block';
+        filtered.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.textContent = formatItem ? formatItem(item) : item[nameKey] || 'Elemento sin nombre';
+            li.setAttribute('data-id', item.id);
+            li.classList.add('autocomplete-item');
+            if (index === selectedIndex) {
+                li.classList.add('active');
+            }
+            li.addEventListener('click', () => selectItem(item));
+            list.appendChild(li);
+        });
+    }
+
+    function selectItem(item) {
+        if (!item || !item[nameKey]) {
+            console.error(`El objeto seleccionado no tiene '${nameKey}'.`, item);
+            input.value = 'Elemento no válido';
+            hiddenInput.value = '';
+            return;
+        }
+
+        input.value = item[nameKey]; // Usar la propiedad dinámica para el nombre
+        hiddenInput.value = item.id; // Guardar el ID en el campo oculto
+        list.style.display = 'none';
+        selectedIndex = -1;
+    }
+
+    function handleKeydown(e) {
+        const items = list.querySelectorAll('.autocomplete-item');
+        if (items.length > 0) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateActiveItem(items, selectedIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                updateActiveItem(items, selectedIndex);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && selectedIndex < items.length) {
+                    const selectedItem = data.find(item =>
+                        (formatItem ? formatItem(item) : item[nameKey]) === items[selectedIndex].textContent
+                    );
+                    selectItem(selectedItem);
+                }
+            }
+        }
+    }
+
+    function updateActiveItem(items, index) {
+        items.forEach(item => item.classList.remove('active')); // Iteración correcta
+        if (items[index]) {
+            items[index].classList.add('active'); // Usar `items[index]` en lugar de `item`
+            items[index].scrollIntoView({ block: 'nearest' }); // Asegurar que el elemento sea visible
+        }
+    }
+
+
+    input.addEventListener('input', function () {
+        const query = this.value.toUpperCase();
+        const filtered = filterData(query);
+        selectedIndex = -1;
+        hiddenInput.value = '';
+        renderList(filtered);
+    });
+
+    input.addEventListener('focus', function () {
+        const query = this.value.toUpperCase();
+        const filtered = filterData(query);
+        renderList(filtered);
+    });
+
+    input.addEventListener('keydown', handleKeydown);
+
+    document.addEventListener('click', function (e) {
+        if (!input.contains(e.target) && !list.contains(e.target)) {
+            list.style.display = 'none';
+        }
+    });
+
+
 }
 
 

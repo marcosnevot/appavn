@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let globalTasksArray = []; // Definir una variable global para las tareas
 
 
-    let currentSortKey = 'fecha_planificacion'; // Almacena la clave de ordenación actual
-    let currentSortDirection = 'none'; // Dirección de orden actual
+    let currentSortKey = ''; // Almacena la clave de ordenación actual
+    let currentSortDirection = ''; // Dirección de orden actual
     const sessionUserId = document.getElementById('user-session-id').value;
 
     // Cargar tareas inicialmente
@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Si el estado es "none", reestablecer al orden original
-            const sortKeyToSend = currentSortDirection === 'none' ? 'fecha_planificacion' : currentSortKey;
-            const sortDirectionToSend = currentSortDirection === 'none' ? 'asc' : currentSortDirection;
+            const sortKeyToSend = currentSortDirection === 'none' ? '' : currentSortKey;
+            const sortDirectionToSend = currentSortDirection === 'none' ? '' : currentSortDirection;
 
             // Recargar tareas con la nueva ordenación y filtros activos
             loadTasks(1, sortKeyToSend, sortDirectionToSend);
@@ -57,58 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    function formatFechaPlanificacion(fecha) {
-        const hoy = new Date();
-        const manana = new Date();
-        manana.setDate(hoy.getDate() + 1);
-        const fechaPlanificacion = new Date(fecha);
 
-        // Array con los nombres de los días de la semana
-        const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-
-        // Verificar si la fecha es hoy
-        if (
-            fechaPlanificacion.getDate() === hoy.getDate() &&
-            fechaPlanificacion.getMonth() === hoy.getMonth() &&
-            fechaPlanificacion.getFullYear() === hoy.getFullYear()
-        ) {
-            return "HOY";
-        }
-
-        // Verificar si la fecha es mañana
-        if (
-            fechaPlanificacion.getDate() === manana.getDate() &&
-            fechaPlanificacion.getMonth() === manana.getMonth() &&
-            fechaPlanificacion.getFullYear() === manana.getFullYear()
-        ) {
-            return "MAÑANA";
-        }
-
-        // Calcular el último día laborable de esta semana (viernes)
-        const diaHoy = hoy.getDay();
-        const diasHastaViernes = 5 - diaHoy; // 5 es viernes
-        const viernesDeEstaSemana = new Date(hoy);
-        viernesDeEstaSemana.setDate(hoy.getDate() + diasHastaViernes);
-
-        // Excluir sábado y domingo
-        const diaSemanaPlanificacion = fechaPlanificacion.getDay();
-        if (diaSemanaPlanificacion === 0 || diaSemanaPlanificacion === 6) {
-            return fechaPlanificacion.toLocaleDateString();
-        }
-
-        // Verificar si la fecha está en esta semana y es entre lunes y viernes
-        if (fechaPlanificacion <= viernesDeEstaSemana && fechaPlanificacion > hoy) {
-            return diasSemana[diaSemanaPlanificacion];
-        }
-
-        // Si la fecha es anterior a hoy, formatearla en rojo
-        if (fechaPlanificacion < hoy) {
-            return `<span style="color: red;">${fechaPlanificacion.toLocaleDateString()}</span>`;
-        }
-
-        // Mostrar la fecha en formato normal para cualquier otra condición
-        return fechaPlanificacion.toLocaleDateString();
-    }
 
 
     document.getElementById('export-tasks-button').addEventListener('click', async function () {
@@ -120,11 +69,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return;  // Salir de la función sin continuar con la exportación
         }
 
-         // Extraer fechas del rango de planificación desde el formulario
-         const fechaPlanificacionInput = document.getElementById('filter-fecha-planificacion').value || '';
-         const [fechaPlanificacionInicio, fechaPlanificacionFin] = fechaPlanificacionInput
-             ? fechaPlanificacionInput.split(' - ')
-             : ['', ''];
+        // Extraer fechas del rango de planificación desde el formulario
+        const fechaPlanificacionInput = document.getElementById('filter-fecha-planificacion').value || '';
+        const [fechaPlanificacionInicio, fechaPlanificacionFin] = fechaPlanificacionInput
+            ? fechaPlanificacionInput.split(' - ')
+            : ['', ''];
 
         const filterData = {
             cliente: document.getElementById('filter-cliente-id-input').value || '', // Usar el ID del cliente
@@ -147,8 +96,8 @@ document.addEventListener('DOMContentLoaded', function () {
             // Enviar las fechas de planificación como valores separados
             fecha_planificacion_inicio: fechaPlanificacionInicio || '',
             fecha_planificacion_fin: fechaPlanificacionFin || '',
-       
-  
+
+
             fileName: fileName + '.xlsx'
         };
 
@@ -184,8 +133,61 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+function formatFechaPlanificacion(fecha) {
+    const hoy = new Date();
+    const manana = new Date();
+    manana.setDate(hoy.getDate() + 1);
+    const fechaPlanificacion = new Date(fecha);
+
+    // Array con los nombres de los días de la semana
+    const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+    // Verificar si la fecha es hoy
+    if (
+        fechaPlanificacion.getDate() === hoy.getDate() &&
+        fechaPlanificacion.getMonth() === hoy.getMonth() &&
+        fechaPlanificacion.getFullYear() === hoy.getFullYear()
+    ) {
+        return "HOY";
+    }
+
+    // Verificar si la fecha es mañana
+    if (
+        fechaPlanificacion.getDate() === manana.getDate() &&
+        fechaPlanificacion.getMonth() === manana.getMonth() &&
+        fechaPlanificacion.getFullYear() === manana.getFullYear()
+    ) {
+        return "MAÑANA";
+    }
+
+    // Calcular el último día laborable de esta semana (viernes)
+    const diaHoy = hoy.getDay();
+    const diasHastaViernes = 5 - diaHoy; // 5 es viernes
+    const viernesDeEstaSemana = new Date(hoy);
+    viernesDeEstaSemana.setDate(hoy.getDate() + diasHastaViernes);
+
+    // Excluir sábado y domingo
+    const diaSemanaPlanificacion = fechaPlanificacion.getDay();
+    if (diaSemanaPlanificacion === 0 || diaSemanaPlanificacion === 6) {
+        return fechaPlanificacion.toLocaleDateString();
+    }
+
+    // Verificar si la fecha está en esta semana y es entre lunes y viernes
+    if (fechaPlanificacion <= viernesDeEstaSemana && fechaPlanificacion > hoy) {
+        return diasSemana[diaSemanaPlanificacion];
+    }
+
+    // Si la fecha es anterior a hoy, formatearla en rojo
+    if (fechaPlanificacion < hoy) {
+        return `<span style="color: red;">${fechaPlanificacion.toLocaleDateString()}</span>`;
+    }
+
+    // Mostrar la fecha en formato normal para cualquier otra condición
+    return fechaPlanificacion.toLocaleDateString();
+}
+
 // Función para cargar las tareas mediante AJAX con paginación
-function loadTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
+function loadTasks(page = 1, sortKey, sortDirection) {
     const tableBody = document.querySelector('table tbody');
     const sessionUserId = document.getElementById('user-session-id').value;
 
@@ -199,13 +201,13 @@ function loadTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'a
         ...window.currentFilters, // Usar filtros activos de la variable global
         estado: window.currentFilters?.estado || 'PENDIENTE,ENESPERA', // Predeterminado
         page, // Página actual
-        sortKey: sortKey || 'fecha_planificacion', // Predeterminado
-        sortDirection: sortDirection || 'asc',
         user_id: sessionUserId, // Usuario actual
-
+        sortKey, // Clave de ordenación
+        sortDirection // Dirección de ordenación
     });
     // console.log(params.toString()); // Verifica qué se está enviando al servidor
 
+    
     fetch(`/tareas/getTasks?${params.toString()}`, {
         method: 'GET',
         headers: {
@@ -251,7 +253,7 @@ function loadInitialTasks(tasks) {
         // Añade una clase según el estado de la tarea
         const estadoClass = task.estado ? `estado-${task.estado.toLowerCase()}` : 'estado-default';
         row.classList.add(estadoClass);
-        
+
         row.innerHTML = `
         <td>${task.id}</td>
         <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
