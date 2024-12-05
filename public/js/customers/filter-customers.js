@@ -105,7 +105,9 @@ document.addEventListener('DOMContentLoaded', function () {
             subclase: document.getElementById('filter-subclase-input').value || '',
             puntaje: document.getElementById('filter-puntaje-input').value || '',
             codigo_sage: document.getElementById('filter-codigo-sage-input').value || '',
-            usuario: document.getElementById('filter-user-ids').value || '' // Para el responsable asignado
+            usuario: document.getElementById('filter-user-ids').value || '', // Para el responsable asignado
+            persona_contacto: document.getElementById('filter-persona_contacto-input').value || '', // Persona de contacto
+            segundo_telefono: document.getElementById('filter-segundo_telefono-input').value || '' // Segundo teléfono
         };
 
         console.log('Datos de filtro:', filterData);

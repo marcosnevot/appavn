@@ -132,6 +132,10 @@
                     <div id="filter-estado-list" class="dropdown-list" style="display: none;">
                         <ul>
                             <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-planificada" value="PLANIFICADA">
+                                <label for="filter-estado-planificada">Planificada</label>
+                            </li>
+                            <li>
                                 <input class="user-checkbox" type="checkbox" id="filter-estado-pendiente" value="PENDIENTE">
                                 <label for="filter-estado-pendiente">Pendiente</label>
                             </li>
@@ -142,6 +146,10 @@
                             <li>
                                 <input class="user-checkbox" type="checkbox" id="filter-estado-completada" value="COMPLETADA">
                                 <label for="filter-estado-completada">Completada</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-recurrente/trimestre" value="RECURRENTE/TRIMESTRE">
+                                <label for="filter-estado-recurrente/trimestre">RECURRENTE/TRIMESTRE</label>
                             </li>
                         </ul>
                     </div>
@@ -172,7 +180,7 @@
 
         <!-- Fila 4: Fechas, Tiempo Previsto, Tiempo Real -->
         <div class="form-row" style="margin-bottom:30px">
-        <div class="form-group grow">
+            <div class="form-group grow">
                 <label for="filter-fecha-planificacion">Fecha de Planificación:</label>
                 <input type="text"
                     id="filter-fecha-planificacion"

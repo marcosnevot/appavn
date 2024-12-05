@@ -84,9 +84,11 @@
             <div class="form-group grow">
                 <label for="estado">Estado:</label>
                 <select name="estado" id="estado">
+                    <option value="PLANIFICADA">Planificada</option>
                     <option value="PENDIENTE">Pendiente</option>
                     <option value="ENESPERA">En Espera</option>
                     <option value="COMPLETADA">Completada</option>
+                    <option value="RECURRENTE/TRIMESTRE">RECURRENTE/TRIMESTRE</option>
                 </select>
             </div>
 

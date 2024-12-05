@@ -35,6 +35,62 @@
                 </div>
             </div>
 
+            <div class="form-group grow">
+                <label for="filter-estado">Estado:</label>
+                <div class="custom-select" id="filter-estado-select">
+                    <div id="filter-selected-estados" class="selected-estados">
+                        <!-- Aquí se mostrarán las selecciones -->
+                    </div>
+                    <div id="filter-estado-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-planificada" value="PLANIFICADA">
+                                <label for="filter-estado-planificada">Planificada</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-pendiente" value="PENDIENTE">
+                                <label for="filter-estado-pendiente">Pendiente</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-enespera" value="ENESPERA">
+                                <label for="filter-estado-enespera">En Espera</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-completada" value="COMPLETADA">
+                                <label for="filter-estado-completada">Completada</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-estado-recurrente/trimestre" value="RECURRENTE/TRIMESTRE">
+                                <label for="filter-estado-recurrente/trimestre">RECURRENTE/TRIMESTRE</label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_estado" id="filter-estado-ids"> <!-- Campo oculto -->
+
+            </div>
+
+            <div class="form-group grow">
+                <label for="filter-user-select">Asignado a:</label>
+                <div class="custom-select" name="filter-user-select" tabindex="0" id="filter-user-select">
+                    <div id="filter-selected-users" class="selected-users">
+                        <!-- Aquí se añadirán los usuarios seleccionados para el filtro -->
+                    </div>
+                    <div id="filter-user-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <!-- Debes cargar dinámicamente los usuarios disponibles -->
+                            @foreach($usuarios as $user)
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-user-{{ $user->id }}" value="{{ $user->id }}">
+                                <label for="filter-user-{{ $user->id }}">{{ $user->name }}</label>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_users" id="filter-user-ids"> <!-- Campo oculto para los IDs de usuarios seleccionados -->
+            </div>
+
 
         </div>
 
@@ -153,30 +209,11 @@
             </div>
 
             <div class="form-group grow">
-                <label for="filter-fecha-imputacion">Fecha de Imputación:</label>
-                <input type="date" name="filter_fecha_imputacion" id="filter-fecha-imputacion">
+                <label for="filter-fecha-planificacion">Fecha de Planificación:</label>
+                <input type="date" name="filter_fecha_planificacion" id="filter-fecha-planificacion">
             </div>
 
-            <div class="form-group grow">
-                <label for="filter-user-select">Asignado a:</label>
-                <div class="custom-select" name="filter-user-select" tabindex="0" id="filter-user-select">
-                    <div id="filter-selected-users" class="selected-users">
-                        <!-- Aquí se añadirán los usuarios seleccionados para el filtro -->
-                    </div>
-                    <div id="filter-user-list" class="dropdown-list" style="display: none;">
-                        <ul>
-                            <!-- Debes cargar dinámicamente los usuarios disponibles -->
-                            @foreach($usuarios as $user)
-                            <li>
-                                <input class="user-checkbox" type="checkbox" id="filter-user-{{ $user->id }}" value="{{ $user->id }}">
-                                <label for="filter-user-{{ $user->id }}">{{ $user->name }}</label>
-                            </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-                <input type="hidden" name="filter_users" id="filter-user-ids"> <!-- Campo oculto para los IDs de usuarios seleccionados -->
-            </div>
+
 
 
         </div>

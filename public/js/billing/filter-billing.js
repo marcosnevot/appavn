@@ -90,11 +90,11 @@ document.addEventListener('DOMContentLoaded', function () {
             asunto: document.getElementById('filter-asunto-input').value || '',
             tipo: document.getElementById('filter-tipo-input').value || '',
             subtipo: document.getElementById('filter-subtipo').value || '',
-            estado: document.getElementById('filter-estado').value || '',
+            estado: document.getElementById('filter-estado-ids').value || '', // Predeterminar a "PENDIENTE, ENESPERA"
             usuario: document.getElementById('filter-user-ids').value || '',
             fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
             fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
-            fecha_imputacion: document.getElementById('filter-fecha-imputacion').value || '',
+            fecha_planificacion: document.getElementById('filter-fecha-planificacion').value || '',
             tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
             tiempo_real: document.getElementById('filter-tiempo-real').value || '',
 
@@ -726,7 +726,7 @@ document.addEventListener('DOMContentLoaded', function () {
             asunto: document.getElementById('filter-asunto-input')?.value || '',
             tipo: document.getElementById('filter-tipo-input')?.value || '',
             subtipo: document.getElementById('filter-subtipo')?.value || '',
-            estado: document.getElementById('filter-estado')?.value || '',
+            estado: document.getElementById('filter-estado-ids').value || '', // Predeterminar a "PENDIENTE, ENESPERA"
             usuario: document.getElementById('filter-user-ids')?.value || '',
             archivo: document.getElementById('filter-archivo')?.value || '',
 
@@ -735,7 +735,6 @@ document.addEventListener('DOMContentLoaded', function () {
             coste: document.getElementById('filter-coste')?.value || '',
             fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
             fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
-            fecha_imputacion: document.getElementById('filter-fecha-imputacion')?.value || '',
             fecha_planificacion: fecha === "past" ? "past" : fecha, // Este valor viene del filtro rápido de planificación
             tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
             tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
@@ -780,6 +779,171 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Generar los botones de filtro de planificación al cargar la página
     generarBotonesFiltroPlanificacion();
+
+    // Checklists de los campos Estado, Subtipo, facturable y Facturado
+
+    function initializeChecklistFilter(fieldName, isBoolean = false) {
+        const selectElement = document.getElementById(`filter-${fieldName}-select`);
+        const listElement = document.getElementById(`filter-${fieldName}-list`);
+        const hiddenInput = document.getElementById(`filter-${fieldName}-ids`);
+        const selectedContainer = document.getElementById(`filter-selected-${fieldName}s`);
+        let selectedItems = [];
+        let currentFocus = -1;
+
+        // Alternar visibilidad de la lista desplegable
+        selectElement.addEventListener('click', function (event) {
+            event.stopPropagation(); // Evitar que se cierre inmediatamente
+            toggleListVisibility();
+        });
+
+        // Manejar selección de checkboxes
+        const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]')); // Convertir NodeList a Array
+        checkboxes.forEach((checkbox, index) => {
+            checkbox.dataset.index = index; // Asignar índice único al checkbox
+
+            checkbox.addEventListener('change', function () {
+                const value = isBoolean ? this.value === "1" : this.value;
+
+                if (this.checked) {
+                    selectedItems.push(value);
+                } else {
+                    selectedItems = selectedItems.filter(item => item !== value);
+                }
+
+                hiddenInput.value = selectedItems.join(',');
+                updateSelectedDisplay(selectedContainer, selectedItems, isBoolean);
+            });
+
+            // Manejar el foco de los checkboxes
+            checkbox.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    focusNextCheckbox(1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    focusNextCheckbox(-1);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    checkboxes[currentFocus].click(); // Simular clic para seleccionar/deseleccionar
+                } else if (e.key === 'Escape') {
+                    listElement.style.display = 'none';
+                    selectElement.focus(); // Devolver el foco al select principal
+                }
+            });
+        });
+
+        // Alternar visibilidad de la lista
+        function toggleListVisibility() {
+            if (listElement.style.display === 'block') {
+                listElement.style.display = 'none';
+            } else {
+                listElement.style.display = 'block';
+                currentFocus = -1; // Reiniciar la selección cuando se vuelve a abrir
+                focusNextCheckbox(1); // Foco en el primer checkbox al abrir
+            }
+        }
+
+        // Actualizar visualización de ítems seleccionados
+        function updateSelectedDisplay(container, items, isBoolean) {
+            container.innerHTML = '';
+            if (items.length === 0) {
+                const placeholder = document.createElement('span');
+                placeholder.textContent = 'Cualquiera...';
+                placeholder.style.color = '#aaa';
+                placeholder.style.fontStyle = 'italic';
+                container.appendChild(placeholder);
+            } else {
+                items.forEach(item => {
+                    const span = document.createElement('span');
+                    span.textContent = isBoolean ? (item === true ? 'Sí' : 'No') : item;
+                    span.style.backgroundColor = '#f0f0f0';
+                    span.style.color = '#333';
+                    span.style.padding = '3px 8px';
+                    span.style.borderRadius = '15px';
+                    span.style.fontSize = '12px';
+                    span.style.lineHeight = '1.5';
+                    span.style.border = '1px solid #ddd';
+                    container.appendChild(span);
+                });
+            }
+        }
+
+        // Función para manejar el enfoque de los checkboxes
+        function focusNextCheckbox(direction) {
+            const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]'));
+            currentFocus = (currentFocus + direction + checkboxes.length) % checkboxes.length; // Calcular el índice
+            checkboxes[currentFocus].focus();
+        }
+
+        // Cerrar la lista al hacer clic fuera
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest(`#filter-${fieldName}-list`) && e.target !== selectElement) {
+                listElement.style.display = 'none';
+            }
+        });
+    }
+
+    // Inicializar checklists
+    ['estado'].forEach(field => {
+        initializeChecklistFilter(field);
+    });
+
+    // Inicializar valores predeterminados para Facturable
+    const facturableDefault = ['1']; // "1" representa "Sí"
+    const hiddenFacturableInput = document.getElementById('filter-facturable-ids');
+    hiddenFacturableInput.value = facturableDefault.join(',');
+
+    // Marcar las casillas de Facturable predeterminadas
+    facturableDefault.forEach(facturable => {
+        const checkbox = document.getElementById(`filter-facturable-${facturable}`);
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+    });
+
+    // Visualizar los valores seleccionados de Facturable
+    const selectedFacturablesContainer = document.getElementById('filter-selected-facturables');
+    facturableDefault.forEach(facturable => {
+        const span = document.createElement('span');
+        span.textContent = facturable === '1' ? 'Sí' : 'No';
+        span.style.backgroundColor = '#f0f0f0';
+        span.style.color = '#333';
+        span.style.padding = '3px 8px';
+        span.style.borderRadius = '15px';
+        span.style.fontSize = '12px';
+        span.style.lineHeight = '1.5';
+        span.style.border = '1px solid #ddd';
+        selectedFacturablesContainer.appendChild(span);
+    });
+
+    // Inicializar valores predeterminados para Facturado
+    const facturadoDefault = ['NO']; // "NO" es el valor predeterminado
+    const hiddenFacturadoInput = document.getElementById('filter-facturado-ids');
+    hiddenFacturadoInput.value = facturadoDefault.join(',');
+
+    // Marcar las casillas de Facturado predeterminadas
+    facturadoDefault.forEach(facturado => {
+        const checkbox = document.getElementById(`filter-facturado-${facturado.toLowerCase()}`);
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+    });
+
+    // Visualizar los valores seleccionados de Facturado
+    const selectedFacturadosContainer = document.getElementById('filter-selected-facturados');
+    facturadoDefault.forEach(facturado => {
+        const span = document.createElement('span');
+        span.textContent = facturado;
+        span.style.backgroundColor = '#f0f0f0';
+        span.style.color = '#333';
+        span.style.padding = '3px 8px';
+        span.style.borderRadius = '15px';
+        span.style.fontSize = '12px';
+        span.style.lineHeight = '1.5';
+        span.style.border = '1px solid #ddd';
+        selectedFacturadosContainer.appendChild(span);
+    });
+
 
 
 });

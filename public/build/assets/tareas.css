@@ -360,6 +360,14 @@ th::after {
     background-color: rgba(232, 245, 233, 0.8) !important; /* Verde con opacidad */
 }
 
+.estado-planificada {
+    background-color: rgba(249, 249, 249, 0.8) !important; /* Gris claro */
+}
+
+.estado-default {
+    background-color: rgba(249, 249, 249, 0.8) !important; /* Gris claro */
+}
+
 .estado-default {
     background-color: rgba(249, 249, 249, 0.8) !important; /* Gris claro */
 }

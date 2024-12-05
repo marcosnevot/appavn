@@ -67,6 +67,11 @@
                 <input type="text" name="direccionEdit" id="direccion" autocomplete="off">
             </div>
 
+            <div class="form-group narrow">
+                <label for="persona_contacto">Persona Contacto:</label>
+                <input type="text" name="persona_contactoEdit" id="persona_contacto" autocomplete="off" placeholder="Persona Contacto">
+            </div>
+
             <div class="form-group medium">
                 <label for="poblacion">Población:</label>
                 <input type="text" name="poblacionEdit" id="poblacion">
@@ -139,6 +144,11 @@
             <div class="form-group wide">
                 <label for="subclase">Subclase:</label>
                 <input type="text" name="subclaseEdit" id="subclase" placeholder="Subclase del Cliente">
+            </div>
+
+            <div class="form-group narrow">
+                <label for="segundo_telefono">Segundo Teléfono:</label>
+                <input type="text" name="segundo_telefonoEdit" id="segundo_telefono" autocomplete="off" placeholder="Segundo Teléfono">
             </div>
 
             <div class="form-group wide">

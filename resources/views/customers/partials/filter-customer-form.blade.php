@@ -70,6 +70,11 @@
                 <input type="text" id="filter-direccion-input" name="filter_direccion" placeholder="Buscar dirección..." autocomplete="off">
             </div>
 
+            <div class="form-group narrow">
+                <label for="filter-persona_contacto">Persona Contacto:</label>
+                <input type="text" name="filter_persona_contacto" id="filter-persona_contacto-input" autocomplete="off" placeholder="Persona Contacto">
+            </div>
+
             <div class="form-group medium">
                 <label for="filter-codigo-postal-input">Código Postal:</label>
                 <input type="text" id="filter-codigo-postal-input" name="filter_codigo_postal" placeholder="Buscar código postal..." autocomplete="off">
@@ -128,6 +133,11 @@
             <div class="form-group">
                 <label for="filter-subclase-input">Subclase:</label>
                 <input type="text" name="filter_subclase" id="filter-subclase-input" placeholder="Buscar subclase...">
+            </div>
+
+            <div class="form-group narrow">
+                <label for="filter-segundo_telefono-input">Segundo Teléfono:</label>
+                <input type="text" name="filter_segundo_telefono" id="filter-segundo_telefono-input" autocomplete="off" placeholder="Segundo Teléfono">
             </div>
 
             <div class="form-group wide">

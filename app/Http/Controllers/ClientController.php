@@ -71,15 +71,17 @@ class ClientController extends Controller
                 $sortKey = 'situaciones.nombre';
             }
 
-            // Aplicar filtros dinámicos basados en la función `filter`
+            // Filtrar por nombre fiscal del cliente
             if (!empty($filters['nombre_fiscal'])) {
                 $query->where('nombre_fiscal', 'like', '%' . $filters['nombre_fiscal'] . '%');
             }
 
+            // Filtrar por NIF
             if (!empty($filters['nif'])) {
                 $query->where('nif', 'like', '%' . $filters['nif'] . '%');
             }
 
+            // Filtrar por tipo de cliente
             if (!empty($filters['tipo_cliente'])) {
                 $tipoCliente = TipoCliente::where('nombre', 'like', '%' . $filters['tipo_cliente'] . '%')->first();
                 if ($tipoCliente) {
@@ -87,6 +89,7 @@ class ClientController extends Controller
                 }
             }
 
+            // Filtrar por clasificación
             if (!empty($filters['clasificacion'])) {
                 $clasificacion = Clasificacion::where('nombre', 'like', '%' . $filters['clasificacion'] . '%')->first();
                 if ($clasificacion) {
@@ -94,6 +97,7 @@ class ClientController extends Controller
                 }
             }
 
+            // Filtrar por tributación
             if (!empty($filters['tributacion'])) {
                 $tributacion = Tributacion::where('nombre', 'like', '%' . $filters['tributacion'] . '%')->first();
                 if ($tributacion) {
@@ -101,21 +105,44 @@ class ClientController extends Controller
                 }
             }
 
+            // Filtrar por situación
             if (!empty($filters['situacion'])) {
                 $situacion = Situacion::where('nombre', 'like', '%' . $filters['situacion'] . '%')->first();
                 if ($situacion) {
                     $query->where('situacion_id', $situacion->id);
                 }
             }
+            // Filtrar por móvil
+            if (!empty($filters['movil'])) {
+                $query->where('movil', 'like', '%' . $filters['movil'] . '%');
+            }
 
+            // Filtrar por fijo
+            if (!empty($filters['fijo'])) {
+                $query->where('fijo', 'like', '%' . $filters['fijo'] . '%');
+            }
+
+            // Filtrar por email
+            if (!empty($filters['email'])) {
+                $query->where('email', 'like', '%' . $filters['email'] . '%');
+            }
+
+            // Filtrar por dirección
             if (!empty($filters['direccion'])) {
                 $query->where('direccion', 'like', '%' . $filters['direccion'] . '%');
             }
 
+            // Filtrar por código postal
             if (!empty($filters['codigo_postal'])) {
                 $query->where('codigo_postal', 'like', '%' . $filters['codigo_postal'] . '%');
             }
 
+            // Filtrar por población
+            if (!empty($filters['poblacion'])) {
+                $query->where('poblacion', 'like', '%' . $filters['poblacion'] . '%');
+            }
+
+            // Filtrar por usuario responsable asignado
             if (!empty($filters['usuario'])) {
                 $userIds = explode(',', $filters['usuario']);
                 $query->whereHas('users', function ($q) use ($userIds) {
@@ -123,20 +150,34 @@ class ClientController extends Controller
                 });
             }
 
+            // Filtrar por datos bancarios
             if (!empty($filters['datos_bancarios'])) {
                 $query->where('datos_bancarios', 'like', '%' . $filters['datos_bancarios'] . '%');
             }
 
+            // Filtrar por subclase
             if (!empty($filters['subclase'])) {
                 $query->where('subclase', 'like', '%' . $filters['subclase'] . '%');
             }
 
+            // Filtrar por puntaje
             if (!empty($filters['puntaje'])) {
                 $query->where('puntaje', '=', $filters['puntaje']);
             }
 
+            // Filtrar por código SAGE
             if (!empty($filters['codigo_sage'])) {
                 $query->where('codigo_sage', 'like', '%' . $filters['codigo_sage'] . '%');
+            }
+
+            // Filtrar por segundo teléfono
+            if (!empty($filters['segundo_telefono'])) {
+                $query->where('segundo_telefono', 'like', '%' . $filters['segundo_telefono'] . '%');
+            }
+
+            // Filtrar por persona de contacto
+            if (!empty($filters['persona_contacto'])) {
+                $query->where('persona_contacto', 'like', '%' . $filters['persona_contacto'] . '%');
             }
 
             // Evitar duplicados y ordenar
@@ -204,6 +245,8 @@ class ClientController extends Controller
                 'nombre_fiscal' => 'required|string|max:255',
                 'nif' => 'nullable|string|max:255',
                 'movil' => 'nullable|string|max:255',
+                'segundo_telefono' => 'nullable|string|max:255',
+                'persona_contacto' => 'nullable|string|max:255',
                 'fijo' => 'nullable|string|max:255',
                 'email' => 'nullable|email|max:255',
                 'direccion' => 'nullable|string|max:255',
@@ -278,6 +321,8 @@ class ClientController extends Controller
                 'nombre_fiscal' => $validated['nombre_fiscal'],
                 'nif' => $validated['nif'] ?? null,
                 'movil' => $validated['movil'] ?? null,
+                'segundo_telefono' => $validated['segundo_telefono'] ?? null,
+                'persona_contacto' => $validated['persona_contacto'] ?? null,
                 'fijo' => $validated['fijo'] ?? null,
                 'email' => $validated['email'] ?? null,
                 'direccion' => $validated['direccion'] ?? null,
@@ -374,6 +419,20 @@ class ClientController extends Controller
                     $query->where('situacion_id', $situacion->id);
                 }
             }
+            // Filtrar por móvil
+            if (!empty($filters['movil'])) {
+                $query->where('movil', 'like', '%' . $filters['movil'] . '%');
+            }
+
+            // Filtrar por fijo
+            if (!empty($filters['fijo'])) {
+                $query->where('fijo', 'like', '%' . $filters['fijo'] . '%');
+            }
+
+            // Filtrar por email
+            if (!empty($filters['email'])) {
+                $query->where('email', 'like', '%' . $filters['email'] . '%');
+            }
 
             // Filtrar por dirección
             if (!empty($filters['direccion'])) {
@@ -383,6 +442,11 @@ class ClientController extends Controller
             // Filtrar por código postal
             if (!empty($filters['codigo_postal'])) {
                 $query->where('codigo_postal', 'like', '%' . $filters['codigo_postal'] . '%');
+            }
+
+            // Filtrar por población
+            if (!empty($filters['poblacion'])) {
+                $query->where('poblacion', 'like', '%' . $filters['poblacion'] . '%');
             }
 
             // Filtrar por usuario responsable asignado
@@ -411,6 +475,16 @@ class ClientController extends Controller
             // Filtrar por código SAGE
             if (!empty($filters['codigo_sage'])) {
                 $query->where('codigo_sage', 'like', '%' . $filters['codigo_sage'] . '%');
+            }
+
+            // Filtrar por segundo teléfono
+            if (!empty($filters['segundo_telefono'])) {
+                $query->where('segundo_telefono', 'like', '%' . $filters['segundo_telefono'] . '%');
+            }
+
+            // Filtrar por persona de contacto
+            if (!empty($filters['persona_contacto'])) {
+                $query->where('persona_contacto', 'like', '%' . $filters['persona_contacto'] . '%');
             }
 
             // Añadir el orden por fecha de creación, de más reciente a más antigua
@@ -505,6 +579,8 @@ class ClientController extends Controller
                 'nombre_fiscalEdit' => 'required|string|max:255', // Validar nombre fiscal
                 'nifEdit' => 'nullable|string|max:255',  // Validar NIF
                 'movilEdit' => 'nullable|string|max:255',  // Validar móvil
+                'segundo_telefonoEdit' => 'nullable|string|max:255',  // Validar móvil
+                'persona_contactoEdit' => 'nullable|string|max:255',  // Validar móvil
                 'fijoEdit' => 'nullable|string|max:255',  // Validar fijo
                 'emailEdit' => 'nullable|email|max:255',  // Validar email
                 'direccionEdit' => 'nullable|string|max:255',  // Validar dirección
@@ -530,6 +606,8 @@ class ClientController extends Controller
                 'nombre_fiscal' => $validated['nombre_fiscalEdit'],
                 'nif' => $validated['nifEdit'],
                 'movil' => $validated['movilEdit'],
+                'segundo_telefono' => $validated['segundo_telefonoEdit'],
+                'persona_contacto' => $validated['persona_contactoEdit'],
                 'fijo' => $validated['fijoEdit'],
                 'email' => $validated['emailEdit'],
                 'direccion' => $validated['direccionEdit'],

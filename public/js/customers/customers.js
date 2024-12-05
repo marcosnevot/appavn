@@ -105,7 +105,9 @@ document.addEventListener('DOMContentLoaded', function () {
             <td>${customer.nombre_fiscal || 'Sin nombre fiscal'}</td>
             <td>${customer.nif || 'Sin NIF'}</td>
             <td>${customer.movil || 'Sin móvil'}</td>
+            <td>${customer.segundo_telefono || 'Sin 2º teléfono'}</td>
             <td>${customer.fijo || 'Sin fijo'}</td>
+            <td>${customer.persona_contacto || 'Sin Persona Contacto'}</td>
             <td>${customer.email || 'Sin email'}</td>
             <td>${customer.direccion || 'Sin dirección'}</td>
             <td>${customer.codigo_postal || 'Sin código postal'}</td>

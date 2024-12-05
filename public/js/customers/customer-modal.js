@@ -68,6 +68,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         const nombreFiscalInput = document.querySelector('input[name="nombre_fiscalEdit"]');
                         const nifInput = document.querySelector('input[name="nifEdit"]');
                         const movilInput = document.querySelector('input[name="movilEdit"]');
+                        const segundo_telefonoInput = document.querySelector('input[name="segundo_telefonoEdit"]');
+                        const persona_contactoInput = document.querySelector('input[name="persona_contactoEdit"]');
                         const fijoInput = document.querySelector('input[name="fijoEdit"]');
                         const emailInput = document.querySelector('input[name="emailEdit"]');
                         const direccionInput = document.querySelector('input[name="direccionEdit"]');
@@ -88,6 +90,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (nombreFiscalInput) nombreFiscalInput.value = customer.nombre_fiscal || '';
                         if (nifInput) nifInput.value = customer.nif || '';
                         if (movilInput) movilInput.value = customer.movil || '';
+                        if (segundo_telefonoInput) segundo_telefonoInput.value = customer.segundo_telefono || '';
+                        if (persona_contactoInput) persona_contactoInput.value = customer.persona_contacto || '';
                         if (fijoInput) fijoInput.value = customer.fijo || '';
                         if (emailInput) emailInput.value = customer.email || '';
                         if (direccionInput) direccionInput.value = customer.direccion || '';
@@ -348,7 +352,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${customer.nombre_fiscal || 'Sin nombre fiscal'}</td>
                 <td>${customer.nif || 'Sin NIF'}</td>
                 <td>${customer.movil || 'Sin móvil'}</td>
+                <td>${customer.segundo_telefono || 'Sin 2º teléfono'}</td>
                 <td>${customer.fijo || 'Sin fijo'}</td>
+                <td>${customer.persona_contacto || 'Sin Persona Contacto'}</td>
                 <td>${customer.email || 'Sin email'}</td>
                 <td>${customer.direccion || 'Sin dirección'}</td>
                 <td>${customer.codigo_postal || 'Sin código postal'}</td>

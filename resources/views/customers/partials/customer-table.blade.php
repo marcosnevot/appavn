@@ -8,7 +8,9 @@
                 <th data-sort-key="nombre_fiscal" style="cursor: pointer;" class="col-cliente">Nombre Fiscal</th>
                 <th data-sort-key="nif" style="cursor: pointer;">NIF</th>
                 <th data-sort-key="movil" style="cursor: pointer;">Móvil</th>
+                <th data-sort-key="segundo_telefono" style="cursor: pointer;">2º Teléfono</th>
                 <th data-sort-key="fijo" style="cursor: pointer;">Fijo</th>
+                <th data-sort-key="persona_contacto" style="cursor: pointer;">Pers. Contacto</th>
                 <th data-sort-key="email" style="cursor: pointer;">Email</th>
                 <th data-sort-key="direccion" style="cursor: pointer;">Dirección</th>
                 <th data-sort-key="codigo_postal" style="cursor: pointer;">Código Postal</th>

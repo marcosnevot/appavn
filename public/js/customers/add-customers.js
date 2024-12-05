@@ -135,6 +135,8 @@ document.addEventListener('DOMContentLoaded', function () {
             nombre_fiscal: document.querySelector('input[name="nombre_fiscal"]').value,
             nif: document.querySelector('input[name="nif"]').value,
             movil: document.querySelector('input[name="movil"]').value,
+            segundo_telefono: document.querySelector('input[name="segundo_telefono"]').value,
+            persona_contacto: document.querySelector('input[name="persona_contacto"]').value,
             fijo: document.querySelector('input[name="fijo"]').value,
             email: document.querySelector('input[name="email"]').value,
             direccion: document.querySelector('input[name="direccion"]').value,
@@ -991,7 +993,9 @@ function updateCustomerTable(customers, isSingleCustomer = false, currentFilters
             <td>${customer.nombre_fiscal || 'Sin nombre fiscal'}</td>
             <td>${customer.nif || 'Sin NIF'}</td>
             <td>${customer.movil || 'Sin móvil'}</td>
+            <td>${customer.segundo_telefono || 'Sin 2º teléfono'}</td>
             <td>${customer.fijo || 'Sin fijo'}</td>
+            <td>${customer.persona_contacto || 'Sin Persona Contacto'}</td>
             <td>${customer.email || 'Sin email'}</td>
             <td>${customer.direccion || 'Sin dirección'}</td>
             <td>${customer.codigo_postal || 'Sin código postal'}</td>
@@ -1032,7 +1036,9 @@ function updateSingleCustomerRow(customer) {
             <td>${customer.nombre_fiscal || 'Sin nombre fiscal'}</td>
             <td>${customer.nif || 'Sin NIF'}</td>
             <td>${customer.movil || 'Sin móvil'}</td>
+            <td>${customer.segundo_telefono || 'Sin 2º teléfono'}</td>
             <td>${customer.fijo || 'Sin fijo'}</td>
+            <td>${customer.persona_contacto || 'Sin Persona Contacto'}</td>
             <td>${customer.email || 'Sin email'}</td>
             <td>${customer.direccion || 'Sin dirección'}</td>
             <td>${customer.codigo_postal || 'Sin código postal'}</td>

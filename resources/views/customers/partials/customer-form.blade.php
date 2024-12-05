@@ -60,6 +60,11 @@
             </div>
 
             <div class="form-group narrow">
+                <label for="persona_contacto">Persona Contacto:</label>
+                <input type="text" name="persona_contacto" id="persona_contacto" autocomplete="off" placeholder="Persona Contacto">
+            </div>
+
+            <div class="form-group narrow">
                 <label for="codigo_postal">Código Postal:</label>
                 <input type="text" name="codigo_postal" id="codigo_postal" autocomplete="off" placeholder="Código Postal">
             </div>
@@ -111,9 +116,14 @@
 
         <!-- Fila 4: Datos Bancarios, Puntaje, Código SAGE -->
         <div class="form-row">
-            <div class="form-group wide">
+            <div class="form-group narrow">
                 <label for="subclase">Subclase:</label>
                 <input type="text" name="subclase" id="subclase" placeholder="Subclase">
+            </div>
+
+            <div class="form-group narrow">
+                <label for="segundo_telefono">Segundo Teléfono:</label>
+                <input type="text" name="segundo_telefono" id="segundo_telefono" autocomplete="off" placeholder="Segundo Teléfono">
             </div>
 
             <div class="form-group wide">
