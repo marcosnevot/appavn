@@ -207,7 +207,7 @@ function loadTasks(page = 1, sortKey, sortDirection) {
     });
     // console.log(params.toString()); // Verifica qué se está enviando al servidor
 
-    
+
     fetch(`/tareas/getTasks?${params.toString()}`, {
         method: 'GET',
         headers: {
@@ -219,10 +219,10 @@ function loadTasks(page = 1, sortKey, sortDirection) {
         .then(data => {
             if (data.success) {
                 // console.log(data.tasks); // Verifica si las tareas están ordenadas correctamente en los datos recibido
-
-
                 loadInitialTasks(data.tasks);
                 updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
+                updateHoursSummaryFromTotals(data.totalTiempoPrevisto, data.totalTiempoReal);
+
             } else {
                 console.error('Error al cargar tareas:', data.message);
             }
@@ -234,8 +234,10 @@ function loadTasks(page = 1, sortKey, sortDirection) {
 }
 
 function truncateText(text, maxLength) {
+    if (!text) return ''; // Retornar vacío si no hay texto
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
+
 
 // Función para cargar y actualizar la tabla de tareas inicialmente
 function loadInitialTasks(tasks) {

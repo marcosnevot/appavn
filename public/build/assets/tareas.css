@@ -336,40 +336,58 @@ th::after {
     /* Permite ajuste de texto dentro de la celda */
 }
 
-.col-descripcion, .col-observaciones {
-    max-width: 300px; /* Define el ancho máximo */
-    width: 20%; /* Establece un ancho proporcional para evitar que se fusionen */
-    max-height: 4.5em; /* Limita la altura máxima */
-    overflow: hidden; /* Oculta contenido excedente */
-    text-overflow: ellipsis; /* Añade puntos suspensivos */
-    -webkit-line-clamp: 3; /* Limita a 3 líneas */
-    -webkit-box-orient: vertical; /* Configura orientación en vertical */
-    line-height: 1.5em; /* Establece el interlineado */
-    word-wrap: break-word; /* Ajusta palabras largas */
+.col-descripcion,
+.col-observaciones {
+    max-width: 300px;
+    /* Define el ancho máximo */
+    width: 20%;
+    /* Establece un ancho proporcional para evitar que se fusionen */
+    max-height: 4.5em;
+    /* Limita la altura máxima */
+    overflow: hidden;
+    /* Oculta contenido excedente */
+    text-overflow: ellipsis;
+    /* Añade puntos suspensivos */
+    -webkit-line-clamp: 3;
+    /* Limita a 3 líneas */
+    -webkit-box-orient: vertical;
+    /* Configura orientación en vertical */
+    line-height: 1.5em;
+    /* Establece el interlineado */
+    word-wrap: break-word;
+    /* Ajusta palabras largas */
 }
 
+
+
 .estado-pendiente {
-    background-color: rgba(255, 248, 225, 0.8) !important; /* Amarillo con opacidad */
+    background-color: rgba(255, 248, 225, 0.8) !important;
+    /* Amarillo con opacidad */
 }
 
 .estado-enespera {
-    background-color: rgba(227, 242, 253, 0.8) !important; /* Azul con opacidad */
+    background-color: rgba(227, 242, 253, 0.8) !important;
+    /* Azul con opacidad */
 }
 
 .estado-completada {
-    background-color: rgba(232, 245, 233, 0.8) !important; /* Verde con opacidad */
+    background-color: rgba(232, 245, 233, 0.8) !important;
+    /* Verde con opacidad */
 }
 
 .estado-planificada {
-    background-color: rgba(249, 249, 249, 0.8) !important; /* Gris claro */
+    background-color: rgba(249, 249, 249, 0.8) !important;
+    /* Gris claro */
 }
 
 .estado-default {
-    background-color: rgba(249, 249, 249, 0.8) !important; /* Gris claro */
+    background-color: rgba(249, 249, 249, 0.8) !important;
+    /* Gris claro */
 }
 
 .estado-default {
-    background-color: rgba(249, 249, 249, 0.8) !important; /* Gris claro */
+    background-color: rgba(249, 249, 249, 0.8) !important;
+    /* Gris claro */
 }
 
 
@@ -1182,6 +1200,73 @@ input[type="date"].planificacion-date-picker:focus {
     color: #059669;
     font-size: 20px;
     animation: highlight 0.5s ease-in-out;
+}
+
+.professional-hours-panel {
+    display: flex;
+    /* Organización en fila */
+    justify-content: space-between;
+    /* Espaciado entre los elementos */
+    align-items: center;
+    /* Alineación vertical */
+    position: fixed;
+    /* Fijo para mantenerlo visible en la pantalla */
+    bottom: 30px;
+    /* Alineado con la parte inferior de la pantalla */
+    right: 70px;
+    /* Alineado con el borde derecho */
+    background-color: #ffffff;
+    /* Fondo blanco profesional */
+    border: 2px solid #d1d5db;
+    /* Borde sutil */
+    border-radius: 12px;
+    /* Esquinas redondeadas */
+    
+    padding: 10px 10px;
+    /* Espaciado interno */
+    max-width: 900px;
+    /* Ancho máximo */
+    z-index: 1000;
+    /* Para que esté siempre visible sobre otros elementos */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Animaciones suaves */
+    gap: 20px;
+    /* Espaciado entre los elementos */
+}
+
+
+
+.professional-hours-panel .hours-item {
+    display: flex;
+    /* Elementos en línea dentro de cada bloque */
+    align-items: center;
+    /* Alineación vertical */
+    gap: 5px;
+    /* Espaciado entre texto y número */
+    font-family: "Inter", sans-serif;
+    /* Fuente moderna */
+    font-size: 14px;
+    /* Tamaño del texto */
+    line-height: 1.5;
+    /* Altura de las líneas */
+    color: #374151;
+    /* Color del texto */
+}
+
+.professional-hours-panel .hours-item strong {
+    color: #111827;
+    /* Color del texto más oscuro */
+    font-weight: 600;
+    /* Negrita */
+}
+
+.professional-hours-panel .hours-item span {
+    font-size: 18px;
+    /* Tamaño del número */
+    font-weight: 700;
+    /* Negrita */
+    color: #2563eb;
+    /* Azul profesional */
 }
 
 

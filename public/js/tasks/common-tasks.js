@@ -155,6 +155,26 @@ function addDoubleClickEventToRows() {
 }
 
 
+// Nueva función para actualizar el panel de horas con los totales
+function updateHoursSummaryFromTotals(totalTiempoPrevisto, totalTiempoReal) {
+    const tiempoPrevistoElement = document.getElementById('total-tiempo-previsto');
+    const tiempoRealElement = document.getElementById('total-tiempo-real');
+
+    if (tiempoPrevistoElement) {
+        tiempoPrevistoElement.textContent = parseFloat(totalTiempoPrevisto || 0).toFixed(2);
+    } else {
+        console.warn("Elemento 'total-tiempo-previsto' no encontrado en el DOM.");
+    }
+
+    if (tiempoRealElement) {
+        tiempoRealElement.textContent = parseFloat(totalTiempoReal || 0).toFixed(2);
+    } else {
+        console.warn("Elemento 'total-tiempo-real' no encontrado en el DOM.");
+    }
+}
+
+
+
 // Función para mostrar la notificación unificada
 function showNotification(message = "Acción completada", type = "success") {
     const notification = document.getElementById('notification');

@@ -22,7 +22,9 @@
                 <option value="situacion">Situación</option>
             </select>
         </div>
-
+        <button id="export-customers-button" class="btn-excel">
+            <img src="{{ asset('images/excel-icon.png') }}" alt="Excel">
+        </button>
         <!-- Botón de Filtrar Cliente -->
         <button id="filter-customer-button" class="btn-new-customer">Filtrar</button>
 

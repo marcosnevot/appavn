@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\CustomerCreated;
 use App\Events\CustomerDeleted;
 use App\Events\CustomerUpdated;
+use App\Exports\CustomersExport;
 use App\Models\Cliente;
 use App\Models\TipoCliente;
 use App\Models\Clasificacion;
@@ -14,7 +15,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 class ClientController extends Controller
 {
@@ -648,5 +649,161 @@ class ClientController extends Controller
             DB::rollBack(); // Deshacer la transacción en caso de error general
             return response()->json(['success' => false, 'message' => 'Error al actualizar el cliente: ' . $e->getMessage()], 500);
         }
+    }
+
+
+
+    // Método de exportación de clientes 
+    public function exportFilteredCustomers(Request $request)
+    {
+        // Obtén los filtros aplicados desde la solicitud
+        $filters = $request->all();
+
+        // Aplica los filtros a la consulta de tareas
+        $query = Cliente::select([
+            'id',
+            'nombre_fiscal',
+            'nif',
+            'tipo_cliente_id',
+            'clasificacion_id',
+            'tributacion_id',
+            'situacion_id',
+            'movil',
+            'fijo',
+            'email',
+            'direccion',
+            'codigo_postal',
+            'poblacion',
+            'datos_bancarios',
+            'subclase',
+            'puntaje',
+            'codigo_sage',
+            'segundo_telefono',
+            'persona_contacto',
+            'created_at'
+        ])->with(['tipoCliente', 'clasificacion', 'tributacion', 'situacion', 'users']);
+
+
+        // Filtrar por nombre fiscal del cliente
+        if (!empty($filters['nombre_fiscal'])) {
+            $query->where('nombre_fiscal', 'like', '%' . $filters['nombre_fiscal'] . '%');
+        }
+
+        // Filtrar por NIF
+        if (!empty($filters['nif'])) {
+            $query->where('nif', 'like', '%' . $filters['nif'] . '%');
+        }
+
+        // Filtrar por tipo de cliente
+        if (!empty($filters['tipo_cliente'])) {
+            $tipoCliente = TipoCliente::where('nombre', 'like', '%' . $filters['tipo_cliente'] . '%')->first();
+            if ($tipoCliente) {
+                $query->where('tipo_cliente_id', $tipoCliente->id);
+            }
+        }
+
+        // Filtrar por clasificación
+        if (!empty($filters['clasificacion'])) {
+            $clasificacion = Clasificacion::where('nombre', 'like', '%' . $filters['clasificacion'] . '%')->first();
+            if ($clasificacion) {
+                $query->where('clasificacion_id', $clasificacion->id);
+            }
+        }
+
+        // Filtrar por tributación
+        if (!empty($filters['tributacion'])) {
+            $tributacion = Tributacion::where('nombre', 'like', '%' . $filters['tributacion'] . '%')->first();
+            if ($tributacion) {
+                $query->where('tributacion_id', $tributacion->id);
+            }
+        }
+
+        // Filtrar por situación
+        if (!empty($filters['situacion'])) {
+            $situacion = Situacion::where('nombre', 'like', '%' . $filters['situacion'] . '%')->first();
+            if ($situacion) {
+                $query->where('situacion_id', $situacion->id);
+            }
+        }
+        // Filtrar por móvil
+        if (!empty($filters['movil'])) {
+            $query->where('movil', 'like', '%' . $filters['movil'] . '%');
+        }
+
+        // Filtrar por fijo
+        if (!empty($filters['fijo'])) {
+            $query->where('fijo', 'like', '%' . $filters['fijo'] . '%');
+        }
+
+        // Filtrar por email
+        if (!empty($filters['email'])) {
+            $query->where('email', 'like', '%' . $filters['email'] . '%');
+        }
+
+        // Filtrar por dirección
+        if (!empty($filters['direccion'])) {
+            $query->where('direccion', 'like', '%' . $filters['direccion'] . '%');
+        }
+
+        // Filtrar por código postal
+        if (!empty($filters['codigo_postal'])) {
+            $query->where('codigo_postal', 'like', '%' . $filters['codigo_postal'] . '%');
+        }
+
+        // Filtrar por población
+        if (!empty($filters['poblacion'])) {
+            $query->where('poblacion', 'like', '%' . $filters['poblacion'] . '%');
+        }
+
+        // Filtrar por usuario responsable asignado
+        if (!empty($filters['usuario'])) {
+            $userIds = explode(',', $filters['usuario']);
+            $query->whereHas('users', function ($q) use ($userIds) {
+                $q->whereIn('users.id', $userIds);
+            });
+        }
+
+        // Filtrar por datos bancarios
+        if (!empty($filters['datos_bancarios'])) {
+            $query->where('datos_bancarios', 'like', '%' . $filters['datos_bancarios'] . '%');
+        }
+
+        // Filtrar por subclase
+        if (!empty($filters['subclase'])) {
+            $query->where('subclase', 'like', '%' . $filters['subclase'] . '%');
+        }
+
+        // Filtrar por puntaje
+        if (!empty($filters['puntaje'])) {
+            $query->where('puntaje', '=', $filters['puntaje']);
+        }
+
+        // Filtrar por código SAGE
+        if (!empty($filters['codigo_sage'])) {
+            $query->where('codigo_sage', 'like', '%' . $filters['codigo_sage'] . '%');
+        }
+
+        // Filtrar por segundo teléfono
+        if (!empty($filters['segundo_telefono'])) {
+            $query->where('segundo_telefono', 'like', '%' . $filters['segundo_telefono'] . '%');
+        }
+
+        // Filtrar por persona de contacto
+        if (!empty($filters['persona_contacto'])) {
+            $query->where('persona_contacto', 'like', '%' . $filters['persona_contacto'] . '%');
+        }
+
+
+        // Añadir el orden por fecha de creación, de más reciente a más antigua
+        $query->orderBy('created_at', 'desc');
+
+
+
+        $filteredCustomers = $query->get();
+        $fileName = $filters['fileName'] ?? 'clientes_filtrados.xlsx';
+
+        // Exporta las tareas filtradas
+
+        return Excel::download(new CustomersExport($filteredCustomers), $fileName);
     }
 }

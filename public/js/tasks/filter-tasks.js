@@ -173,6 +173,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     updateTaskTable(data.filteredTasks);
                     updatePagination(data.pagination, (newPage) => loadFilteredTasks(newPage, sortKey, sortDirection)); // Paginación con filtros y orden
+                    updateHoursSummaryFromTotals(data.totalTiempoPrevisto, data.totalTiempoReal);
                     resetFiltroRapidoPlanificacion();
                     updateSelectedUserNamesFromFilterForm();
                     closeFilterTaskForm();
@@ -592,6 +593,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+
+
+
     // Checklists de los campos Estado, Subtipo, facturable y Facturado
 
     function initializeChecklistFilter(fieldName, isBoolean = false) {
@@ -750,18 +754,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     // Filtro según la planificación
     const planificacionFilterContainer = document.getElementById('planificacion-filter-buttons');
 
@@ -898,6 +890,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     updateTaskTable(data.filteredTasks); // Actualizar la tabla con las tareas filtradas
                     updatePagination(data.pagination, loadFilteredTasks);  // Pasar loadFilteredTasks para paginación si es necesario
+                    updateHoursSummaryFromTotals(data.totalTiempoPrevisto, data.totalTiempoReal);
                 } else {
                     console.error('Error al filtrar tareas:', data.message);
                 }

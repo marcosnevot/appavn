@@ -187,8 +187,15 @@ class TaskController extends Controller
 
             // Orden terciario: desempatador por id
 
+            // Clonar el query para usarlo en el cálculo de totales
+            $totalQuery = clone $query;
+
             // Paginación
             $tasks = $query->paginate(50);
+
+            // Calcular los totales
+            $totalTiempoPrevisto = $totalQuery->sum('tiempo_previsto');
+            $totalTiempoReal = $totalQuery->sum('tiempo_real');
 
             Log::debug('Parámetros de ordenación:', ['sortKey' => $sortKey, 'sortDirection' => $sortDirection]);
             Log::debug('SQL generado:', DB::getQueryLog());
@@ -201,6 +208,8 @@ class TaskController extends Controller
                     'per_page' => $tasks->perPage(),
                     'total' => $tasks->total(),
                 ],
+                'totalTiempoPrevisto' => $totalTiempoPrevisto,
+                'totalTiempoReal' => $totalTiempoReal,
             ]);
         } catch (\Exception $e) {
             Log::error('Error al obtener tareas: ' . $e->getMessage());
@@ -898,8 +907,15 @@ class TaskController extends Controller
             // Añadir el orden por fecha de planificacion, de más antigua a más reciente
             $query->distinct()->orderBy('fecha_planificacion', 'asc');
 
+            // Clonar el query para usarlo en el cálculo de totales
+            $totalQuery = clone $query;
+
             // Ejecutar la consulta y obtener las tareas filtradas
             $filteredTasks = $query->paginate(50);
+
+            // Calcular los totales
+            $totalTiempoPrevisto = $totalQuery->sum('tiempo_previsto');
+            $totalTiempoReal = $totalQuery->sum('tiempo_real');
 
             // Devolver las tareas filtradas como respuesta JSON
             return response()->json([
@@ -911,7 +927,9 @@ class TaskController extends Controller
                     'next_page_url' => $filteredTasks->nextPageUrl(),
                     'prev_page_url' => $filteredTasks->previousPageUrl(),
                     'total' => $filteredTasks->total(),
-                ]
+                ],
+                'totalTiempoPrevisto' => $totalTiempoPrevisto,
+                'totalTiempoReal' => $totalTiempoReal,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -1130,166 +1148,165 @@ class TaskController extends Controller
 
 
     public function update(Request $request, $id)
-{
-    try {
-        // Iniciar una transacción para asegurar la integridad de los datos
-        DB::beginTransaction();
+    {
+        try {
+            // Iniciar una transacción para asegurar la integridad de los datos
+            DB::beginTransaction();
 
-        // Reglas de validación dinámica
-        $rules = [];
+            // Reglas de validación dinámica
+            $rules = [];
 
-        // Agregar reglas dinámicamente para los campos presentes en la solicitud
-        foreach (
-            [
-                'cliente_idEdit' => 'nullable',
-                'cliente_nombreEdit' => 'nullable|string|max:255',
-                'asunto_idEdit' => 'nullable',
-                'asunto_nombreEdit' => 'nullable|string|max:255',
-                'tipo_idEdit' => 'nullable',
-                'tipo_nombreEdit' => 'nullable|string|max:255',
-                'subtipoEdit' => 'nullable|string',
-                'estadoEdit' => 'nullable|string',
-                'archivoEdit' => 'nullable|string',
-                'descripcionEdit' => 'nullable|string',
-                'observacionesEdit' => 'nullable|string',
-                'facturableEdit' => 'nullable|boolean',
-                'facturadoEdit' => 'nullable|string',
-                'facturado' => 'nullable|string',  // Facturado desde la celda
-                'precioEdit' => 'nullable|numeric',
-                'suplidoEdit' => 'nullable|numeric',
-                'costeEdit' => 'nullable|numeric',
-                'fecha_planificacionEdit' => 'nullable|date',
-                'fecha_inicioEdit' => 'nullable|date',
-                'fecha_vencimientoEdit' => 'nullable|date',
-                'fecha_imputacionEdit' => 'nullable|date',
-                'tiempo_previstoEdit' => 'nullable|numeric',
-                'tiempo_realEdit' => 'nullable|numeric',
-                'usersEdit' => 'nullable|array',
-                'usersEdit.*' => 'exists:users,id',
-                'duplicar' => 'nullable|boolean',
-            ] as $field => $rule
-        ) {
-            if ($request->has($field)) { // Validar solo campos presentes
-                $rules[$field] = $rule;
+            // Agregar reglas dinámicamente para los campos presentes en la solicitud
+            foreach (
+                [
+                    'cliente_idEdit' => 'nullable',
+                    'cliente_nombreEdit' => 'nullable|string|max:255',
+                    'asunto_idEdit' => 'nullable',
+                    'asunto_nombreEdit' => 'nullable|string|max:255',
+                    'tipo_idEdit' => 'nullable',
+                    'tipo_nombreEdit' => 'nullable|string|max:255',
+                    'subtipoEdit' => 'nullable|string',
+                    'estadoEdit' => 'nullable|string',
+                    'archivoEdit' => 'nullable|string',
+                    'descripcionEdit' => 'nullable|string',
+                    'observacionesEdit' => 'nullable|string',
+                    'facturableEdit' => 'nullable|boolean',
+                    'facturadoEdit' => 'nullable|string',
+                    'facturado' => 'nullable|string',  // Facturado desde la celda
+                    'precioEdit' => 'nullable|numeric',
+                    'suplidoEdit' => 'nullable|numeric',
+                    'costeEdit' => 'nullable|numeric',
+                    'fecha_planificacionEdit' => 'nullable|date',
+                    'fecha_inicioEdit' => 'nullable|date',
+                    'fecha_vencimientoEdit' => 'nullable|date',
+                    'fecha_imputacionEdit' => 'nullable|date',
+                    'tiempo_previstoEdit' => 'nullable|numeric',
+                    'tiempo_realEdit' => 'nullable|numeric',
+                    'usersEdit' => 'nullable|array',
+                    'usersEdit.*' => 'exists:users,id',
+                    'duplicar' => 'nullable|boolean',
+                ] as $field => $rule
+            ) {
+                if ($request->has($field)) { // Validar solo campos presentes
+                    $rules[$field] = $rule;
+                }
             }
-        }
 
-        // Validar la solicitud
-        $validated = $request->validate($rules);
+            // Validar la solicitud
+            $validated = $request->validate($rules);
 
-        // Buscar la tarea por ID
-        $task = Tarea::findOrFail($id);
+            // Buscar la tarea por ID
+            $task = Tarea::findOrFail($id);
 
-        // Preparar los datos para la actualización
-        $updateData = [];
+            // Preparar los datos para la actualización
+            $updateData = [];
 
-        // Actualizar campos solo si están presentes en la solicitud
-        foreach (
-            [
-                'cliente_id' => 'cliente_idEdit',
-                'asunto_id' => 'asunto_idEdit',
-                'tipo_id' => 'tipo_idEdit',
-                'subtipo' => 'subtipoEdit',
-                'estado' => 'estadoEdit',
-                'archivo' => 'archivoEdit',
-                'descripcion' => 'descripcionEdit',
-                'observaciones' => 'observacionesEdit',
-                'facturable' => 'facturableEdit',
-                'precio' => 'precioEdit',
-                'suplido' => 'suplidoEdit',
-                'coste' => 'costeEdit',
-                'fecha_planificacion' => 'fecha_planificacionEdit',
-                'fecha_inicio' => 'fecha_inicioEdit',
-                'fecha_vencimiento' => 'fecha_vencimientoEdit',
-                'fecha_imputacion' => 'fecha_imputacionEdit',
-                'tiempo_previsto' => 'tiempo_previstoEdit',
-                'tiempo_real' => 'tiempo_realEdit',
-            ] as $field => $requestKey
-        ) {
-            if ($request->has($requestKey)) { // Incluir solo campos presentes
-                $updateData[$field] = $request->input($requestKey);
+            // Actualizar campos solo si están presentes en la solicitud
+            foreach (
+                [
+                    'cliente_id' => 'cliente_idEdit',
+                    'asunto_id' => 'asunto_idEdit',
+                    'tipo_id' => 'tipo_idEdit',
+                    'subtipo' => 'subtipoEdit',
+                    'estado' => 'estadoEdit',
+                    'archivo' => 'archivoEdit',
+                    'descripcion' => 'descripcionEdit',
+                    'observaciones' => 'observacionesEdit',
+                    'facturable' => 'facturableEdit',
+                    'precio' => 'precioEdit',
+                    'suplido' => 'suplidoEdit',
+                    'coste' => 'costeEdit',
+                    'fecha_planificacion' => 'fecha_planificacionEdit',
+                    'fecha_inicio' => 'fecha_inicioEdit',
+                    'fecha_vencimiento' => 'fecha_vencimientoEdit',
+                    'fecha_imputacion' => 'fecha_imputacionEdit',
+                    'tiempo_previsto' => 'tiempo_previstoEdit',
+                    'tiempo_real' => 'tiempo_realEdit',
+                ] as $field => $requestKey
+            ) {
+                if ($request->has($requestKey)) { // Incluir solo campos presentes
+                    $updateData[$field] = $request->input($requestKey);
+                }
             }
-        }
 
-        // Manejar el campo "facturado" (priorizar celda sobre formulario)
-        if ($request->has('facturado')) {
-            $updateData['facturado'] = $request->input('facturado');
-        } elseif ($request->has('facturadoEdit')) {
-            $updateData['facturado'] = $request->input('facturadoEdit');
-        }
-
-        // Verificar si se debe crear o asociar un cliente
-        if (isset($validated['cliente_nombreEdit']) && !$request->filled('cliente_idEdit')) {
-            $clienteExistente = Cliente::where('nombre_fiscal', strtoupper($validated['cliente_nombreEdit']))
-                ->lockForUpdate()
-                ->first();
-
-            if ($clienteExistente) {
-                $updateData['cliente_id'] = $clienteExistente->id;
-            } else {
-                $cliente = Cliente::create([
-                    'nombre_fiscal' => strtoupper($validated['cliente_nombreEdit']),
-                    'nif' => $request->input('cliente_nifEdit', null),
-                    'email' => $request->input('cliente_emailEdit', null),
-                    'telefono' => $request->input('cliente_telefonoEdit', null),
-                ]);
-                $updateData['cliente_id'] = $cliente->id;
+            // Manejar el campo "facturado" (priorizar celda sobre formulario)
+            if ($request->has('facturado')) {
+                $updateData['facturado'] = $request->input('facturado');
+            } elseif ($request->has('facturadoEdit')) {
+                $updateData['facturado'] = $request->input('facturadoEdit');
             }
-        }
 
-        // Verificar si se debe crear o asociar un asunto
-        if (isset($validated['asunto_nombreEdit']) && !$request->filled('asunto_idEdit')) {
-            $asuntoExistente = Asunto::where('nombre', strtoupper($validated['asunto_nombreEdit']))
-                ->lockForUpdate()
-                ->first();
+            // Verificar si se debe crear o asociar un cliente
+            if (isset($validated['cliente_nombreEdit']) && !$request->filled('cliente_idEdit')) {
+                $clienteExistente = Cliente::where('nombre_fiscal', strtoupper($validated['cliente_nombreEdit']))
+                    ->lockForUpdate()
+                    ->first();
 
-            if ($asuntoExistente) {
-                $updateData['asunto_id'] = $asuntoExistente->id;
-            } else {
-                $asunto = Asunto::create(['nombre' => strtoupper($validated['asunto_nombreEdit'])]);
-                $updateData['asunto_id'] = $asunto->id;
+                if ($clienteExistente) {
+                    $updateData['cliente_id'] = $clienteExistente->id;
+                } else {
+                    $cliente = Cliente::create([
+                        'nombre_fiscal' => strtoupper($validated['cliente_nombreEdit']),
+                        'nif' => $request->input('cliente_nifEdit', null),
+                        'email' => $request->input('cliente_emailEdit', null),
+                        'telefono' => $request->input('cliente_telefonoEdit', null),
+                    ]);
+                    $updateData['cliente_id'] = $cliente->id;
+                }
             }
-        }
 
-        // Verificar si se debe crear o asociar un tipo
-        if (isset($validated['tipo_nombreEdit']) && !$request->filled('tipo_idEdit')) {
-            $tipoExistente = Tipo::where('nombre', strtoupper($validated['tipo_nombreEdit']))
-                ->lockForUpdate()
-                ->first();
+            // Verificar si se debe crear o asociar un asunto
+            if (isset($validated['asunto_nombreEdit']) && !$request->filled('asunto_idEdit')) {
+                $asuntoExistente = Asunto::where('nombre', strtoupper($validated['asunto_nombreEdit']))
+                    ->lockForUpdate()
+                    ->first();
 
-            if ($tipoExistente) {
-                $updateData['tipo_id'] = $tipoExistente->id;
-            } else {
-                $tipo = Tipo::create(['nombre' => strtoupper($validated['tipo_nombreEdit'])]);
-                $updateData['tipo_id'] = $tipo->id;
+                if ($asuntoExistente) {
+                    $updateData['asunto_id'] = $asuntoExistente->id;
+                } else {
+                    $asunto = Asunto::create(['nombre' => strtoupper($validated['asunto_nombreEdit'])]);
+                    $updateData['asunto_id'] = $asunto->id;
+                }
             }
+
+            // Verificar si se debe crear o asociar un tipo
+            if (isset($validated['tipo_nombreEdit']) && !$request->filled('tipo_idEdit')) {
+                $tipoExistente = Tipo::where('nombre', strtoupper($validated['tipo_nombreEdit']))
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($tipoExistente) {
+                    $updateData['tipo_id'] = $tipoExistente->id;
+                } else {
+                    $tipo = Tipo::create(['nombre' => strtoupper($validated['tipo_nombreEdit'])]);
+                    $updateData['tipo_id'] = $tipo->id;
+                }
+            }
+
+            // Actualizar la tarea con los datos procesados
+            $task->update($updateData);
+
+            // Asociar los usuarios a la tarea (si se han seleccionado)
+            if (!empty($validated['usersEdit'])) {
+                $task->users()->sync($validated['usersEdit']);
+            }
+
+            // Emitir el evento para notificar a otros usuarios
+            broadcast(new TaskUpdated($task));
+
+            // Confirmar la transacción
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'task' => $task->load(['cliente', 'asunto', 'tipo', 'users']),
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'errors' => $e->errors()], 400);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Error al actualizar la tarea: ' . $e->getMessage()], 500);
         }
-
-        // Actualizar la tarea con los datos procesados
-        $task->update($updateData);
-
-        // Asociar los usuarios a la tarea (si se han seleccionado)
-        if (!empty($validated['usersEdit'])) {
-            $task->users()->sync($validated['usersEdit']);
-        }
-
-        // Emitir el evento para notificar a otros usuarios
-        broadcast(new TaskUpdated($task));
-
-        // Confirmar la transacción
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'task' => $task->load(['cliente', 'asunto', 'tipo', 'users']),
-        ]);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        DB::rollBack();
-        return response()->json(['success' => false, 'errors' => $e->errors()], 400);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json(['success' => false, 'message' => 'Error al actualizar la tarea: ' . $e->getMessage()], 500);
     }
-}
-
 }

@@ -26,16 +26,7 @@
         </div>
 
 
-        <!-- Desplegable de Ordenar por -->
-        <div class="sort-container" style="display: none;">
-            <label for="sort-select" class="sort-label">Ordenar por:</label>
-            <select id="sort-select" class="sort-select">
-                <option value="fecha_creacion" selected>Fecha de Creación</option>
-                <option value="cliente">Cliente</option>
-                <option value="asunto">Asunto</option>
-                <option value="estado">Estado</option>
-            </select>
-        </div>
+
         <button id="export-tasks-button" class="btn-excel">
             <img src="{{ asset('images/excel-icon.png') }}" alt="Excel">
         </button>
@@ -76,6 +67,9 @@
 
 <!-- Formulario de edición de la tarea -->
 @include('tasks.partials.edit-task-form')
+
+
+
 
 @endsection
 

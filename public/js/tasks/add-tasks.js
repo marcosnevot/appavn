@@ -755,8 +755,8 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
                         <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
-            <td>${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
-            <td>${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
+            <td class="col-descripcion">${task.descripcion ? truncateText2(task.descripcion, 100) : ''}</td>
+            <td class="col-observaciones">${task.observaciones ? truncateText2(task.observaciones, 100) : ''}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
             <td>${task.facturado || 'No'}</td>
             <td>${task.estado}</td>
@@ -774,13 +774,21 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             tableBody.appendChild(row);
         }
 
-
+        
         // Añadir el evento de doble clic a las filas de la tabla
         addDoubleClickEventToRows();
     });
 
 
 }
+
+function truncateText2(text, maxLength) {
+    console.log('hola');
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+
 
 // Función para actualizar una fila específica en la tabla al editar una tarea
 function updateSingleTaskRow(task) {

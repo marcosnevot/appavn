@@ -87,6 +87,72 @@ document.addEventListener('DOMContentLoaded', function () {
             // Recargar tareas con la nueva ordenación y filtros activos
             loadCustomers(1, sortKeyToSend, sortDirectionToSend);
         });
+
+
+
+    });
+
+    document.getElementById('export-customers-button').addEventListener('click', async function () {
+
+        const fileName = prompt("Ingrese el nombre para el archivo (sin extensión):", "clientes");
+
+        // Verificar si el usuario canceló
+        if (!fileName) {
+            return; // Salir si el usuario cancela el prompt
+        }
+
+        const filterData = {
+            nombre_fiscal: document.getElementById('filter-nombre-fiscal-input').value || '',
+            nif: document.getElementById('filter-nif-input').value || '',
+            movil: document.getElementById('filter-movil-input').value || '',
+            fijo: document.getElementById('filter-fijo-input').value || '',
+            email: document.getElementById('filter-email-input').value || '',
+            direccion: document.getElementById('filter-direccion-input').value || '',
+            codigo_postal: document.getElementById('filter-codigo-postal-input').value || '',
+            poblacion: document.getElementById('filter-poblacion-input').value || '',
+            tipo_cliente: document.getElementById('filter-tipo-cliente-input').value || '',
+            clasificacion: document.getElementById('filter-clasificacion-input').value || '',
+            tributacion: document.getElementById('filter-tributacion-input').value || '',
+            situacion: document.getElementById('filter-situacion-input').value || '',
+            datos_bancarios: document.getElementById('filter-datos-bancarios-input').value || '',
+            subclase: document.getElementById('filter-subclase-input').value || '',
+            puntaje: document.getElementById('filter-puntaje-input').value || '',
+            codigo_sage: document.getElementById('filter-codigo-sage-input').value || '',
+            usuario: document.getElementById('filter-user-ids').value || '', // Para el responsable asignado
+            persona_contacto: document.getElementById('filter-persona_contacto-input').value || '', // Persona de contacto
+            segundo_telefono: document.getElementById('filter-segundo_telefono-input').value || '', // Segundo teléfono
+
+
+            fileName: fileName + '.xlsx'
+        };
+
+        try {
+            const response = await fetch('/clientes/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(filterData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName + '.xlsx';  // Nombre del archivo personalizado
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url); // Liberar el objeto URL
+        } catch (error) {
+            console.error('Error al exportar:', error);
+            alert('Ocurrió un error al intentar exportar los clientes. Por favor, inténtalo nuevamente.');
+        }
     });
 
 
