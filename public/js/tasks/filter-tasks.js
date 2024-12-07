@@ -2,9 +2,9 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('El script de filtro ha sido cargado correctamente.');
 
     // Obtener los datos de clientes, asuntos y tipos desde los atributos data
-    const clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
-    const asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
-    const tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+    clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
+    asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
+    tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
 
     const filterTaskButton = document.getElementById('filter-task-button');
     const filterTaskForm = document.getElementById('filter-task-form');
@@ -910,4 +910,413 @@ document.addEventListener('DOMContentLoaded', function () {
     generarBotonesFiltroPlanificacion();
 
 
+
+    // Filtros rápidos en encabezados
+
+    // Añadir listeners a los encabezados de tabla con `data-sort-key`
+    const headers = document.querySelectorAll('th[data-field]');
+
+    headers.forEach(header => {
+        header.addEventListener('contextmenu', function (event) {
+            event.preventDefault();
+            const field = header.getAttribute('data-field'); // Toma solo data-field
+            if (!field) {
+                console.error('El encabezado no tiene el atributo data-field.');
+                return;
+            }
+
+            const dropdownList = document.querySelector(`#${field}-list`);
+            const inputField = document.querySelector(`#filter-task-form [name="${field}"]`);
+            const autocompleteContainer = document.querySelector(`#filter-${field}-input`)?.closest('.autocomplete');
+
+            if (autocompleteContainer) {
+                const dataList = getAutocompleteData(field); // Usa data-field para datos
+                showAutocompleteField(header, autocompleteContainer, dataList, field);
+            } else if (dropdownList) {
+                showDropdownList(header, dropdownList, field);
+            } else if (inputField) {
+                showInputField(header, inputField);
+            } else {
+                console.error(`No se encontró ningún elemento asociado para: ${field}`);
+            }
+        });
+    });
+
+
+    // Función para obtener los datos del autocompletar según el campo
+    function getAutocompleteData(field) {
+        if (field === 'cliente') return clientesData; // Clientes
+        if (field === 'asunto') return asuntosData;   // Asuntos
+        if (field === 'tipo') return tiposData;       // Tipos
+        console.error(`No se encontró un conjunto de datos para el campo: ${field}`);
+        return [];
+    }
+
+
+
+
+
+
+
+    function showDropdownList(header, dropdownList, field) {
+        hideAllDropdownLists(); // Ocultar otras listas desplegadas
+
+        // Clonar visualmente la lista desplegable
+        const mirroredList = dropdownList.cloneNode(true);
+        mirroredList.id = `${dropdownList.id}-mirrored`; // Evitar conflictos de ID
+        mirroredList.style.position = 'absolute';
+        mirroredList.style.display = 'block';
+
+        // Ajustar posición y ancho basado en el encabezado
+        const updatePosition = () => {
+            const rect = header.getBoundingClientRect();
+            mirroredList.style.top = `${rect.bottom + window.scrollY}px`;
+            mirroredList.style.left = `${rect.left + window.scrollX - 25}px`; // Desplazar 10px a la izquierda
+            mirroredList.style.width = `${rect.width + 50}px`; // Incrementar ancho por 20px
+        };
+        updatePosition();
+
+        const scrollContainer = document.querySelector('.table-container'); // Contenedor de scroll
+
+        // Cerrar desplegable al hacer scroll
+        const handleScroll = () => {
+            if (document.body.contains(mirroredList)) {
+                document.body.removeChild(mirroredList);
+            }
+            scrollContainer.removeEventListener('scroll', handleScroll);
+        };
+        scrollContainer.addEventListener('scroll', handleScroll);
+
+        // Añadir al documento
+        document.body.appendChild(mirroredList);
+
+        // Manejar las selecciones
+        const checkboxes = mirroredList.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const originalCheckbox = dropdownList.querySelector(`#${checkbox.id}`);
+                if (originalCheckbox) {
+                    originalCheckbox.checked = checkbox.checked; // Sincronizar estado del checkbox
+                }
+                updateHiddenField(field, dropdownList);
+                applyFilterOnChange(); // Activar el filtrado automáticamente
+            });
+            // Manejar clic en el texto asociado
+            const label = mirroredList.querySelector(`label[for="${checkbox.id}"]`);
+            if (label) {
+                label.addEventListener('click', function (event) {
+                    event.preventDefault(); // Evitar comportamiento predeterminado
+                    checkbox.checked = !checkbox.checked; // Alternar el estado del checkbox
+                    checkbox.dispatchEvent(new Event('change')); // Activar el evento `change`
+                });
+            }
+        });
+
+        // Manejar clic fuera con verificación
+        setTimeout(() => {
+            document.addEventListener('click', function handleClickOutside(event) {
+                if (
+                    !mirroredList.contains(event.target) &&
+                    !header.contains(event.target)
+                ) {
+                    if (document.body.contains(mirroredList)) {
+                        document.body.removeChild(mirroredList);
+                    }
+                    document.removeEventListener('click', handleClickOutside);
+                }
+            });
+        }, 0);
+    }
+
+    function showInputField(header, inputField) {
+        hideAllDropdownLists(); // Ocultar cualquier lista desplegada
+
+        // Clonar visualmente el input
+        const inputClone = inputField.cloneNode(true);
+        inputClone.id = `${inputField.id}-mirrored`; // Evitar conflictos de ID
+        inputClone.style.position = 'absolute';
+
+
+        // Ajustar posición y ancho basado en el encabezado
+        const updatePosition = () => {
+            const rect = header.getBoundingClientRect();
+            inputClone.style.top = `${rect.bottom + window.scrollY}px`;
+            inputClone.style.left = `${rect.left + window.scrollX - 25}px`;
+            inputClone.style.width = `${rect.width + 50}px`; // Ajustar al ancho del encabezado
+            inputClone.style.height = '500px';
+
+        };
+        updatePosition();
+
+        const scrollContainer = document.querySelector('.table-container'); // Contenedor de scroll
+
+        // Cerrar input al hacer scroll
+        const handleScroll = () => {
+            if (document.body.contains(inputClone)) {
+                document.body.removeChild(inputClone);
+            }
+            scrollContainer.removeEventListener('scroll', handleScroll);
+        };
+        scrollContainer.addEventListener('scroll', handleScroll);
+
+        // Añadir al documento
+        document.body.appendChild(inputClone);
+
+        // Si el input tiene asociado un daterangepicker, inicializarlo en el input clonado
+        if (inputField.id === 'filter-fecha-planificacion') {
+            $(inputClone).daterangepicker({
+                autoUpdateInput: true,
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    separator: ' - ',
+                    applyLabel: 'Aplicar',
+                    cancelLabel: 'Cancelar',
+                },
+                drops: 'down',
+            });
+
+            // Manejar la selección de fechas
+            $(inputClone).on('apply.daterangepicker', function (ev, picker) {
+                ev.stopPropagation(); // Evitar cierre prematuro
+                inputField.value = `${picker.startDate.format('YYYY-MM-DD')} - ${picker.endDate.format('YYYY-MM-DD')}`;
+                applyFilterOnChange(); // Activar el filtro automáticamente
+            });
+
+            // Manejar la cancelación
+            $(inputClone).on('cancel.daterangepicker', function () {
+                inputField.value = ''; // Limpiar el campo original
+                applyFilterOnChange(); // Activar el filtro automáticamente
+            });
+
+            // Inicializar valor vacío
+            $(inputClone).val('');
+        }
+
+        // Sincronizar valores en tiempo real
+        inputClone.addEventListener('input', function () {
+            inputField.value = inputClone.value; // Actualizar el valor del input original
+            applyFilterOnChange(); // Activar el filtrado automáticamente
+        });
+
+        // Manejar clic fuera con verificación
+        setTimeout(() => {
+            document.addEventListener('click', function handleClickOutside(event) {
+                if (
+                    !inputClone.contains(event.target) &&
+                    !header.contains(event.target) &&
+                    !event.target.closest('.daterangepicker') // Prevenir cierre al interactuar con el calendario
+                ) {
+                    if (document.body.contains(inputClone)) {
+                        document.body.removeChild(inputClone);
+                    }
+                    $(inputClone).data('daterangepicker')?.remove(); // Eliminar instancia de daterangepicker
+                    scrollContainer.removeEventListener('scroll', handleScroll);
+                    document.removeEventListener('click', handleClickOutside);
+                }
+            });
+        }, 0);
+
+        inputClone.focus(); // Foco automático en el input clonado
+    }
+
+    function showAutocompleteField(header, autocompleteContainer, dataList, field) {
+        console.log('Autocompletar detectado');
+        hideAllDropdownLists(); // Ocultar otras listas desplegadas
+
+        // Clonar el contenedor completo del autocompletar
+        const clonedContainer = autocompleteContainer.cloneNode(true);
+        clonedContainer.id = `${autocompleteContainer.id}-mirrored`; // Evitar conflictos de ID
+        clonedContainer.style.position = 'absolute';
+
+        // Ajustar posición y ancho basado en el encabezado
+        const updatePosition = () => {
+            const rect = header.getBoundingClientRect();
+            clonedContainer.style.top = `${rect.bottom + window.scrollY}px`;
+            clonedContainer.style.left = `${rect.left + window.scrollX - 10}px`;
+            clonedContainer.style.width = `${rect.width + 50}px`; // Ajustar al ancho del encabezado
+            clonedContainer.style.minHeight = '50px'; // Altura mínima para mostrar solo el input
+            clonedContainer.style.maxHeight = '500px'; // Altura inicial contraída
+            clonedContainer.style.overflowY = 'hidden'; // Ocultar scroll inicial
+            clonedContainer.style.padding = '10px';
+            clonedContainer.style.border = '1px solid #ccc';
+            clonedContainer.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+            clonedContainer.style.backgroundColor = '#fff';
+            clonedContainer.style.zIndex = '1000';
+            clonedContainer.style.transition = 'max-height 0.3s ease'; // Transición suave
+        };
+
+        updatePosition();
+
+        // Añadir al documento
+        document.body.appendChild(clonedContainer);
+
+        const input = clonedContainer.querySelector('.autocomplete-input');
+        const list = clonedContainer.querySelector('.autocomplete-list');
+        const hiddenInput = clonedContainer.querySelector('input[type="hidden"]'); // Campo oculto del contenedor clonado
+        list.innerHTML = ''; // Limpiar cualquier lista previa
+
+        // Definir la propiedad según el campo
+        const property = getAutocompleteProperty(field);
+        if (!property) {
+            console.error(`No se puede proceder con el autocompletar para el campo: ${field}`);
+            return;
+        }
+
+        // Manejar la entrada del usuario
+        input.addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+            console.log('Valor del input clonado:', query);
+
+            if (!query) {
+                list.style.display = 'none';
+                clonedContainer.style.maxHeight = '0'; // Contraer la lista si está vacía
+                return;
+            }
+
+            // Filtrar y renderizar resultados
+            const filteredData = dataList.filter(item =>
+                item && item[property] && item[property].toLowerCase().includes(query)
+            );
+            renderAutocompleteList(list, filteredData, property, input, hiddenInput, clonedContainer); // Pasar el contenedor clonado
+        });
+
+        // Manejar clic fuera con verificación
+        setTimeout(() => {
+            document.addEventListener('click', function handleClickOutside(event) {
+                if (
+                    !clonedContainer.contains(event.target) &&
+                    !header.contains(event.target)
+                ) {
+                    if (document.body.contains(clonedContainer)) {
+                        document.body.removeChild(clonedContainer);
+                    }
+                    document.removeEventListener('click', handleClickOutside);
+                }
+            });
+        }, 0);
+
+        input.focus(); // Foco automático en el input clonado
+    }
+
+    function renderAutocompleteList(list, data, property, inputField, hiddenInputField, autocompleteContainer) {
+        list.innerHTML = ''; // Limpia la lista
+        if (data.length === 0) {
+            list.style.display = 'none';
+            if (autocompleteContainer) {
+                autocompleteContainer.style.maxHeight = '50px'; // Contraer si no hay resultados
+            }
+            return;
+        }
+
+        // Crear y agregar elementos a la lista
+        data.forEach(item => {
+            if (item && item[property]) {
+                const li = document.createElement('li');
+                li.textContent = item[property]; // Mostrar el valor de la propiedad dinámica
+                li.classList.add('autocomplete-item');
+                li.style.padding = '8px'; // Espaciado para los elementos
+                li.addEventListener('click', () => {
+                    // Actualizar el campo visible con el valor seleccionado
+                    inputField.value = item[property];
+
+                    // Identificar si es cliente, asunto o tipo para actualizar el campo correspondiente
+                    if (inputField.id.includes('cliente')) {
+                        const mainHiddenInputField = document.querySelector('#filter-cliente-id-input');
+                        if (mainHiddenInputField) {
+                            mainHiddenInputField.value = item.id || '';
+                            console.log(`Campo oculto principal actualizado: ${mainHiddenInputField.name} = ${mainHiddenInputField.value}`);
+                        }
+                    } else if (inputField.id.includes('asunto')) {
+                        const mainVisibleInputField = document.querySelector('#filter-asunto-input');
+                        if (mainVisibleInputField) {
+                            mainVisibleInputField.value = item[property];
+                            console.log(`Campo visible actualizado: ${mainVisibleInputField.id} = ${mainVisibleInputField.value}`);
+                        }
+                    } else if (inputField.id.includes('tipo')) {
+                        const mainVisibleInputField = document.querySelector('#filter-tipo-input');
+                        if (mainVisibleInputField) {
+                            mainVisibleInputField.value = item[property];
+                            console.log(`Campo visible actualizado: ${mainVisibleInputField.id} = ${mainVisibleInputField.value}`);
+                        }
+                    }
+
+                
+
+                    // Eliminar el contenedor después de la selección
+                    if (autocompleteContainer && autocompleteContainer.parentNode) {
+                        autocompleteContainer.parentNode.removeChild(autocompleteContainer);
+                    }
+
+                    // Activar el filtrado automáticamente
+                    applyFilterOnChange();
+                    console.log(`Seleccionado: ${item[property]}, ID: ${item.id}`);
+                });
+                list.appendChild(li);
+            }
+        });
+
+        // Mostrar lista
+        list.style.display = 'block';
+        list.style.marginTop = '5px';
+
+        // Ajustar altura dinámica del contenedor al escribir o cuando hay resultados
+        if (autocompleteContainer) {
+            autocompleteContainer.style.minHeight = '200px'; // Fijar altura al escribir
+            autocompleteContainer.style.overflowY = 'auto'; // Activar scroll si es necesario
+        }
+    }
+
+
+    // Mapeo de propiedades según el campo
+    function getAutocompleteProperty(field) {
+
+        const fieldToPropertyMap = {
+            cliente: 'nombre_fiscal',
+            asunto: 'nombre',
+            tipo: 'nombre'
+        };
+
+        if (!fieldToPropertyMap[field]) {
+            console.error(`No se encontró una propiedad para el campo: ${field}`);
+            return null; // O lanza un error si quieres forzar la definición
+        }
+
+        return fieldToPropertyMap[field];
+    }
+
+
+
+
+
+    function hideAllDropdownLists() {
+        const mirroredLists = document.querySelectorAll('[id$="-mirrored"]'); // Identificar todas las listas clonadas
+        mirroredLists.forEach(list => {
+            list.remove(); // Eliminar clones del DOM
+        });
+    }
+
+    function updateHiddenField(field, dropdownList) {
+        const hiddenField = document.querySelector(`#${field}-ids`); // Buscar el campo oculto relacionado
+        const selectedValues = [];
+
+        // Recopilar valores seleccionados
+        const checkboxes = dropdownList.querySelectorAll('input[type="checkbox"]:checked');
+        checkboxes.forEach(checkbox => {
+            // Si el campo es "facturable", convertir 1/0 a true/false, de lo contrario usar el valor original
+            const value = field === "facturable" ? (checkbox.value === "1" ? true : false) : checkbox.value;
+            selectedValues.push(value);
+        });
+
+        // Actualizar el campo oculto con los valores seleccionados
+        if (hiddenField) {
+            hiddenField.value = selectedValues.join(','); // Guardar valores como lista separada por comas
+            console.log(`Campo oculto actualizado (${field}-ids):`, hiddenField.value); // Verifica el valor
+        }
+    }
+
+
+    function applyFilterOnChange() {
+        console.log("Aplicando filtro automáticamente.");
+        loadFilteredTasks(); // Invocar la función existente para actualizar la tabla
+    }
 });

@@ -358,6 +358,27 @@ th::after {
     /* Ajusta palabras largas */
 }
 
+th[data-field] input {
+    width: 200px;
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+[id$="-mirrored"] {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 5px;
+    max-width: 200px;
+    /* Ajusta según necesidad */
+    max-height: 300px;
+    /* Para limitar el tamaño */
+    overflow-y: auto;
+    /* Habilitar scroll si es necesario */
+}
 
 
 .estado-pendiente {
@@ -1221,7 +1242,7 @@ input[type="date"].planificacion-date-picker:focus {
     /* Borde sutil */
     border-radius: 12px;
     /* Esquinas redondeadas */
-    
+
     padding: 10px 10px;
     /* Espaciado interno */
     max-width: 900px;

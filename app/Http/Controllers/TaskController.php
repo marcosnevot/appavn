@@ -182,15 +182,15 @@ class TaskController extends Controller
                 $sortDirection = 'asc';
             }
 
+            // Clonar el query para usarlo en el cálculo de totales
+            $totalQuery = clone $query;
+
             // Evitar duplicados y ordenar
             $query->distinct()->orderBy($sortKey, $sortDirection);
 
             // Orden terciario: desempatador por id
 
-            // Clonar el query para usarlo en el cálculo de totales
-            $totalQuery = clone $query;
-
-            // Paginación
+            // Paginacións
             $tasks = $query->paginate(50);
 
             // Calcular los totales
@@ -904,11 +904,12 @@ class TaskController extends Controller
             }
 
 
+            // Clonar el query para usarlo en el cálculo de totales
+            $totalQuery = clone $query;
+
             // Añadir el orden por fecha de planificacion, de más antigua a más reciente
             $query->distinct()->orderBy('fecha_planificacion', 'asc');
 
-            // Clonar el query para usarlo en el cálculo de totales
-            $totalQuery = clone $query;
 
             // Ejecutar la consulta y obtener las tareas filtradas
             $filteredTasks = $query->paginate(50);

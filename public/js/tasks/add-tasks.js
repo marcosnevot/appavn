@@ -717,7 +717,6 @@ function setupPaginationListeners() {
 
 // Función para actualizar la tabla con la nueva tarea
 function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pagination = null) {
-    console.log('updateTaskTable llamada por:', new Error().stack);
 
     const tableBody = document.querySelector('table tbody');
     console.log('Evento recibido:');
@@ -755,8 +754,8 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
                         <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
-            <td class="col-descripcion">${task.descripcion ? truncateText2(task.descripcion, 100) : ''}</td>
-            <td class="col-observaciones">${task.observaciones ? truncateText2(task.observaciones, 100) : ''}</td>
+            <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+            <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
             <td>${task.facturable ? 'Sí' : 'No'}</td>
             <td>${task.facturado || 'No'}</td>
             <td>${task.estado}</td>
@@ -780,12 +779,6 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
     });
 
 
-}
-
-function truncateText2(text, maxLength) {
-    console.log('hola');
-    if (!text) return '';
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 
 
