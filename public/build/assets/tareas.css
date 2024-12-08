@@ -367,7 +367,7 @@ th[data-field] input {
 }
 
 [id$="-mirrored"] {
-    background-color: #fff;
+    background-color: #1E1E1E;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -379,6 +379,23 @@ th[data-field] input {
     overflow-y: auto;
     /* Habilitar scroll si es necesario */
 }
+
+/* Estilo inicial del contenedor */
+/* Estado inicial del contenedor */
+.autocomplete-container {
+    transform: translateY(-10px); /* Reducido y desplazado hacia arriba */
+    visibility: hidden; /* Oculto para evitar interacción */
+    transition:  transform 0.3s ease; /* Animaciones suaves */
+}
+
+/* Estado visible del contenedor */
+.autocomplete-container.show {
+    transform: translateY(0); /* Tamaño completo y en su posición */
+    visibility: visible; /* Interactuable */
+}
+
+
+
 
 
 .estado-pendiente {

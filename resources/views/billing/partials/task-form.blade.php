@@ -83,16 +83,7 @@
                 </select>
             </div>
 
-            <div class="form-group grow">
-                <label for="estado">Estado:</label>
-                <select name="estado" id="estado">
-                    <option value="PLANIFICADA">Planificada</option>
-                    <option value="PENDIENTE">Pendiente</option>
-                    <option value="ENESPERA">En Espera</option>
-                    <option value="COMPLETADA">Completada</option>
-                    <option value="RECURRENTE/TRIMESTRE">RECURRENTE/TRIMESTRE</option>
-                </select>
-            </div>
+            
 
             <div class="form-group">
                 <label for="user-select">Asignado a:</label>
@@ -174,11 +165,17 @@
                 <input type="date" name="fecha_vencimiento" id="fecha_vencimiento">
             </div>
 
+           
             <div class="form-group grow">
-                <label for="fecha_imputacion">Fecha de Imputación:</label>
-                <input type="date" name="fecha_imputacion" id="fecha_imputacion">
+                <label for="estado">Estado:</label>
+                <select name="estado" id="estado">
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="PLANIFICADA">Planificada</option>
+                    <option value="ENESPERA">En Espera</option>
+                    <option value="COMPLETADA">Completada</option>
+                    <option value="RECURRENTE/TRIMESTRE">RECURRENTE/TRIMESTRE</option>
+                </select>
             </div>
-
 
         </div>
 

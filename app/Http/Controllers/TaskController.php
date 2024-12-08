@@ -749,7 +749,14 @@ class TaskController extends Controller
             // Asignar usuarios a la tarea
             if (!empty($validated['users'])) {
                 $task->users()->sync($validated['users']);
+
+                // Notificar a los usuarios asignados
+                $assignedUsers = $task->users;
+                foreach ($assignedUsers as $user) {
+                    $user->notify(new TaskAssignedNotification($task, auth()->user()));
+                }
             }
+
 
             // Emitir el evento para otros usuarios
             broadcast(new TaskCreated($task));
