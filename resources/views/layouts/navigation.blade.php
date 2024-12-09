@@ -14,7 +14,7 @@
 
         <!-- Navigation Links -->
         <div class="menu-links">
-            <a href="{{ route('tasks.index', ['sortKey' => 'fecha_planificacion', 'sortDirection' => 'asc']) }}"
+            <a href="{{ route('tasks.index') }}"
                 class="menu-link {{ request()->routeIs('tasks.index') ? 'active' : '' }}">
                 <span class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -39,6 +39,19 @@
                 </span>
                 {{ __('Facturación') }}
             </a>
+
+            <a href="{{ route('calls.index') }}"
+                class="menu-link {{ request()->routeIs('calls.index') ? 'active' : '' }}">
+                <span class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 01-2.18 2 19.86 19.86 0 01-8.63-3.1 19.5 19.5 0 01-6-6A19.86 19.86 0 012.08 4.18 2 2 0 014.06 2h3a2 2 0 012 1.72c.13.94.37 1.85.7 2.73a2 2 0 01-.45 2.11l-1.27 1.27a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.88.33 1.79.57 2.73.7a2 2 0 011.72 2z" />
+                    </svg>
+                </span>
+                {{ __('Citas/Llamadas') }}
+            </a>
+
+
+
 
             <hr class="border-gray-700">
 

@@ -106,17 +106,57 @@ class TaskController extends Controller
                 }
             }
 
-            // Filtros con búsqueda en relaciones
-            if (!empty($filters['asunto'])) {
-                $query->whereHas('asunto', function ($q) use ($filters) {
-                    $q->where('nombre', 'like', '%' . $filters['asunto'] . '%');
-                });
-            }
+            // Filtrar por cliente (múltiples IDs)
+            if (!empty($filters['cliente'])) {
+                $clienteValues = explode(',', $filters['cliente']); // Dividir los valores por comas
+                $clientesById = Cliente::whereIn('id', $clienteValues)
+                    ->pluck('id')
+                    ->toArray();
+                $clientesByName = Cliente::where(function ($query) use ($clienteValues) {
+                    foreach ($clienteValues as $value) {
+                        $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $clientes = array_unique(array_merge($clientesById, $clientesByName));
 
+                if (!empty($clientes)) {
+                    $query->whereIn('cliente_id', $clientes);
+                }
+            }
+            // Filtrar por asuntos (múltiples IDs o nombres)
+            if (!empty($filters['asunto'])) {
+                $asuntoValues = explode(',', $filters['asunto']); // Dividir los valores por comas
+                $asuntosById = Asunto::whereIn('id', $asuntoValues)
+                    ->pluck('id')
+                    ->toArray();
+                $asuntosByName = Asunto::where(function ($query) use ($asuntoValues) {
+                    foreach ($asuntoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $asuntos = array_unique(array_merge($asuntosById, $asuntosByName));
+                if (!empty($asuntos)) {
+                    $query->whereIn('asunto_id', $asuntos);
+                }
+            }
+            // Filtrar por tipo (múltiples IDs o nombres)
             if (!empty($filters['tipo'])) {
-                $query->whereHas('tipo', function ($q) use ($filters) {
-                    $q->where('nombre', 'like', '%' . $filters['tipo'] . '%');
-                });
+                $tipoValues = explode(',', $filters['tipo']); // Dividir los valores por comas
+                $tiposById = Tipo::whereIn('id', $tipoValues)
+                    ->pluck('id')
+                    ->toArray();
+                $tiposByName = Tipo::where(function ($query) use ($tipoValues) {
+                    foreach ($tipoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $tipos = array_unique(array_merge($tiposById, $tiposByName));
+                if (!empty($tipos)) {
+                    $query->whereIn('tipo_id', $tipos);
+                }
             }
 
             // Filtro por usuario asignado
@@ -164,10 +204,7 @@ class TaskController extends Controller
                 }
             }
 
-            // Filtro por cliente
-            if (!empty($filters['cliente'])) {
-                $query->where('cliente_id', $filters['cliente']);
-            }
+
 
             DB::enableQueryLog();
 
@@ -221,7 +258,23 @@ class TaskController extends Controller
     }
 
 
+    public function callsIndex()
+    {
 
+        // Obtener todas las tareas de la base de datos, ordenadas por las más recientes
+        $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
+            ->orderBy('fecha_planificacion', 'asc') // Ordenar por la fecha de creación, de más reciente a más antigua
+            ->get();
+
+        // Obtener datos adicionales necesarios para el formulario
+        $clientes = Cliente::all();
+        $asuntos = Asunto::all();
+        $tipos = Tipo::all();
+        $usuarios = User::all();
+
+        // Pasar las tareas y los datos adicionales a la vista
+        return view('calls.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
+    }
 
 
 
@@ -289,17 +342,57 @@ class TaskController extends Controller
             }
 
 
-            // Filtros con búsqueda en relaciones
-            if (!empty($filters['asunto'])) {
-                $query->whereHas('asunto', function ($q) use ($filters) {
-                    $q->where('nombre', 'like', '%' . $filters['asunto'] . '%');
-                });
-            }
+            // Filtrar por cliente (múltiples IDs)
+            if (!empty($filters['cliente'])) {
+                $clienteValues = explode(',', $filters['cliente']); // Dividir los valores por comas
+                $clientesById = Cliente::whereIn('id', $clienteValues)
+                    ->pluck('id')
+                    ->toArray();
+                $clientesByName = Cliente::where(function ($query) use ($clienteValues) {
+                    foreach ($clienteValues as $value) {
+                        $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $clientes = array_unique(array_merge($clientesById, $clientesByName));
 
+                if (!empty($clientes)) {
+                    $query->whereIn('cliente_id', $clientes);
+                }
+            }
+            // Filtrar por asuntos (múltiples IDs o nombres)
+            if (!empty($filters['asunto'])) {
+                $asuntoValues = explode(',', $filters['asunto']); // Dividir los valores por comas
+                $asuntosById = Asunto::whereIn('id', $asuntoValues)
+                    ->pluck('id')
+                    ->toArray();
+                $asuntosByName = Asunto::where(function ($query) use ($asuntoValues) {
+                    foreach ($asuntoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $asuntos = array_unique(array_merge($asuntosById, $asuntosByName));
+                if (!empty($asuntos)) {
+                    $query->whereIn('asunto_id', $asuntos);
+                }
+            }
+            // Filtrar por tipo (múltiples IDs o nombres)
             if (!empty($filters['tipo'])) {
-                $query->whereHas('tipo', function ($q) use ($filters) {
-                    $q->where('nombre', 'like', '%' . $filters['tipo'] . '%');
-                });
+                $tipoValues = explode(',', $filters['tipo']); // Dividir los valores por comas
+                $tiposById = Tipo::whereIn('id', $tipoValues)
+                    ->pluck('id')
+                    ->toArray();
+                $tiposByName = Tipo::where(function ($query) use ($tipoValues) {
+                    foreach ($tipoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $tipos = array_unique(array_merge($tiposById, $tiposByName));
+                if (!empty($tipos)) {
+                    $query->whereIn('tipo_id', $tipos);
+                }
             }
 
             // Filtro por usuario asignado
@@ -345,13 +438,6 @@ class TaskController extends Controller
                     $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
                 }
             }
-
-
-            // Filtro por cliente
-            if (!empty($filters['cliente'])) {
-                $query->where('cliente_id', $filters['cliente']);
-            }
-
 
             // Filtro por usuario asignado
             if (!empty($filters['usuario'])) {
@@ -503,18 +589,59 @@ class TaskController extends Controller
                 }
             }
 
-            // Filtros con búsqueda en relaciones
+            // Filtrar por cliente (múltiples IDs)
+            if (!empty($filters['cliente'])) {
+                $clienteValues = explode(',', $filters['cliente']); // Dividir los valores por comas
+                $clientesById = Cliente::whereIn('id', $clienteValues)
+                    ->pluck('id')
+                    ->toArray();
+                $clientesByName = Cliente::where(function ($query) use ($clienteValues) {
+                    foreach ($clienteValues as $value) {
+                        $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $clientes = array_unique(array_merge($clientesById, $clientesByName));
+
+                if (!empty($clientes)) {
+                    $query->whereIn('cliente_id', $clientes);
+                }
+            }
+            // Filtrar por asuntos (múltiples IDs o nombres)
             if (!empty($filters['asunto'])) {
-                $query->whereHas('asunto', function ($q) use ($filters) {
-                    $q->where('nombre', 'like', '%' . $filters['asunto'] . '%');
-                });
+                $asuntoValues = explode(',', $filters['asunto']); // Dividir los valores por comas
+                $asuntosById = Asunto::whereIn('id', $asuntoValues)
+                    ->pluck('id')
+                    ->toArray();
+                $asuntosByName = Asunto::where(function ($query) use ($asuntoValues) {
+                    foreach ($asuntoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $asuntos = array_unique(array_merge($asuntosById, $asuntosByName));
+                if (!empty($asuntos)) {
+                    $query->whereIn('asunto_id', $asuntos);
+                }
+            }
+            // Filtrar por tipo (múltiples IDs o nombres)
+            if (!empty($filters['tipo'])) {
+                $tipoValues = explode(',', $filters['tipo']); // Dividir los valores por comas
+                $tiposById = Tipo::whereIn('id', $tipoValues)
+                    ->pluck('id')
+                    ->toArray();
+                $tiposByName = Tipo::where(function ($query) use ($tipoValues) {
+                    foreach ($tipoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $tipos = array_unique(array_merge($tiposById, $tiposByName));
+                if (!empty($tipos)) {
+                    $query->whereIn('tipo_id', $tipos);
+                }
             }
 
-            if (!empty($filters['tipo'])) {
-                $query->whereHas('tipo', function ($q) use ($filters) {
-                    $q->where('nombre', 'like', '%' . $filters['tipo'] . '%');
-                });
-            }
 
             // Filtro por usuario asignado
             if (!empty($filters['usuario'])) {
@@ -559,11 +686,6 @@ class TaskController extends Controller
                 } else {
                     $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
                 }
-            }
-
-            // Filtro por cliente
-            if (!empty($filters['cliente'])) {
-                $query->where('cliente_id', $filters['cliente']);
             }
 
             DB::enableQueryLog();
@@ -753,7 +875,10 @@ class TaskController extends Controller
                 // Notificar a los usuarios asignados
                 $assignedUsers = $task->users;
                 foreach ($assignedUsers as $user) {
-                    $user->notify(new TaskAssignedNotification($task, auth()->user()));
+                    // Excluir al usuario autenticado
+                    if ($user->id !== auth()->id()) {
+                        $user->notify(new TaskAssignedNotification($task, auth()->user()));
+                    }
                 }
             }
 
@@ -784,28 +909,83 @@ class TaskController extends Controller
             // Crear una consulta base para filtrar las tareas
             $query = Tarea::with(['cliente', 'asunto', 'tipo', 'users']); // Asegurarse de cargar las relaciones
 
-            // Filtrar por cliente
+            // Filtrar por cliente (múltiples IDs)
             if (!empty($filters['cliente'])) {
-                $query->where('cliente_id', $filters['cliente']);
+                $clienteValues = explode(',', $filters['cliente']); // Dividir los valores por comas
+
+                // Buscar por IDs exactos
+                $clientesById = Cliente::whereIn('id', $clienteValues)
+                    ->pluck('id')
+                    ->toArray();
+
+                // Buscar por nombres parciales
+                $clientesByName = Cliente::where(function ($query) use ($clienteValues) {
+                    foreach ($clienteValues as $value) {
+                        $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+
+                // Combinar resultados y aplicar el filtro
+                $clientes = array_unique(array_merge($clientesById, $clientesByName));
+
+                if (!empty($clientes)) {
+                    $query->whereIn('cliente_id', $clientes);
+                }
             }
 
-            // Filtrar por asunto
+            // Filtrar por asuntos (múltiples IDs o nombres)
             if (!empty($filters['asunto'])) {
-                // Buscar el asunto por nombre
-                $asunto = Asunto::where('nombre', 'like', '%' . $filters['asunto'] . '%')->first();
-                if ($asunto) {
-                    $query->where('asunto_id', $asunto->id);
+                $asuntoValues = explode(',', $filters['asunto']); // Dividir los valores por comas
+
+                // Buscar por IDs exactos
+                $asuntosById = Asunto::whereIn('id', $asuntoValues)
+                    ->pluck('id')
+                    ->toArray();
+
+                // Buscar por nombres parciales
+                $asuntosByName = Asunto::where(function ($query) use ($asuntoValues) {
+                    foreach ($asuntoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+
+                // Combinar resultados y aplicar el filtro
+                $asuntos = array_unique(array_merge($asuntosById, $asuntosByName));
+
+                if (!empty($asuntos)) {
+                    $query->whereIn('asunto_id', $asuntos);
                 }
             }
 
-            // Filtrar por tipo
+            // Filtrar por tipo (múltiples IDs o nombres)
             if (!empty($filters['tipo'])) {
-                // Buscar el tipo por nombre
-                $tipo = Tipo::where('nombre', 'like', '%' . $filters['tipo'] . '%')->first();
-                if ($tipo) {
-                    $query->where('tipo_id', $tipo->id);
+                $tipoValues = explode(',', $filters['tipo']); // Dividir los valores por comas
+
+                // Buscar por IDs exactos
+                $tiposById = Tipo::whereIn('id', $tipoValues)
+                    ->pluck('id')
+                    ->toArray();
+
+                // Buscar por nombres parciales
+                $tiposByName = Tipo::where(function ($query) use ($tipoValues) {
+                    foreach ($tipoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+
+                // Combinar resultados y aplicar el filtro
+                $tipos = array_unique(array_merge($tiposById, $tiposByName));
+
+                if (!empty($tipos)) {
+                    $query->whereIn('tipo_id', $tipos);
                 }
             }
+
+
+
 
             // Filtrar por subtipo
             if (!empty($filters['subtipo'])) {
@@ -972,28 +1152,62 @@ class TaskController extends Controller
             'fecha_inicio',
             'created_at'
         ])->with(['cliente', 'asunto', 'tipo', 'users']);
-        // Filtrar por cliente
+
+        // Filtrar por cliente (múltiples IDs)
         if (!empty($filters['cliente'])) {
-            $query->where('cliente_id', $filters['cliente']);
-        }
+            $clienteValues = explode(',', $filters['cliente']); // Dividir los valores por comas
+            $clientesById = Cliente::whereIn('id', $clienteValues)
+                ->pluck('id')
+                ->toArray();
+            $clientesByName = Cliente::where(function ($query) use ($clienteValues) {
+                foreach ($clienteValues as $value) {
+                    $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
+                }
+            })->pluck('id')
+                ->toArray();
+            $clientes = array_unique(array_merge($clientesById, $clientesByName));
 
-        // Filtrar por asunto
+            if (!empty($clientes)) {
+                $query->whereIn('cliente_id', $clientes);
+            }
+        }
+        // Filtrar por asuntos (múltiples IDs o nombres)
         if (!empty($filters['asunto'])) {
-            // Buscar el asunto por nombre
-            $asunto = Asunto::where('nombre', 'like', '%' . $filters['asunto'] . '%')->first();
-            if ($asunto) {
-                $query->where('asunto_id', $asunto->id);
+            $asuntoValues = explode(',', $filters['asunto']); // Dividir los valores por comas
+            $asuntosById = Asunto::whereIn('id', $asuntoValues)
+                ->pluck('id')
+                ->toArray();
+            $asuntosByName = Asunto::where(function ($query) use ($asuntoValues) {
+                foreach ($asuntoValues as $value) {
+                    $query->orWhere('nombre', 'like', '%' . $value . '%');
+                }
+            })->pluck('id')
+                ->toArray();
+            $asuntos = array_unique(array_merge($asuntosById, $asuntosByName));
+            if (!empty($asuntos)) {
+                $query->whereIn('asunto_id', $asuntos);
+            }
+        }
+        // Filtrar por tipo (múltiples IDs o nombres)
+        if (!empty($filters['tipo'])) {
+            $tipoValues = explode(',', $filters['tipo']); // Dividir los valores por comas
+            $tiposById = Tipo::whereIn('id', $tipoValues)
+                ->pluck('id')
+                ->toArray();
+            $tiposByName = Tipo::where(function ($query) use ($tipoValues) {
+                foreach ($tipoValues as $value) {
+                    $query->orWhere('nombre', 'like', '%' . $value . '%');
+                }
+            })->pluck('id')
+                ->toArray();
+            $tipos = array_unique(array_merge($tiposById, $tiposByName));
+            if (!empty($tipos)) {
+                $query->whereIn('tipo_id', $tipos);
             }
         }
 
-        // Filtrar por tipo
-        if (!empty($filters['tipo'])) {
-            // Buscar el tipo por nombre
-            $tipo = Tipo::where('nombre', 'like', '%' . $filters['tipo'] . '%')->first();
-            if ($tipo) {
-                $query->where('tipo_id', $tipo->id);
-            }
-        }
+
+
 
         // Filtrar por subtipo
         if (!empty($filters['subtipo'])) {

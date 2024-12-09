@@ -8,32 +8,38 @@
         @csrf
         <!-- Fila 1: Cliente, Asunto, Tipo, Subtipo, Estado -->
         <div class="form-row">
-            <div class="form-group wide">
+
+            <div class="form-group row1">
                 <label for="filter-cliente-input">Cliente:</label>
                 <div class="autocomplete">
                     <input type="text" id="filter-cliente-input" class="autocomplete-input" placeholder="Buscar cliente..." autocomplete="off">
-                    <input type="hidden" name="filter_cliente_id" id="filter-cliente-id-input">
+                    <input type="hidden" name="filter_cliente_ids" id="filter-cliente-ids">
+                    <div id="filter-cliente-selected" class="selected-items-container"></div>
                     <ul id="filter-cliente-list" class="autocomplete-list"></ul>
                 </div>
             </div>
 
-            <div class="form-group wide">
+            <div class="form-group row1">
                 <label for="filter-asunto-input">Asunto:</label>
                 <div class="autocomplete">
                     <input type="text" id="filter-asunto-input" class="autocomplete-input" placeholder="Buscar asunto..." autocomplete="off">
-                    <input type="hidden" name="filter_asunto_id" id="filter-asunto-id-input">
+                    <input type="hidden" name="filter_asunto_ids" id="filter-asunto-ids">
+                    <div id="filter-asunto-selected" class="selected-items-container"></div>
                     <ul id="filter-asunto-list" class="autocomplete-list"></ul>
                 </div>
             </div>
 
-            <div class="form-group medium">
+            <div class="form-group row1">
                 <label for="filter-tipo-input">Tipo de Tarea:</label>
                 <div class="autocomplete">
                     <input type="text" id="filter-tipo-input" class="autocomplete-input" placeholder="Buscar tipo..." autocomplete="off">
-                    <input type="hidden" name="filter_tipo_id" id="filter-tipo-id-input">
-                    <ul id="filter-tipo-list" class="autocomplete-list"></ul>
+                    <input type="hidden" name="filter_tipo_ids" id="filter-tipo-ids">
+                    <div id="filter-tipo-selected" class="selected-items-container"></div>
+                    <ul id="filter-tipo-list" class="autocomplete-list" aria-selected="true"></ul>
                 </div>
             </div>
+
+
 
 
         </div>

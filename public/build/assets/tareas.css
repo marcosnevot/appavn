@@ -41,11 +41,13 @@
     background-color: #f4f4f9;
     border: 1px solid #d1d5db;
     border-radius: 8px;
-    padding: 12px 20px;
+    padding: 5px 10px;
     margin-bottom: 15px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     height: 60px;
+    max-height: 60px;
+
     /* Altura fija */
     overflow-y: auto;
     /* Scrollbar vertical cuando el contenido exceda la altura */
@@ -383,15 +385,20 @@ th[data-field] input {
 /* Estilo inicial del contenedor */
 /* Estado inicial del contenedor */
 .autocomplete-container {
-    transform: translateY(-10px); /* Reducido y desplazado hacia arriba */
-    visibility: hidden; /* Oculto para evitar interacción */
-    transition:  transform 0.3s ease; /* Animaciones suaves */
+    transform: translateY(-10px);
+    /* Reducido y desplazado hacia arriba */
+    visibility: hidden;
+    /* Oculto para evitar interacción */
+    transition: transform 0.3s ease;
+    /* Animaciones suaves */
 }
 
 /* Estado visible del contenedor */
 .autocomplete-container.show {
-    transform: translateY(0); /* Tamaño completo y en su posición */
-    visibility: visible; /* Interactuable */
+    transform: translateY(0);
+    /* Tamaño completo y en su posición */
+    visibility: visible;
+    /* Interactuable */
 }
 
 
@@ -525,7 +532,17 @@ th[data-field] input {
 
 .form-group {
     flex: 1 1 auto;
+    margin-bottom: 25px;
+
     /* Deja que el ancho sea automático si no hay un `flex-basis` definido */
+}
+
+/* Estilo específico para .row1 */
+.form-group.row1 {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 33%;
+    box-sizing: border-box;
 }
 
 .form-group.grow {
@@ -554,8 +571,9 @@ th[data-field] input {
 /* Fila 1: Cliente, Asunto, Tipo, Subtipo, Estado */
 .form-row.fila-1 .cliente,
 .form-row.fila-1 .asunto {
-    flex-basis: 30%;
+
     /* Asignamos 30% a Cliente y Asunto */
+    width: 200px;
 }
 
 .form-row.fila-1 .tipo,
@@ -718,7 +736,7 @@ th[data-field] input {
     max-height: 200px;
     overflow-y: auto;
     width: 100%;
-    margin-top: -15px;
+    margin-top: -5px;
     list-style-type: none;
     padding: 0;
     display: none;
@@ -740,6 +758,66 @@ th[data-field] input {
 .autocomplete-list li:hover {
     background-color: #f0f0f0;
 }
+
+.selected-items-container {
+    display: flex;
+    flex-wrap: nowrap;
+    /* Mantener todos los elementos en una línea */
+    gap: 8px;
+    /* Espaciado entre elementos */
+    padding: 5px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: #f4f4f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    /* Fijo, igual al ancho del contenedor padre */
+    max-width: 100%;
+    /* No superar el ancho del input */
+    overflow-x: auto;
+    /* Activar barra de scroll horizontal */
+    overflow-y: hidden;
+    /* Sin scroll vertical */
+    white-space: nowrap;
+    /* No permitir que el texto haga wrap */
+    box-sizing: border-box;
+    margin-top: 5px;
+    min-height: 40px;
+}
+
+.selected-item {
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 3px 8px;
+    border-radius: 15px;
+    font-size: 12px;
+    line-height: 1.5;
+    border: 1px solid #ddd;
+    display: inline-flex;
+    align-items: center;
+    margin: 2px;
+    /* Espaciado entre ítems */
+}
+
+.selected-item button {
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 12px;
+    margin-left: 5px;
+    cursor: pointer;
+    line-height: 1;
+    /* Alineación del botón */
+}
+
+.selected-item button:hover {
+    color: #f87171;
+    /* Rojo claro para hover */
+}
+
+
+
+
 
 .highlight {
     font-weight: bold;
@@ -1249,7 +1327,7 @@ input[type="date"].planificacion-date-picker:focus {
     /* Alineación vertical */
     position: fixed;
     /* Fijo para mantenerlo visible en la pantalla */
-    bottom: 30px;
+    bottom: 20px;
     /* Alineado con la parte inferior de la pantalla */
     right: 70px;
     /* Alineado con el borde derecho */

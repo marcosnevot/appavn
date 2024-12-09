@@ -8,33 +8,43 @@
         @csrf
         <!-- Fila 1: Cliente, Asunto, Tipo, Subtipo, Estado -->
         <div class="form-row">
-            <div class="form-group wide">
+            <div class="form-group row1">
                 <label for="filter-cliente-input">Cliente:</label>
                 <div class="autocomplete">
                     <input type="text" id="filter-cliente-input" class="autocomplete-input" placeholder="Buscar cliente..." autocomplete="off">
-                    <input type="hidden" name="filter_cliente_id" id="filter-cliente-id-input">
+                    <input type="hidden" name="filter_cliente_ids" id="filter-cliente-ids">
+                    <div id="filter-cliente-selected" class="selected-items-container"></div>
                     <ul id="filter-cliente-list" class="autocomplete-list"></ul>
                 </div>
             </div>
 
-            <div class="form-group wide">
+            <div class="form-group row1">
                 <label for="filter-asunto-input">Asunto:</label>
                 <div class="autocomplete">
                     <input type="text" id="filter-asunto-input" class="autocomplete-input" placeholder="Buscar asunto..." autocomplete="off">
-                    <input type="hidden" name="filter_asunto_id" id="filter-asunto-id-input">
+                    <input type="hidden" name="filter_asunto_ids" id="filter-asunto-ids">
+                    <div id="filter-asunto-selected" class="selected-items-container"></div>
                     <ul id="filter-asunto-list" class="autocomplete-list"></ul>
                 </div>
             </div>
 
-            <div class="form-group medium">
+            <div class="form-group row1">
                 <label for="filter-tipo-input">Tipo de Tarea:</label>
                 <div class="autocomplete">
                     <input type="text" id="filter-tipo-input" class="autocomplete-input" placeholder="Buscar tipo..." autocomplete="off">
-                    <input type="hidden" name="filter_tipo_id" id="filter-tipo-id-input">
+                    <input type="hidden" name="filter_tipo_ids" id="filter-tipo-ids">
+                    <div id="filter-tipo-selected" class="selected-items-container"></div>
                     <ul id="filter-tipo-list" class="autocomplete-list"></ul>
                 </div>
             </div>
 
+
+
+
+        </div>
+
+        <!-- Fila 2: Asignado a, Archivo, Facturable, Facturado -->
+        <div class="form-row">
             <div class="form-group grow">
                 <label for="filter-estado">Estado:</label>
                 <div class="custom-select" id="filter-estado-select">
@@ -91,13 +101,49 @@
                 <input type="hidden" name="filter_users" id="filter-user-ids"> <!-- Campo oculto para los IDs de usuarios seleccionados -->
             </div>
 
+            <!-- Facturable -->
+            <div class="form-group grow">
+                <label for="filter-facturable">Facturable:</label>
+                <div class="custom-select" id="filter-facturable-select">
+                    <div id="filter-selected-facturables" class="selected-facturables">
+                    </div>
+                    <div id="filter-facturable-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-facturable-1" value="1">
+                                <label for="filter-facturable-1">Sí</label>
+                            </li>
+                            <li>
+                                <input class="user-checkbox" type="checkbox" id="filter-facturable-0" value="0">
+                                <label for="filter-facturable-0">No</label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_facturable" id="filter-facturable-ids"> <!-- Campo oculto -->
+            </div>
+
+
+            <!-- Facturado -->
+            <div class="form-group grow">
+                <label for="filter-facturado">Facturado:</label>
+                <div class="custom-select" id="filter-facturado-select">
+                    <div id="filter-selected-facturados" class="selected-items"></div>
+                    <div id="filter-facturado-list" class="dropdown-list" style="display: none;">
+                        <ul>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-si" value="SI"><label for="filter-facturado-si">Sí</label></li>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-no" value="NO"><label for="filter-facturado-no">No</label></li>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-nunca" value="NUNCA"><label for="filter-facturado-nunca">Nunca</label></li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" name="filter_facturado" id="filter-facturado-ids">
+            </div>
 
         </div>
 
-        <!-- Fila 2: Asignado a, Archivo, Facturable, Facturado -->
+
         <div class="form-row" style="display: none;">
-
-
 
             <div class="form-group narrow" style="display: none;">
                 <label for="filter-archivo">Archivo:</label>
@@ -159,44 +205,7 @@
         <!-- Fila 4: Fechas, Tiempo Previsto, Tiempo Real -->
         <div class="form-row" style="margin-bottom:30px">
 
-            <!-- Facturable -->
-            <div class="form-group grow">
-                <label for="filter-facturable">Facturable:</label>
-                <div class="custom-select" id="filter-facturable-select">
-                    <div id="filter-selected-facturables" class="selected-facturables">
-                    </div>
-                    <div id="filter-facturable-list" class="dropdown-list" style="display: none;">
-                        <ul>
-                            <li>
-                                <input class="user-checkbox" type="checkbox" id="filter-facturable-1" value="1">
-                                <label for="filter-facturable-1">Sí</label>
-                            </li>
-                            <li>
-                                <input class="user-checkbox" type="checkbox" id="filter-facturable-0" value="0">
-                                <label for="filter-facturable-0">No</label>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <input type="hidden" name="filter_facturable" id="filter-facturable-ids"> <!-- Campo oculto -->
-            </div>
 
-
-            <!-- Facturado -->
-            <div class="form-group grow">
-                <label for="filter-facturado">Facturado:</label>
-                <div class="custom-select" id="filter-facturado-select">
-                    <div id="filter-selected-facturados" class="selected-items"></div>
-                    <div id="filter-facturado-list" class="dropdown-list" style="display: none;">
-                        <ul>
-                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-si" value="SI"><label for="filter-facturado-si">Sí</label></li>
-                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-no" value="NO"><label for="filter-facturado-no">No</label></li>
-                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-nunca" value="NUNCA"><label for="filter-facturado-nunca">Nunca</label></li>
-                        </ul>
-                    </div>
-                </div>
-                <input type="hidden" name="filter_facturado" id="filter-facturado-ids">
-            </div>
 
             <div class="form-group grow">
                 <label for="filter-fecha-inicio">Fecha de Inicio:</label>

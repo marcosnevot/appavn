@@ -204,6 +204,7 @@ function loadTasks(page = 1, sortKey, sortDirection) {
         user_id: sessionUserId, // Usuario actual
         sortKey, // Clave de ordenación
         sortDirection, // Dirección de ordenación
+        asunto: window.currentFilters?.asunto || 'CITA,LLAMADA TELEFONICA',
 
     });
      console.log(currentFilters); // Verifica qué se está enviando al servidor
@@ -223,7 +224,6 @@ function loadTasks(page = 1, sortKey, sortDirection) {
                 loadInitialTasks(data.tasks);
                 updatePagination(data.pagination, (newPage) => loadTasks(newPage, sortKey, sortDirection));
                 updateHoursSummaryFromTotals(data.totalTiempoPrevisto, data.totalTiempoReal);
-                
 
             } else {
                 console.error('Error al cargar tareas:', data.message);

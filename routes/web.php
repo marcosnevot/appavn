@@ -60,6 +60,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/billing', [TaskController::class, 'billingIndex'])->name('billing.index');
     Route::get('/billing/getBilling', [TaskController::class, 'getBilling'])->name('billing.get');
 
+
+    Route::get('/calls', [TaskController::class, 'callsIndex'])->name('calls.index');
+
+
     Route::get('/times', [TaskController::class, 'timesIndex'])->name('times.index');
     Route::get('/times/getTimes', [TaskController::class, 'getTimes'])->name('times.get');
 

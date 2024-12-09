@@ -36,14 +36,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const isInsideForm = filterTaskForm.contains(event.target); // Verifica si el clic fue dentro del formulario
         const isfilterTaskButton = document.getElementById('filter-task-button').contains(event.target);
         const isDateRangePicker = event.target.closest('.daterangepicker'); // Verifica si el clic fue dentro del Date Range Picker
+        const isSelectedItem = event.target.closest('.selected-item'); // Verifica si el clic fue dentro de un item seleccionado
 
-        // Verifica si el clic no es dentro del formulario, del botón o del Date Range Picker
-        if (!isInsideForm && !isfilterTaskButton && !isDateRangePicker) {
+        // Verifica si el clic no es dentro del formulario, del botón, del Date Range Picker o de un ítem seleccionado
+        if (!isInsideForm && !isfilterTaskButton && !isDateRangePicker && !isSelectedItem) {
             if (filterTaskForm.classList.contains('show')) {
                 closeFilterTaskForm();
             }
         }
     });
+
 
 
     // Función para cerrar el formulario
@@ -67,15 +69,20 @@ document.addEventListener('DOMContentLoaded', function () {
         resetSelectedUsers();
 
         // Limpiar los campos ocultos que almacenan los IDs
-        document.getElementById('filter-cliente-id-input').value = '';
-        document.getElementById('filter-asunto-id-input').value = '';
-        document.getElementById('filter-tipo-id-input').value = '';
+        document.getElementById('filter-cliente-ids').value = '';
+        document.getElementById('filter-asunto-ids').value = '';
+        document.getElementById('filter-tipo-ids').value = '';
         document.getElementById('filter-user-ids').value = '';
 
         // Limpiar las visualizaciones de autocompletar
         document.getElementById('filter-cliente-input').value = '';
         document.getElementById('filter-asunto-input').value = '';
         document.getElementById('filter-tipo-input').value = '';
+
+        // Limpiar los contenedores de seleccionados
+        document.getElementById('filter-cliente-selected').innerHTML = '';
+        document.getElementById('filter-asunto-selected').innerHTML = '';
+        document.getElementById('filter-tipo-selected').innerHTML = '';
 
         // Si las listas de autocompletar están visibles, ocultarlas
         document.getElementById('filter-cliente-list').style.display = 'none';
@@ -129,9 +136,9 @@ document.addEventListener('DOMContentLoaded', function () {
             : ['', ''];
 
         const filterData = {
-            cliente: document.getElementById('filter-cliente-id-input').value || '', // Usar el ID del cliente
-            asunto: document.getElementById('filter-asunto-input').value || '',
-            tipo: document.getElementById('filter-tipo-input').value || '',
+            cliente: document.getElementById('filter-cliente-ids').value || '', // Usar los IDs de clientes seleccionados
+            asunto: document.getElementById('filter-asunto-ids').value || '',  // Usar los IDs/nombres de asuntos seleccionados
+            tipo: document.getElementById('filter-tipo-ids').value || '',
             subtipo: document.getElementById('filter-subtipo-ids').value || '', // Usar el campo oculto con los valores seleccionados
             estado: document.getElementById('filter-estado-ids').value || '', // <-- Usar el campo oculto con los valores seleccionados
             usuario: document.getElementById('filter-user-ids').value || '',
@@ -254,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
-    // Función para actualizar el panel de filtros
     function updateFilterInfoPanel(filters) {
         const filterInfoContent = document.getElementById('filter-info-content');
         const filterInfoPanel = document.getElementById('filter-info-panel');
@@ -271,19 +277,48 @@ document.addEventListener('DOMContentLoaded', function () {
             filterEntries.forEach(([key, value]) => {
                 const p = document.createElement('p');
 
-                // Manejo especial para mostrar el nombre del cliente en lugar del ID
                 if (key === 'cliente') {
-                    const cliente = clientesData.find(cliente => cliente.id === parseInt(value));
-                    p.textContent = `Cliente: ${cliente ? cliente.nombre_fiscal : 'Desconocido'}`;
-                }
-                else if (key === 'usuario') {
-                    const userIds = value.split(',').map(id => parseInt(id)); // Convertir IDs en array de números
+                    // Manejo para clientes
+                    const clienteIds = value.split(',').map(id => parseInt(id));
+                    const clienteNames = clienteIds
+                        .map(id => {
+                            const cliente = clientesData.find(cliente => cliente.id === id);
+                            return cliente ? cliente.nombre_fiscal : 'Desconocido';
+                        })
+                        .join(', ');
+
+                    p.textContent = `Cliente(s): ${clienteNames || 'Desconocido'}`;
+                } else if (key === 'asunto') {
+                    // Manejo para asuntos
+                    const asuntoIds = value.split(',').map(id => parseInt(id));
+                    const asuntoNames = asuntoIds
+                        .map(id => {
+                            const asunto = asuntosData.find(asunto => asunto.id === id);
+                            return asunto ? asunto.nombre : 'Desconocido';
+                        })
+                        .join(', ');
+
+                    p.textContent = `Asunto(s): ${asuntoNames || 'Desconocido'}`;
+                } else if (key === 'tipo') {
+                    // Manejo para tipos
+                    const tipoIds = value.split(',').map(id => parseInt(id));
+                    const tipoNames = tipoIds
+                        .map(id => {
+                            const tipo = tiposData.find(tipo => tipo.id === id);
+                            return tipo ? tipo.nombre : 'Desconocido';
+                        })
+                        .join(', ');
+
+                    p.textContent = `Tipo(s): ${tipoNames || 'Desconocido'}`;
+                } else if (key === 'usuario') {
+                    // Manejo para usuarios
+                    const userIds = value.split(',').map(id => parseInt(id));
                     const userNames = userIds
                         .map(id => {
                             const usuario = usersData.find(usuario => usuario.id === id);
                             return usuario ? usuario.name : 'Desconocido';
                         })
-                        .join(', '); // Combinar nombres de usuarios en una cadena
+                        .join(', ');
 
                     p.textContent = `Mostrando Tareas De: ${userNames}`;
                 } else {
@@ -293,18 +328,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 filterInfoContent.appendChild(p);
             });
 
-            // Mostrar el criterio y dirección de ordenación
-            const sortInfo = document.createElement('p');
-            const sortKey = filters.sortKey || 'fecha_planificacion'; // Predeterminado
-            const sortDirection = filters.sortDirection || 'asc'; // Predeterminado
-
-            sortInfo.textContent = `Orden: ${capitalizeFirstLetter(sortKey)} (${capitalizeFirstLetter(sortDirection)})`;
-            filterInfoContent.appendChild(sortInfo);
 
             // Mostrar el panel si hay filtros
             filterInfoPanel.classList.remove('hide');
         }
     }
+
 
     // Función para capitalizar la primera letra
     function capitalizeFirstLetter(string) {
@@ -334,25 +363,34 @@ document.addEventListener('DOMContentLoaded', function () {
     // Autocompletar para Cliente
     setupAutocomplete(
         'filter-cliente-input',
-        'filter-cliente-id-input',
+        'filter-cliente-ids',
         'filter-cliente-list',
         clientesData,
-        item => `${item.nombre_fiscal} (${item.nif})`,  // Mostrar nombre y NIF
-        item => item.nombre_fiscal,  // Comparar con el nombre
-        item => item.nif  // Comparar también con el NIF
+        item => `${item.nombre_fiscal} (${item.nif})`, // Mostrar nombre y NIF
+        item => item.nombre_fiscal, // Comparar con el nombre
+        item => item.nif // Comparar también con el NIF
     );
 
     // Autocompletar para Asunto
-    setupAutocomplete('filter-asunto-input', 'filter-asunto-id-input', 'filter-asunto-list', asuntosData,
-        item => item.nombre,
-        item => item.nombre
+    setupAutocomplete(
+        'filter-asunto-input',
+        'filter-asunto-ids',
+        'filter-asunto-list',
+        asuntosData,
+        item => item.nombre, // Mostrar nombre
+        item => item.nombre // Comparar con el nombre
     );
 
     // Autocompletar para Tipo
-    setupAutocomplete('filter-tipo-input', 'filter-tipo-id-input', 'filter-tipo-list', tiposData,
-        item => item.nombre,
-        item => item.nombre
+    setupAutocomplete(
+        'filter-tipo-input',
+        'filter-tipo-ids',
+        'filter-tipo-list',
+        tiposData,
+        item => item.nombre, // Mostrar nombre
+        item => item.nombre // Comparar con el nombre
     );
+
 
     document.addEventListener('click', function (e) {
         // Cerrar todas las listas de autocompletar si el clic no es en un input o en una lista de autocompletar
@@ -367,12 +405,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const input = document.getElementById(inputId);
         const hiddenInput = document.getElementById(hiddenInputId);
         const list = document.getElementById(listId);
+        const selectedContainer = document.getElementById(`${inputId.replace('-input', '')}-selected`);
+        let selectedItems = []; // Array para almacenar las selecciones
         let selectedIndex = -1;
 
         function filterItems(query) {
             const filtered = dataList.filter(item => {
                 const mainMatch = itemSelector(item).toLowerCase().includes(query.toLowerCase());
-                const extraMatch = extraMatchSelector ? extraMatchSelector(item)?.toLowerCase().includes(query.toLowerCase()) : false; // Verifica que extraMatchSelector(item) no sea null
+                const extraMatch = extraMatchSelector ? extraMatchSelector(item)?.toLowerCase().includes(query.toLowerCase()) : false;
                 return mainMatch || extraMatch;
             });
             renderList(filtered);
@@ -398,48 +438,96 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        function renderSelectedItems() {
+            // Mantener el ancho del contenedor igual al del input
+            selectedContainer.style.width = `${input.offsetWidth}px`;
+            selectedContainer.style.overflowX = 'auto'; // Habilitar scroll horizontal
+            selectedContainer.innerHTML = ''; // Limpiar el contenedor
+
+            selectedItems.forEach(item => {
+                const span = document.createElement('span');
+                span.classList.add('selected-item');
+                span.textContent = displayFormatter(item);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'x';
+                removeBtn.addEventListener('click', () => removeItem(item));
+                span.appendChild(removeBtn);
+
+                selectedContainer.appendChild(span);
+            });
+
+            updateHiddenInput(); // Actualizar el campo oculto
+        }
+
+
+
+        function updateHiddenInput() {
+            hiddenInput.value = selectedItems
+                .map(item => item.id || item.nombre) // Incluir IDs o nombres según estén disponibles
+                .join(',');
+            console.log(`Valores para el filtro: ${hiddenInput.value}`);
+        }
+
+
         function selectItem(item) {
-            input.value = displayFormatter(item);
-            hiddenInput.value = item.id;
+            if (!selectedItems.some(selected => selected.id === item.id)) {
+                selectedItems.push(item);
+                renderSelectedItems();
+            }
+            input.value = '';
             list.style.display = 'none';
             selectedIndex = -1;
         }
 
+        function removeItem(item) {
+            selectedItems = selectedItems.filter(selected => selected.id !== item.id);
+            renderSelectedItems();
+        }
+
         input.addEventListener('focus', function () {
-            // Cerrar todas las listas de autocompletar cuando se hace foco en un nuevo campo
             closeAllAutocompleteLists();
             selectedIndex = -1;
             filterItems(input.value);
         });
 
         input.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();  // Convertir a mayúsculas
-            hiddenInput.value = '';  // Limpiar el campo oculto
+            this.value = this.value.toUpperCase();
             filterItems(this.value);
         });
 
         input.addEventListener('keydown', function (e) {
             const items = document.querySelectorAll(`#${listId} .autocomplete-item`);
-            if (items.length > 0) {
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-                    updateActiveItem(items, selectedIndex);
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    selectedIndex = Math.max(selectedIndex - 1, 0);
-                    updateActiveItem(items, selectedIndex);
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (selectedIndex >= 0 && selectedIndex < items.length) {
-                        const selectedItem = dataList.find(item =>
-                            displayFormatter(item) === items[selectedIndex].textContent
-                        );
-                        selectItem(selectedItem);
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && selectedIndex < items.length) {
+                    // Si hay un elemento seleccionado en la lista
+                    const selectedItem = dataList.find(item =>
+                        displayFormatter(item) === items[selectedIndex].textContent
+                    );
+                    selectItem(selectedItem);
+                } else if (input.value.trim()) {
+                    // Si no hay selección pero hay texto en el input
+                    const query = input.value.trim();
+                    if (!selectedItems.some(item => item.nombre === query)) {
+                        selectedItems.push({ id: null, nombre: query }); // Agregar texto como un "nombre" sin ID
+                        renderSelectedItems();
                     }
+                    input.value = ''; // Limpiar el input
+                    list.style.display = 'none'; // Ocultar la lista
+                    selectedIndex = -1; // Reiniciar el índice
                 }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateActiveItem(items, selectedIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                updateActiveItem(items, selectedIndex);
             }
         });
+
 
         function updateActiveItem(items, index) {
             items.forEach(item => item.classList.remove('active'));
@@ -449,6 +537,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
+
 
     function closeAutocompleteListIfClickedOutside(inputId, listId, event) {
         const input = document.getElementById(inputId);
@@ -843,9 +932,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Preparar los datos de filtro, combinando los filtros rápidos con los filtros del formulario principal
         const filterData = {
-            cliente: document.getElementById('filter-cliente-id-input')?.value || '', // Usar el ID del cliente
-            asunto: document.getElementById('filter-asunto-input')?.value || '',
-            tipo: document.getElementById('filter-tipo-input')?.value || '',
+            cliente: document.getElementById('filter-cliente-ids').value || '', // Usar los IDs de clientes seleccionados
+            asunto: document.getElementById('filter-asunto-ids').value || '',  // Usar los IDs/nombres de asuntos seleccionados
+            tipo: document.getElementById('filter-tipo-ids').value || '',
             subtipo: document.getElementById('filter-subtipo-ids').value || '', // Usar el campo oculto con los valores seleccionados
             estado: document.getElementById('filter-estado-ids').value || '', // Predeterminar a "PENDIENTE, ENESPERA"
             usuario: document.getElementById('filter-user-ids')?.value || '',
@@ -899,11 +988,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error en la solicitud:', error.message);
             });
     }
-
-
-
-
-
 
 
     // Generar los botones de filtro de planificación al cargar la página
@@ -971,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Ajustar posición y ancho basado en el encabezado
         const updatePosition = () => {
             const rect = header.getBoundingClientRect();
-            mirroredList.style.top = `${rect.bottom + window.scrollY-1}px`;
+            mirroredList.style.top = `${rect.bottom + window.scrollY - 1}px`;
             mirroredList.style.left = `${rect.left + window.scrollX - 25}px`; // Desplazar 10px a la izquierda
             mirroredList.style.width = `${rect.width + 50}px`; // Incrementar ancho por 20px
         };
@@ -1050,7 +1134,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Ajustar posición y ancho basado en el encabezado
         const updatePosition = () => {
             const rect = header.getBoundingClientRect();
-            inputClone.style.top = `${rect.bottom + window.scrollY-1}px`;
+            inputClone.style.top = `${rect.bottom + window.scrollY - 1}px`;
             inputClone.style.left = `${rect.left + window.scrollX - 25}px`;
             inputClone.style.width = `${rect.width + 50}px`; // Ajustar al ancho del encabezado
             inputClone.style.height = '50px';
@@ -1147,13 +1231,19 @@ document.addEventListener('DOMContentLoaded', function () {
         clonedContainer.classList.add('autocomplete-container'); // Asegurar que tenga la clase base
         clonedContainer.style.position = 'absolute';
 
+        // Eliminar el div de `selected-items-container` del clon
+        const selectedContainerClone = clonedContainer.querySelector('.selected-items-container');
+        if (selectedContainerClone) {
+            clonedContainer.removeChild(selectedContainerClone);
+        }
+
         // Ajustar posición y ancho basado en el encabezado
         const updatePosition = () => {
             const rect = header.getBoundingClientRect();
-            clonedContainer.style.top = `${rect.bottom + window.scrollY-5}px`;
+            clonedContainer.style.top = `${rect.bottom + window.scrollY - 5}px`;
             clonedContainer.style.left = `${rect.left + window.scrollX - 10}px`;
             clonedContainer.style.width = `${rect.width + 50}px`; // Ajustar al ancho del encabezado
-        
+
         };
 
         updatePosition();
@@ -1188,6 +1278,13 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Mapeo de identificadores para optimizar la lógica
+        const fieldMapping = {
+            cliente: { hidden: '#filter-cliente-ids', visible: '#filter-cliente-input', selected: '#filter-cliente-selected' },
+            asunto: { hidden: '#filter-asunto-ids', visible: '#filter-asunto-input', selected: '#filter-asunto-selected' },
+            tipo: { hidden: '#filter-tipo-ids', visible: '#filter-tipo-input', selected: '#filter-tipo-selected' }
+        };
+
         // Manejar la entrada del usuario
         input.addEventListener('input', function () {
             const query = this.value.trim().toLowerCase();
@@ -1198,34 +1295,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 list.style.display = 'none';
                 clonedContainer.style.minHeight = '50px'; // Contraer si no hay resultados
 
-                // Restablecer el campo oculto y visible para el cliente
-                if (input.id.includes('cliente')) {
-                    // Restablecer campo oculto (ID del cliente)
-                    const mainHiddenInputField = document.querySelector('#filter-cliente-id-input');
-                    if (mainHiddenInputField) {
-                        mainHiddenInputField.value = ''; // Limpiar el valor del cliente seleccionado
-                        console.log(`Campo oculto principal restablecido: ${mainHiddenInputField.name}`);
-                    }
+                // Restablecer campos ocultos y visibles dinámicamente
+                Object.keys(fieldMapping).forEach(field => {
+                    if (input.id.includes(field)) {
+                        const { hidden, visible, selected } = fieldMapping[field];
 
-                    // Restablecer campo visible (nombre del cliente)
-                    const mainVisibleInputField = document.querySelector('#filter-cliente-input'); // Asegúrate del ID correcto
-                    if (mainVisibleInputField) {
-                        mainVisibleInputField.value = ''; // Limpiar el nombre del cliente visible
-                        console.log(`Campo visible principal restablecido: ${mainVisibleInputField.id}`);
+                        // Restablecer campo oculto
+                        const mainHiddenInputField = document.querySelector(hidden);
+                        if (mainHiddenInputField) {
+                            mainHiddenInputField.value = '';
+                            console.log(`Campo oculto principal restablecido: ${mainHiddenInputField.name}`);
+                        }
+
+                        // Restablecer campo visible
+                        const mainVisibleInputField = document.querySelector(visible);
+                        if (mainVisibleInputField) {
+                            mainVisibleInputField.value = '';
+                            console.log(`Campo visible principal restablecido: ${mainVisibleInputField.id}`);
+                        }
+
+                        // Limpiar el contenedor de "selected-items" del formulario original
+                        const selectedContainer = document.querySelector(selected);
+                        if (selectedContainer) {
+                            selectedContainer.innerHTML = ''; // Limpiar cualquier selección previa
+                            console.log(`Selected items limpiados en: ${selected}`);
+                        }
                     }
-                } else if (input.id.includes('asunto')) {
-                    const mainVisibleInputField = document.querySelector('#filter-asunto-input');
-                    if (mainVisibleInputField) {
-                        mainVisibleInputField.value = ''; // Limpiar el valor del asunto seleccionado
-                        console.log(`Campo visible restablecido: ${mainVisibleInputField.id}`);
-                    }
-                } else if (input.id.includes('tipo')) {
-                    const mainVisibleInputField = document.querySelector('#filter-tipo-input');
-                    if (mainVisibleInputField) {
-                        mainVisibleInputField.value = ''; // Limpiar el valor del tipo seleccionado
-                        console.log(`Campo visible restablecido: ${mainVisibleInputField.id}`);
-                    }
-                }
+                });
 
                 // Aplicar el filtro para mostrar todos los resultados
                 applyFilterOnChange();
@@ -1238,6 +1334,7 @@ document.addEventListener('DOMContentLoaded', function () {
             );
             renderAutocompleteList(list, filteredData, property, input, hiddenInput, clonedContainer);
         });
+
 
 
 
@@ -1264,6 +1361,8 @@ document.addEventListener('DOMContentLoaded', function () {
         input.focus(); // Foco automático en el input clonado
     }
 
+
+
     function renderAutocompleteList(list, data, property, inputField, hiddenInputField, autocompleteContainer) {
         list.innerHTML = ''; // Limpia la lista
         if (data.length === 0) {
@@ -1281,51 +1380,73 @@ document.addEventListener('DOMContentLoaded', function () {
                 li.textContent = item[property]; // Mostrar el valor de la propiedad dinámica
                 li.classList.add('autocomplete-item');
                 li.style.padding = '8px'; // Espaciado para los elementos
+
                 li.addEventListener('click', () => {
-                    // Actualizar el campo visible con el valor seleccionado
-                    inputField.value = item[property];
+                    // Mapeo de identificadores para optimizar la lógica
+                    const fieldMapping = {
+                        cliente: { hidden: '#filter-cliente-ids', visible: '#filter-cliente-input', selected: '#filter-cliente-selected' },
+                        asunto: { hidden: '#filter-asunto-ids', visible: '#filter-asunto-input', selected: '#filter-asunto-selected' },
+                        tipo: { hidden: '#filter-tipo-ids', visible: '#filter-tipo-input', selected: '#filter-tipo-selected' }
+                    };
 
-                    // Identificar si es cliente, asunto o tipo para actualizar el campo correspondiente
-                    if (inputField.id.includes('cliente')) {
-                        // Actualizar el campo oculto (ID del cliente)
-                        const mainHiddenInputField = document.querySelector('#filter-cliente-id-input');
-                        if (mainHiddenInputField) {
-                            mainHiddenInputField.value = item.id || '';
-                            console.log(`Campo oculto principal actualizado: ${mainHiddenInputField.name} = ${mainHiddenInputField.value}`);
+                    // Identificar el campo correspondiente
+                    Object.keys(fieldMapping).forEach(field => {
+                        if (inputField.id.includes(field)) {
+                            const { hidden, visible, selected } = fieldMapping[field];
+
+                            // Reflejar la selección en el contenedor de "selected items"
+                            const selectedContainer = document.querySelector(selected);
+                            if (selectedContainer) {
+                                selectedContainer.innerHTML = ''; // Limpiar cualquier selección previa
+                                const selectedItem = document.createElement('div');
+                                selectedItem.classList.add('selected-item');
+                                selectedItem.textContent = item[property];
+
+                                // Botón para eliminar el ítem seleccionado
+                                const removeBtn = document.createElement('button');
+                                removeBtn.textContent = '×';
+                                removeBtn.classList.add('remove-item');
+                                removeBtn.addEventListener('click', () => {
+                                    selectedContainer.innerHTML = ''; // Limpiar el contenedor
+                                    const mainHiddenInputField = document.querySelector(hidden);
+                                    if (mainHiddenInputField) {
+                                        mainHiddenInputField.value = ''; // Limpiar el campo oculto
+                                    }
+                                });
+
+                                selectedItem.appendChild(removeBtn);
+                                selectedContainer.appendChild(selectedItem);
+                            }
+
+                            // Actualizar el campo oculto con el ID del elemento seleccionado
+                            const mainHiddenInputField = document.querySelector(hidden);
+                            if (mainHiddenInputField) {
+                                mainHiddenInputField.value = item.id || '';
+                                console.log(`Campo oculto actualizado: ${mainHiddenInputField.name} = ${mainHiddenInputField.value}`);
+                            }
+
+                            // Mantener funcionalidad de búsqueda
+                            const mainVisibleInputField = document.querySelector(visible);
+                            if (mainVisibleInputField) {
+                                mainVisibleInputField.value = item[property];
+                                applyFilterOnChange(); // Aplicar el filtro inmediatamente
+                            }
                         }
-
-                        // Actualizar el campo visible (nombre del cliente)
-                        const mainVisibleInputField = document.querySelector('#filter-cliente-input'); // Asegúrate de que el ID es correcto
-                        if (mainVisibleInputField) {
-                            mainVisibleInputField.value = item[property]; // Actualizar con el nombre del cliente
-                            console.log(`Campo visible actualizado: ${mainVisibleInputField.id} = ${mainVisibleInputField.value}`);
-                        }
-
-                    } else if (inputField.id.includes('asunto')) {
-                        const mainVisibleInputField = document.querySelector('#filter-asunto-input');
-                        if (mainVisibleInputField) {
-                            mainVisibleInputField.value = item[property];
-                            console.log(`Campo visible actualizado: ${mainVisibleInputField.id} = ${mainVisibleInputField.value}`);
-                        }
-                    } else if (inputField.id.includes('tipo')) {
-                        const mainVisibleInputField = document.querySelector('#filter-tipo-input');
-                        if (mainVisibleInputField) {
-                            mainVisibleInputField.value = item[property];
-                            console.log(`Campo visible actualizado: ${mainVisibleInputField.id} = ${mainVisibleInputField.value}`);
-                        }
-                    }
-
-
+                    });
 
                     // Eliminar el contenedor después de la selección
                     if (autocompleteContainer && autocompleteContainer.parentNode) {
                         autocompleteContainer.parentNode.removeChild(autocompleteContainer);
                     }
+                    applyFilterOnChange(); // Aplicar el filtro inmediatamente
 
-                    // Activar el filtrado automáticamente
-                    applyFilterOnChange();
-                    console.log(`Seleccionado: ${item[property]}, ID: ${item.id}`);
+                    // Limpiar el input visible
+                    inputField.value = '';
+
+                    // Ocultar la lista
+                    list.style.display = 'none';
                 });
+
                 list.appendChild(li);
             }
         });
@@ -1335,14 +1456,12 @@ document.addEventListener('DOMContentLoaded', function () {
         list.style.marginTop = '5px';
         list.style.marginLeft = '-5px';
 
-
-        // Ajustar altura dinámica del contenedor al escribir o cuando hay resultados
+        // Ajustar altura dinámica del contenedor
         if (autocompleteContainer) {
             autocompleteContainer.style.minHeight = '200px'; // Fijar altura al escribir
             autocompleteContainer.style.overflowY = 'auto'; // Activar scroll si es necesario
         }
     }
-
 
     // Mapeo de propiedades según el campo
     function getAutocompleteProperty(field) {
