@@ -464,10 +464,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function updateHiddenInput() {
             hiddenInput.value = selectedItems
-                .map(item => item.id || item.nombre) // Incluir IDs o nombres según estén disponibles
+                .map(item => {
+                    // Usa `nombre_fiscal` para clientes, `nombre` para otros
+                    return item.id || item.nombre_fiscal || item.nombre || '';
+                })
                 .join(',');
             console.log(`Valores para el filtro: ${hiddenInput.value}`);
         }
+        
 
 
         function selectItem(item) {
@@ -501,16 +505,23 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (selectedIndex >= 0 && selectedIndex < items.length) {
-                    // Si hay un elemento seleccionado en la lista
+                    // Selección desde la lista desplegable
                     const selectedItem = dataList.find(item =>
                         displayFormatter(item) === items[selectedIndex].textContent
                     );
                     selectItem(selectedItem);
                 } else if (input.value.trim()) {
-                    // Si no hay selección pero hay texto en el input
+                    // Si no hay selección, agregar el texto como ítem personalizado
                     const query = input.value.trim();
-                    if (!selectedItems.some(item => item.nombre === query)) {
-                        selectedItems.push({ id: null, nombre: query }); // Agregar texto como un "nombre" sin ID
+                    const newItem = {
+                        id: null,
+                        nombre_fiscal: inputId.includes('cliente') ? query : '', // Usar `nombre_fiscal` para clientes
+                        nombre: !inputId.includes('cliente') ? query : '' // Usar `nombre` para otros
+                    };
+        
+                    if (!selectedItems.some(item =>
+                        item.nombre_fiscal === newItem.nombre_fiscal || item.nombre === newItem.nombre)) {
+                        selectedItems.push(newItem); // Agregar ítem al array seleccionado
                         renderSelectedItems();
                     }
                     input.value = ''; // Limpiar el input
@@ -527,6 +538,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateActiveItem(items, selectedIndex);
             }
         });
+        
 
 
         function updateActiveItem(items, index) {
