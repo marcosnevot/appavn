@@ -10,8 +10,8 @@
                 <th data-sort-key="users" data-field="filter-user" style="cursor: pointer;">Asignado a</th>
                 <th data-sort-key="cliente.nombre_fiscal" data-field="cliente" class="col-cliente" id="header-client" style="cursor: pointer;">Cliente</th>
                 <th data-sort-key="asunto.nombre" data-field="asunto" style="cursor: pointer;">Asunto</th>
-                <th data-sort-key="descripcion"  style="cursor: pointer;" class="col-descripcion">Descripción</th>
-                <th data-sort-key="observaciones"  style="cursor: pointer;" class="col-descripcion">Observaciones</th>
+                <th data-sort-key="descripcion" data-field="filter_descripcion"  style="cursor: pointer;" class="col-descripcion">Descripción</th>
+                <th data-sort-key="observaciones" data-field="filter_observaciones"  style="cursor: pointer;" class="col-observaciones">Observaciones</th>
                 <th data-sort-key="facturable" data-field="filter-facturable" style="cursor: pointer;">Facturable</th>
                 <th data-sort-key="facturado" data-field="filter-facturado" style="cursor: pointer;">Facturado</th>
                 <th data-sort-key="estado" data-field="filter-estado" style="cursor: pointer;">Estado</th>

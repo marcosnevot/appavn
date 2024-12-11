@@ -90,6 +90,7 @@
 <script src="{{ asset('js/billing/add-billing.js') }}"></script>
 <script src="{{ asset('js/billing/filter-billing.js') }}"></script>
 <script src="{{ asset('js/billing/billing-modal.js') }}"></script>
+<script src="{{ asset('js/common.js') }}"></script>
 
 
 @endsection

@@ -63,6 +63,12 @@ window.currentFilters = {
 
 };
 
+
+let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
+let asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
+let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+
+
 // Función para abrir el modal con los detalles de la tarea
 function openTasksModal(taskId) {
     console.log("Abriendo modal para la tarea:", taskId); // Log para verificar cuándo se abre el modal

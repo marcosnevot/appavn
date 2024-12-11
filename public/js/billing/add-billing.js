@@ -650,7 +650,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         modal.style.display = 'flex'; // Mostrar el modal
 
-        // Confirmación modal
+        // Eliminar controladores previos para evitar duplicaciones
+        const confirmYesButton = document.getElementById('confirm-modal-yes');
+        const confirmNoButton = document.getElementById('confirm-modal-no');
+
+        confirmYesButton.replaceWith(confirmYesButton.cloneNode(true)); // Clonar el botón para eliminar eventos
+        confirmNoButton.replaceWith(confirmNoButton.cloneNode(true)); // Clonar el botón para eliminar eventos
+
         document.getElementById('confirm-modal-yes').addEventListener('click', function () {
             modal.style.display = 'none';
 
@@ -659,13 +665,25 @@ document.addEventListener('DOMContentLoaded', function () {
             const clienteEmail = document.getElementById('cliente-email').value.trim();
             const clienteTelefono = document.getElementById('cliente-telefono').value.trim();
 
+            // Limpiar los campos del modal
+            resetModalFields();
+
             // Pasar estos valores al envío del formulario
             submitTaskForm({ clienteNIF, clienteEmail, clienteTelefono });
         });
 
         document.getElementById('confirm-modal-no').addEventListener('click', function () {
             modal.style.display = 'none';
+            // Limpiar los campos del modal
+            resetModalFields();
         });
+    }
+
+
+    function resetModalFields() {
+        document.getElementById('cliente-nif').value = '';
+        document.getElementById('cliente-email').value = '';
+        document.getElementById('cliente-telefono').value = '';
     }
 
 
@@ -943,8 +961,32 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
 
         // Añadir el evento de doble clic a las filas de la tabla
         addDoubleClickEventToRows();
-        // Inicializar el evento de clic derecho en las celdas de "Facturado"
-        initializeFacturadoContextMenu();
+        // Configuración dinámica de columnas para el menú contextual
+        const columnsConfig = [
+            {
+                class: 'facturado-cell',
+                field: 'facturado',
+                options: ['SI', 'NO', 'NUNCA'],
+            },
+            {
+                class: 'facturable-cell',
+                field: 'facturable',
+                options: ['1', '0'], // Representar como 1 (Sí) y 0 (No)
+            },
+            {
+                class: 'estado-cell',
+                field: 'estado',
+                options: ['PENDIENTE', 'ENESPERA', 'COMPLETADA'],
+            },
+            {
+                class: 'planificacion-cell',
+                field: 'fecha_planificacion',
+                options: ['Hoy', 'Mañana', 'Semana Siguiente'], // Puedes añadir opciones personalizadas
+            },
+        ];
+
+        // Inicializar el menú contextual dinámico con la configuración de columnas
+        initializeDynamicContextMenu(columnsConfig);
     });
 
 
@@ -983,8 +1025,32 @@ function updateSingleTaskRow(task) {
 
     // Añadir el evento de doble clic a la fila actualizada (si es necesario)
     addDoubleClickEventToRows();
-    // Inicializar el evento de clic derecho en las celdas de "Facturado"
-    initializeFacturadoContextMenu();
+    // Configuración dinámica de columnas para el menú contextual
+    const columnsConfig = [
+        {
+            class: 'facturado-cell',
+            field: 'facturado',
+            options: ['SI', 'NO', 'NUNCA'],
+        },
+        {
+            class: 'facturable-cell',
+            field: 'facturable',
+            options: ['1', '0'], // Representar como 1 (Sí) y 0 (No)
+        },
+        {
+            class: 'estado-cell',
+            field: 'estado',
+            options: ['PENDIENTE', 'ENESPERA', 'COMPLETADA'],
+        },
+        {
+            class: 'planificacion-cell',
+            field: 'fecha_planificacion',
+            options: ['Hoy', 'Mañana', 'Semana Siguiente'], // Puedes añadir opciones personalizadas
+        },
+    ];
+
+    // Inicializar el menú contextual dinámico con la configuración de columnas
+    initializeDynamicContextMenu(columnsConfig);
 }
 
 

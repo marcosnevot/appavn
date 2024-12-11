@@ -178,6 +178,18 @@
                 <label for="filter-coste">Coste (€):</label>
                 <input type="number" step="0.01" name="filter_coste" id="filter-coste">
             </div>
+
+            <!-- Campo para filtrar por Descripción -->
+            <div class="form-group grow">
+                <label for="filter-descripcion-input">Descripción:</label>
+                <input type="text" id="filter-descripcion-input" name="filter_descripcion" placeholder="Buscar descripción..." class="form-control">
+            </div>
+
+            <!-- Campo para filtrar por Observaciones -->
+            <div class="form-group grow">
+                <label for="filter-observaciones-input">Observaciones:</label>
+                <input type="text" id="filter-observaciones-input" name="filter_observaciones" placeholder="Buscar observaciones..." class="form-control">
+            </div>
         </div>
 
         <!-- Fila 4: Fechas, Tiempo Previsto, Tiempo Real -->

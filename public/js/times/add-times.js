@@ -630,7 +630,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         modal.style.display = 'flex'; // Mostrar el modal
 
-        // Confirmación modal
+        // Eliminar controladores previos para evitar duplicaciones
+        const confirmYesButton = document.getElementById('confirm-modal-yes');
+        const confirmNoButton = document.getElementById('confirm-modal-no');
+
+        confirmYesButton.replaceWith(confirmYesButton.cloneNode(true)); // Clonar el botón para eliminar eventos
+        confirmNoButton.replaceWith(confirmNoButton.cloneNode(true)); // Clonar el botón para eliminar eventos
+
         document.getElementById('confirm-modal-yes').addEventListener('click', function () {
             modal.style.display = 'none';
 
@@ -639,13 +645,25 @@ document.addEventListener('DOMContentLoaded', function () {
             const clienteEmail = document.getElementById('cliente-email').value.trim();
             const clienteTelefono = document.getElementById('cliente-telefono').value.trim();
 
+            // Limpiar los campos del modal
+            resetModalFields();
+
             // Pasar estos valores al envío del formulario
             submitTaskForm({ clienteNIF, clienteEmail, clienteTelefono });
         });
 
         document.getElementById('confirm-modal-no').addEventListener('click', function () {
             modal.style.display = 'none';
+            // Limpiar los campos del modal
+            resetModalFields();
         });
+    }
+
+
+    function resetModalFields() {
+        document.getElementById('cliente-nif').value = '';
+        document.getElementById('cliente-email').value = '';
+        document.getElementById('cliente-telefono').value = '';
     }
 
 
@@ -983,32 +1001,28 @@ function updateSingleTaskRow(task) {
     if (existingRow) {
         // Si la fila ya existe, actualizar su contenido
         existingRow.innerHTML = `
-            <td>${task.id}</td>
-            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
-            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
-            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            <td>${task.tiempo_previsto || 'N/A'}</td>
-            <td>${task.tiempo_real || 'N/A'}</td>
-            <td>${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
-            <td>${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
-            <td style="display: none;">${task.archivo || 'No disponible'}</td>
-            <td>${task.facturable ? 'Sí' : 'No'}</td>
-            <td>${task.facturado || 'No'}</td>
-            <td>${task.subtipo || ''}</td>
-            <td>${task.estado}</td>
-            <td style="display: none;">${task.precio || 'N/A'}</td>
-            <td style="display: none;">${task.suplido || 'N/A'}</td>
-            <td style="display: none;">${task.coste || 'N/A'}</td>
-            <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td style="display: none;">${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
+        <td>${task.id}</td>
+         <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+          <td>
+        ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+        </td>             
+        <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
+        <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
+        <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
+        <td>${task.tiempo_previsto || 'N/A'}</td>
+        <td>${task.tiempo_real || 'N/A'}</td> 
+        <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
+        <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
+        <td>${task.facturable ? 'Sí' : 'No'}</td>
+        <td>${task.facturado || 'No'}</td>
+        <td>${task.estado}</td>
+        <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
+        <td>${task.subtipo || ''}</td>
+        <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
+        
+      
 
-            <td>
-            ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-            </td>             
-            <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
-            <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
-        `;
+    `;
     } else {
         console.error(`No se encontró una fila con el ID de la tarea: ${task.id}`);
     }

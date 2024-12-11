@@ -340,10 +340,11 @@ th::after {
 
 .col-descripcion,
 .col-observaciones {
-    max-width: 300px;
+    max-width: 250px;
     /* Define el ancho máximo */
-    width: 20%;
+    width: 250px;
     /* Establece un ancho proporcional para evitar que se fusionen */
+    min-width: 250px;
     max-height: 4.5em;
     /* Limita la altura máxima */
     overflow: hidden;

@@ -64,9 +64,9 @@ window.currentFilters = {
 
 }; // Variable global para los filtros activos
 
-let clientesData = [];
-let asuntosData = [];
-let tiposData = [];
+let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
+let asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
+let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
 
 // Función para abrir el modal con los detalles de la tarea
 function openTasksModal(taskId) {

@@ -1,168 +1,77 @@
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('El script de filtro ha sido cargado correctamente.');
-
-    // Obtener los datos de clientes, asuntos y tipos desde los atributos data
-    const clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
-    const asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
-    const tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
-
-    const filterTaskButton = document.getElementById('filter-task-button');
-    const filterTaskForm = document.getElementById('filter-task-form');
-    const filterTaskFormContent = document.getElementById('filter-task-form-content');
-
-    const applyFilterButton = document.getElementById('apply-filter-button');
-    const cancelFilterButton = document.getElementById('cancel-filter-button');
-    const clearFilterButton = document.getElementById('clear-filter-button');
 
 
+const filterTaskButton = document.getElementById('filter-task-button');
+const filterTaskForm = document.getElementById('filter-task-form');
+const filterTaskFormContent = document.getElementById('filter-task-form-content');
 
-    // Mostrar el formulario de filtrar tareas
-    filterTaskButton.addEventListener('click', function () {
-        filterTaskForm.style.display = 'block';
-        setTimeout(() => {
-            filterTaskForm.classList.remove('hide');
-            filterTaskForm.classList.add('show');
-        }, 10);
-    });
+const applyFilterButton = document.getElementById('apply-filter-button');
+const cancelFilterButton = document.getElementById('cancel-filter-button');
+const clearFilterButton = document.getElementById('clear-filter-button');
 
-    // Ocultar el formulario de filtrar tareas
-    cancelFilterButton.addEventListener('click', function () {
-        closeFilterTaskForm();
-    });
 
-    // Ocultar el formulario cuando se hace clic fuera de él
-    document.addEventListener('click', function (event) {
-        const isInsideForm = filterTaskForm.contains(event.target); // Verifica si el clic fue dentro del formulario
-        const isfilterTaskButton = document.getElementById('filter-task-button').contains(event.target);
-        const isDateRangePicker = event.target.closest('.daterangepicker'); // Verifica si el clic fue dentro del Date Range Picker
-        const isSelectedItem = event.target.closest('.selected-item'); // Verifica si el clic fue dentro de un item seleccionado
+let isLoading = false; // Bandera para evitar solicitudes concurrentes
 
-        // Verifica si el clic no es dentro del formulario, del botón, del Date Range Picker o de un ítem seleccionado
-        if (!isInsideForm && !isfilterTaskButton && !isDateRangePicker && !isSelectedItem) {
-            if (filterTaskForm.classList.contains('show')) {
-                closeFilterTaskForm();
-            }
+function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
+    if (isLoading) return; // Salir si ya hay una solicitud en curso
+    isLoading = true; // Marcar que una solicitud está en curso
+
+    const filterData = {
+        cliente: document.getElementById('filter-cliente-ids').value || '', // Usar los IDs de clientes seleccionados
+        asunto: document.getElementById('filter-asunto-ids').value || '',  // Usar los IDs/nombres de asuntos seleccionados
+        tipo: document.getElementById('filter-tipo-ids').value || '',
+        subtipo: document.getElementById('filter-subtipo').value || '',
+        estado: document.getElementById('filter-estado-ids').value || '', // Predeterminar a "PENDIENTE, ENESPERA"
+        usuario: document.getElementById('filter-user-ids').value || '',
+        fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
+        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
+        fecha_planificacion: document.getElementById('filter-fecha-planificacion').value || '',
+        tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
+        tiempo_real: document.getElementById('filter-tiempo-real').value || '',
+        descripcion: document.getElementById('filter-descripcion-input').value || '', // Nuevo campo para descripción
+        observaciones: document.getElementById('filter-observaciones-input').value || '', // Nuevo campo para observaciones
+        // Filtros personalizados para Facturación
+        facturable: document.getElementById('filter-facturable-ids').value || '', // Usar el campo oculto con los valores seleccionados
+        facturado: document.getElementById('filter-facturado-ids').value || '', // Usar el campo oculto con los valores seleccionados
+    };
+
+    console.log('Datos de filtro:', filterData);
+    window.currentFilters = filterData; // Actualiza los filtros activos en la variable global
+
+    // Actualizar el panel con los filtros actuales
+    updateFilterInfoPanel(filterData);
+
+    // Realizar la solicitud al servidor para filtrar las tareas
+    fetch(`/tareas/filtrar?page=${page}`, {  // <-- Asegúrate de pasar el número de página
+        method: 'POST',
+        body: JSON.stringify(filterData),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         }
-    });
-
-
-    // Función para cerrar el formulario
-    function closeFilterTaskForm() {
-        filterTaskForm.classList.remove('show');
-        filterTaskForm.classList.add('hide');
-        setTimeout(() => {
-            filterTaskForm.style.display = 'none';
-        }, 400);
-
-    }
-
-    // Lógica para limpiar los campos del formulario de filtros
-    clearFilterButton.addEventListener('click', function (e) {
-        e.preventDefault(); // Evitar que se envíe el formulario al hacer clic en "Limpiar"
-
-        // Usar el método reset() para limpiar todos los campos del formulario
-        filterTaskFormContent.reset();
-
-        // Limpiar los usuarios seleccionados
-        resetSelectedUsers();
-
-        // Limpiar los campos ocultos que almacenan los IDs
-        document.getElementById('filter-cliente-ids').value = '';
-        document.getElementById('filter-asunto-ids').value = '';
-        document.getElementById('filter-tipo-ids').value = '';
-        document.getElementById('filter-user-ids').value = '';
-
-        // Limpiar las visualizaciones de autocompletar
-        document.getElementById('filter-cliente-input').value = '';
-        document.getElementById('filter-asunto-input').value = '';
-        document.getElementById('filter-tipo-input').value = '';
-
-        // Si las listas de autocompletar están visibles, ocultarlas
-        document.getElementById('filter-cliente-list').style.display = 'none';
-        document.getElementById('filter-asunto-list').style.display = 'none';
-        document.getElementById('filter-tipo-list').style.display = 'none';
-        document.getElementById('filter-user-list').style.display = 'none';
-    });
-
-
-    function loadFilteredTasks(page = 1) {
-
-        const filterData = {
-            cliente: document.getElementById('filter-cliente-ids').value || '', // Usar los IDs de clientes seleccionados
-            asunto: document.getElementById('filter-asunto-ids').value || '',  // Usar los IDs/nombres de asuntos seleccionados
-            tipo: document.getElementById('filter-tipo-ids').value || '',
-            subtipo: document.getElementById('filter-subtipo').value || '',
-            estado: document.getElementById('filter-estado-ids').value || '', // Predeterminar a "PENDIENTE, ENESPERA"
-            usuario: document.getElementById('filter-user-ids').value || '',
-            fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
-            fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
-            fecha_planificacion: document.getElementById('filter-fecha-planificacion').value || '',
-            tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
-            tiempo_real: document.getElementById('filter-tiempo-real').value || '',
-
-            // Filtros personalizados para Facturación
-            facturable: document.getElementById('filter-facturable-ids').value || '', // Usar el campo oculto con los valores seleccionados
-            facturado: document.getElementById('filter-facturado-ids').value || '', // Usar el campo oculto con los valores seleccionados
-        };
-
-        console.log('Datos de filtro:', filterData);
-        window.currentFilters = filterData; // Actualiza los filtros activos en la variable global
-
-        // Actualizar el panel con los filtros actuales
-        updateFilterInfoPanel(filterData);
-
-        // Realizar la solicitud al servidor para filtrar las tareas
-        fetch(`/tareas/filtrar?page=${page}`, {  // <-- Asegúrate de pasar el número de página
-            method: 'POST',
-            body: JSON.stringify(filterData),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Datos enviados:', filterData);
+                console.log('Respuesta del servidor:', data);
+                updateTaskTable(data.filteredTasks);
+                updatePagination(data.pagination, loadFilteredTasks);  // Pasa loadFilteredTasks como argumento
+                resetFiltroRapidoPlanificacion();
+                updateSelectedUserNamesFromFilterForm();
+                closeFilterTaskForm();
+            } else {
+                console.error('Error al filtrar tareas:', data.message);
             }
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('Datos enviados:', filterData);
-                    console.log('Respuesta del servidor:', data);
-                    updateTaskTable(data.filteredTasks);
-                    updatePagination(data.pagination, loadFilteredTasks);  // Pasa loadFilteredTasks como argumento
-                    resetFiltroRapidoPlanificacion();
-                    updateSelectedUserNamesFromFilterForm();
-                    closeFilterTaskForm();
-                } else {
-                    console.error('Error al filtrar tareas:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error en la solicitud:', error.message);
-            });
-    }
+        .catch(error => {
+            console.error('Error en la solicitud:', error.message);
+        })
+        .finally(() => {
+            isLoading = false; // Restablecer la bandera al finalizar
+        });
+}
 
-    applyFilterButton.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        // Agregar filtros predeterminados para facturación
-        //document.getElementById('filter-facturable').value = 'true';
-        //document.getElementById('filter-facturado').value = 'No';
-
-        loadFilteredTasks();
-    });
-
-    // Función para restablecer el filtro rápido de planificación
-    function resetFiltroRapidoPlanificacion() {
-        // Remover la clase 'active' de todos los botones
-        document.querySelectorAll('.btn-filter-planificacion').forEach(btn => btn.classList.remove('active'));
-
-        // Marcar el botón de "Todas" como activo
-        const botonTodas = document.querySelector('.btn-filter-planificacion[data-fecha=""]');
-        if (botonTodas) {
-            botonTodas.classList.add('active');
-        }
-    }
-
-
-    let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
+let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
     // Función para actualizar el panel de filtros
     function updateFilterInfoPanel(filters) {
@@ -243,6 +152,146 @@ document.addEventListener('DOMContentLoaded', function () {
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1).replace('_', ' ');
     }
+
+    // Función para restablecer el filtro rápido de planificación
+    function resetFiltroRapidoPlanificacion() {
+        // Remover la clase 'active' de todos los botones
+        document.querySelectorAll('.btn-filter-planificacion').forEach(btn => btn.classList.remove('active'));
+
+        // Marcar el botón de "Todas" como activo
+        const botonTodas = document.querySelector('.btn-filter-planificacion[data-fecha=""]');
+        if (botonTodas) {
+            botonTodas.classList.add('active');
+        }
+    }
+
+
+    // Función para cerrar el formulario
+    function closeFilterTaskForm() {
+        filterTaskForm.classList.remove('show');
+        filterTaskForm.classList.add('hide');
+        setTimeout(() => {
+            filterTaskForm.style.display = 'none';
+        }, 400);
+
+    }
+
+
+
+    // Función para actualizar el nombre de los usuarios en el título desde el formulario
+    function updateSelectedUserNamesFromFilterForm() {
+        const selectedUserNamesElement = document.getElementById('selected-user-names'); // Seleccionar el span en el título
+        const selectedCheckboxes = document.querySelectorAll('#filter-user-list input.user-checkbox:checked'); // Checkboxes seleccionados
+
+        if (selectedCheckboxes.length === 0) {
+            // Si no hay usuarios seleccionados, mostrar "todos"
+            selectedUserNamesElement.textContent = 'todos';
+        } else {
+            // Obtén los nombres de los usuarios seleccionados
+            const selectedNames = Array.from(selectedCheckboxes).map(checkbox => {
+                const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                return label ? label.textContent : ''; // Extrae el texto del label asociado
+            }).join(', ');
+
+            // Actualiza el contenido del span con los nombres seleccionados
+            selectedUserNamesElement.textContent = selectedNames;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('El script de filtro ha sido cargado correctamente.');
+
+    
+
+
+    // Mostrar el formulario de filtrar tareas
+    filterTaskButton.addEventListener('click', function () {
+        filterTaskForm.style.display = 'block';
+        setTimeout(() => {
+            filterTaskForm.classList.remove('hide');
+            filterTaskForm.classList.add('show');
+        }, 10);
+    });
+
+    // Ocultar el formulario de filtrar tareas
+    cancelFilterButton.addEventListener('click', function () {
+        closeFilterTaskForm();
+    });
+
+    // Ocultar el formulario cuando se hace clic fuera de él
+    document.addEventListener('click', function (event) {
+        const isInsideForm = filterTaskForm.contains(event.target); // Verifica si el clic fue dentro del formulario
+        const isfilterTaskButton = document.getElementById('filter-task-button').contains(event.target);
+        const isDateRangePicker = event.target.closest('.daterangepicker'); // Verifica si el clic fue dentro del Date Range Picker
+        const isSelectedItem = event.target.closest('.selected-item'); // Verifica si el clic fue dentro de un item seleccionado
+
+        // Verifica si el clic no es dentro del formulario, del botón, del Date Range Picker o de un ítem seleccionado
+        if (!isInsideForm && !isfilterTaskButton && !isDateRangePicker && !isSelectedItem) {
+            if (filterTaskForm.classList.contains('show')) {
+                closeFilterTaskForm();
+            }
+        }
+    });
+
+
+    
+
+    // Lógica para limpiar los campos del formulario de filtros
+    clearFilterButton.addEventListener('click', function (e) {
+        e.preventDefault(); // Evitar que se envíe el formulario al hacer clic en "Limpiar"
+
+        // Usar el método reset() para limpiar todos los campos del formulario
+        filterTaskFormContent.reset();
+
+        // Limpiar los usuarios seleccionados
+        resetSelectedUsers();
+
+        // Limpiar los campos ocultos que almacenan los IDs
+        document.getElementById('filter-cliente-ids').value = '';
+        document.getElementById('filter-asunto-ids').value = '';
+        document.getElementById('filter-tipo-ids').value = '';
+        document.getElementById('filter-user-ids').value = '';
+
+        // Limpiar las visualizaciones de autocompletar
+        document.getElementById('filter-cliente-input').value = '';
+        document.getElementById('filter-asunto-input').value = '';
+        document.getElementById('filter-tipo-input').value = '';
+
+        // Si las listas de autocompletar están visibles, ocultarlas
+        document.getElementById('filter-cliente-list').style.display = 'none';
+        document.getElementById('filter-asunto-list').style.display = 'none';
+        document.getElementById('filter-tipo-list').style.display = 'none';
+        document.getElementById('filter-user-list').style.display = 'none';
+    });
+
+
+   
+
+    applyFilterButton.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        // Agregar filtros predeterminados para facturación
+        //document.getElementById('filter-facturable').value = 'true';
+        //document.getElementById('filter-facturado').value = 'No';
+
+        loadFilteredTasks();
+    });
+
+    
+
+
+    
 
     // Función para limpiar los usuarios seleccionados
     function resetSelectedUsers() {
@@ -457,25 +506,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // Función para actualizar el nombre de los usuarios en el título desde el formulario
-    function updateSelectedUserNamesFromFilterForm() {
-        const selectedUserNamesElement = document.getElementById('selected-user-names'); // Seleccionar el span en el título
-        const selectedCheckboxes = document.querySelectorAll('#filter-user-list input.user-checkbox:checked'); // Checkboxes seleccionados
-
-        if (selectedCheckboxes.length === 0) {
-            // Si no hay usuarios seleccionados, mostrar "todos"
-            selectedUserNamesElement.textContent = 'todos';
-        } else {
-            // Obtén los nombres de los usuarios seleccionados
-            const selectedNames = Array.from(selectedCheckboxes).map(checkbox => {
-                const label = document.querySelector(`label[for="${checkbox.id}"]`);
-                return label ? label.textContent : ''; // Extrae el texto del label asociado
-            }).join(', ');
-
-            // Actualiza el contenido del span con los nombres seleccionados
-            selectedUserNamesElement.textContent = selectedNames;
-        }
-    }
+    
 
 
     // Función para manejar la selección de usuarios en el formulario de filtrado
@@ -829,6 +860,8 @@ document.addEventListener('DOMContentLoaded', function () {
             fecha_planificacion: fecha === "past" ? "past" : fecha, // Este valor viene del filtro rápido de planificación
             tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
             tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
+            descripcion: document.getElementById('filter-descripcion-input').value || '', // Nuevo campo para descripción
+            observaciones: document.getElementById('filter-observaciones-input').value || '', // Nuevo campo para observaciones
             // Filtros por defecto para la vista de Facturación
             facturable: true,
             facturado: 'NO'

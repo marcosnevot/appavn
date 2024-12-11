@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const taskForm = document.getElementById('task-form');
     const addTaskForm = document.getElementById('add-task-form'); // El propio formulario
 
-     clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
+    clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
 
-     asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
+    asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
 
-     tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+    tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
 
     let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
@@ -488,7 +488,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         modal.style.display = 'flex'; // Mostrar el modal
 
-        // Confirmación modal
+        // Eliminar controladores previos para evitar duplicaciones
+        const confirmYesButton = document.getElementById('confirm-modal-yes');
+        const confirmNoButton = document.getElementById('confirm-modal-no');
+
+        confirmYesButton.replaceWith(confirmYesButton.cloneNode(true)); // Clonar el botón para eliminar eventos
+        confirmNoButton.replaceWith(confirmNoButton.cloneNode(true)); // Clonar el botón para eliminar eventos
+
         document.getElementById('confirm-modal-yes').addEventListener('click', function () {
             modal.style.display = 'none';
 
@@ -497,14 +503,27 @@ document.addEventListener('DOMContentLoaded', function () {
             const clienteEmail = document.getElementById('cliente-email').value.trim();
             const clienteTelefono = document.getElementById('cliente-telefono').value.trim();
 
+            // Limpiar los campos del modal
+            resetModalFields();
+
             // Pasar estos valores al envío del formulario
             submitTaskForm({ clienteNIF, clienteEmail, clienteTelefono });
         });
 
         document.getElementById('confirm-modal-no').addEventListener('click', function () {
             modal.style.display = 'none';
+            // Limpiar los campos del modal
+            resetModalFields();
         });
     }
+
+
+    function resetModalFields() {
+        document.getElementById('cliente-nif').value = '';
+        document.getElementById('cliente-email').value = '';
+        document.getElementById('cliente-telefono').value = '';
+    }
+
 
 
     // Asignar Usuarios a una tarea
@@ -773,7 +792,7 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             tableBody.appendChild(row);
         }
 
-        
+
         // Añadir el evento de doble clic a las filas de la tabla
         addDoubleClickEventToRows();
     });

@@ -204,6 +204,12 @@ class TaskController extends Controller
                 }
             }
 
+            foreach (['descripcion', 'observaciones'] as $field) {
+                if (!empty($filters[$field])) {
+                    $query->where($field, 'like', '%' . $filters[$field] . '%');
+                }
+            }
+
 
 
             DB::enableQueryLog();
@@ -473,6 +479,12 @@ class TaskController extends Controller
                 $query->where('facturado', 'NO');
             }
 
+            foreach (['descripcion', 'observaciones'] as $field) {
+                if (!empty($filters[$field])) {
+                    $query->where($field, 'like', '%' . $filters[$field] . '%');
+                }
+            }
+
 
             // Incluir relaciones necesarias
             $query->with(['cliente', 'asunto', 'tipo', 'users']);
@@ -589,18 +601,29 @@ class TaskController extends Controller
                 }
             }
 
-            // Filtrar por cliente (múltiples IDs)
-            if (!empty($filters['cliente'])) {
+             // Filtrar por cliente (múltiples IDs)
+             if (!empty($filters['cliente'])) {
                 $clienteValues = explode(',', $filters['cliente']); // Dividir los valores por comas
-                $clientesById = Cliente::whereIn('id', $clienteValues)
-                    ->pluck('id')
-                    ->toArray();
-                $clientesByName = Cliente::where(function ($query) use ($clienteValues) {
-                    foreach ($clienteValues as $value) {
-                        $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
-                    }
-                })->pluck('id')
-                    ->toArray();
+
+                // Dividir los valores entre números (IDs) y texto (nombres parciales)
+                $idValues = array_filter($clienteValues, 'is_numeric'); // IDs específicos
+                $nameValues = array_filter($clienteValues, fn($value) => !is_numeric($value)); // Nombres parciales
+
+                // Buscar por IDs exactos
+                $clientesById = !empty($idValues)
+                    ? Cliente::whereIn('id', $idValues)->pluck('id')->toArray()
+                    : [];
+
+                // Buscar por nombres parciales
+                $clientesByName = !empty($nameValues)
+                    ? Cliente::where(function ($query) use ($nameValues) {
+                        foreach ($nameValues as $value) {
+                            $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
+                        }
+                    })->pluck('id')->toArray()
+                    : [];
+
+                // Combinar resultados y aplicar el filtro
                 $clientes = array_unique(array_merge($clientesById, $clientesByName));
 
                 if (!empty($clientes)) {
@@ -685,6 +708,12 @@ class TaskController extends Controller
                         ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
                 } else {
                     $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+                }
+            }
+
+            foreach (['descripcion', 'observaciones'] as $field) {
+                if (!empty($filters[$field])) {
+                    $query->where($field, 'like', '%' . $filters[$field] . '%');
                 }
             }
 
@@ -913,18 +942,23 @@ class TaskController extends Controller
             if (!empty($filters['cliente'])) {
                 $clienteValues = explode(',', $filters['cliente']); // Dividir los valores por comas
 
+                // Dividir los valores entre números (IDs) y texto (nombres parciales)
+                $idValues = array_filter($clienteValues, 'is_numeric'); // IDs específicos
+                $nameValues = array_filter($clienteValues, fn($value) => !is_numeric($value)); // Nombres parciales
+
                 // Buscar por IDs exactos
-                $clientesById = Cliente::whereIn('id', $clienteValues)
-                    ->pluck('id')
-                    ->toArray();
+                $clientesById = !empty($idValues)
+                    ? Cliente::whereIn('id', $idValues)->pluck('id')->toArray()
+                    : [];
 
                 // Buscar por nombres parciales
-                $clientesByName = Cliente::where(function ($query) use ($clienteValues) {
-                    foreach ($clienteValues as $value) {
-                        $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
-                    }
-                })->pluck('id')
-                    ->toArray();
+                $clientesByName = !empty($nameValues)
+                    ? Cliente::where(function ($query) use ($nameValues) {
+                        foreach ($nameValues as $value) {
+                            $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
+                        }
+                    })->pluck('id')->toArray()
+                    : [];
 
                 // Combinar resultados y aplicar el filtro
                 $clientes = array_unique(array_merge($clientesById, $clientesByName));
@@ -933,6 +967,8 @@ class TaskController extends Controller
                     $query->whereIn('cliente_id', $clientes);
                 }
             }
+
+
 
             // Filtrar por asuntos (múltiples IDs o nombres)
             if (!empty($filters['asunto'])) {
@@ -1087,6 +1123,12 @@ class TaskController extends Controller
                         ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
                 } else {
                     $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+                }
+            }
+
+            foreach (['descripcion', 'observaciones'] as $field) {
+                if (!empty($filters[$field])) {
+                    $query->where($field, 'like', '%' . $filters[$field] . '%');
                 }
             }
 
@@ -1309,6 +1351,12 @@ class TaskController extends Controller
                     ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
             } else {
                 $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+            }
+        }
+
+        foreach (['descripcion', 'observaciones'] as $field) {
+            if (!empty($filters[$field])) {
+                $query->where($field, 'like', '%' . $filters[$field] . '%');
             }
         }
 

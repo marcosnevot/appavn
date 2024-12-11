@@ -153,6 +153,8 @@ document.addEventListener('DOMContentLoaded', function () {
             // fecha_imputacion: document.getElementById('filter-fecha-imputacion').value || '',
             tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
             tiempo_real: document.getElementById('filter-tiempo-real').value || '',
+            descripcion: document.getElementById('filter-descripcion-input').value || '', // Nuevo campo para descripción
+            observaciones: document.getElementById('filter-observaciones-input').value || '', // Nuevo campo para observaciones
             // Enviar las fechas de planificación como valores separados
             fecha_planificacion_inicio: fechaPlanificacionInicio || '',
             fecha_planificacion_fin: fechaPlanificacionFin || '',
@@ -949,6 +951,8 @@ document.addEventListener('DOMContentLoaded', function () {
             fecha_planificacion: fecha === "past" ? "past" : fecha, // Este valor viene del filtro rápido de planificación
             tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
             tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
+            descripcion: document.getElementById('filter-descripcion-input').value || '', // Nuevo campo para descripción
+            observaciones: document.getElementById('filter-observaciones-input').value || '', // Nuevo campo para observaciones
             sortKey: sortKey, // Clave para ordenar
             sortDirection: sortDirection // Dirección de orden
         };

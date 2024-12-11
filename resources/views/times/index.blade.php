@@ -121,7 +121,7 @@
 <script src="{{ asset('js/times/add-times.js') }}"></script>
 <script src="{{ asset('js/times/filter-times.js') }}"></script>
 <script src="{{ asset('js/times/times.js') }}"></script>
-<script src="{{ asset('js/tasks/task-modal.js') }}"></script>
+<script src="{{ asset('js/times/times-modal.js') }}"></script>
 
 
 @endsection

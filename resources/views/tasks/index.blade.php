@@ -80,6 +80,7 @@
 <script src="{{ asset('js/tasks/tasks.js') }}"></script>
 <script src="{{ asset('js/tasks/filter-tasks.js') }}"></script>
 <script src="{{ asset('js/tasks/task-modal.js') }}"></script>
+<script src="{{ asset('js/common.js') }}"></script>
 
 
 
