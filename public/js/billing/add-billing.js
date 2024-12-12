@@ -915,12 +915,6 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
             // Si no coincide con los filtros actuales, no la mostramos
             return;
         }
-        console.log('Valores de filtros recogidos:', {
-            cliente: document.getElementById('filter-cliente-input')?.value,
-            asunto: document.getElementById('filter-asunto-input')?.value,
-            facturable: getChecklistValues('facturable', true),
-            facturado: getChecklistValues('facturado')
-        });
 
 
         const row = document.createElement('tr');
@@ -933,20 +927,30 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
         row.innerHTML = `
             <td>${task.id}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>
-             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-             </td> 
+            <td class="fecha-planificacion-cell" 
+                data-fecha_planificacion="${task.fecha_planificacion || ''}" 
+                data-task-id="${task.id}">
+                ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+            </td> 
             <td class="col-cliente">${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
             <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
-            <td>${task.facturable ? 'SI' : 'NO'}</td>
+           <td class="facturable-cell" 
+                data-facturable="${task.facturable ? 'SI' : 'NO'}" 
+                data-task-id="${task.id}">
+                ${task.facturable ? 'SI' : 'NO'}
+            </td>
             <td class="facturado-cell" 
                 data-facturado="${task.facturado || 'NO'}" 
                 data-task-id="${task.id}">
                 ${task.facturado || 'NO'}
             </td>
-            <td>${task.estado}</td>
+            <td class="estado-cell" 
+                data-estado="${task.estado || 'PENDIENTE'}" 
+                data-task-id="${task.id}">
+                ${task.estado || 'PENDIENTE'}
+            </td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
         `;
@@ -961,97 +965,17 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
 
         // Añadir el evento de doble clic a las filas de la tabla
         addDoubleClickEventToRows();
-        // Configuración dinámica de columnas para el menú contextual
-        const columnsConfig = [
-            {
-                class: 'facturado-cell',
-                field: 'facturado',
-                options: ['SI', 'NO', 'NUNCA'],
-            },
-            {
-                class: 'facturable-cell',
-                field: 'facturable',
-                options: ['1', '0'], // Representar como 1 (Sí) y 0 (No)
-            },
-            {
-                class: 'estado-cell',
-                field: 'estado',
-                options: ['PENDIENTE', 'ENESPERA', 'COMPLETADA'],
-            },
-            {
-                class: 'planificacion-cell',
-                field: 'fecha_planificacion',
-                options: ['Hoy', 'Mañana', 'Semana Siguiente'], // Puedes añadir opciones personalizadas
-            },
-        ];
 
-        // Inicializar el menú contextual dinámico con la configuración de columnas
-        initializeDynamicContextMenu(columnsConfig);
     });
-
+    // Inicializar eventos de clic derecho para cada columna dinámica
+    initializeContextMenu('facturado-cell', 'facturado', ['SI', 'NO', 'NUNCA']);
+    initializeContextMenu('facturable-cell', 'facturable', ['1', '0']);
+    initializeContextMenu('estado-cell', 'estado', ['PENDIENTE', 'ENESPERA', 'COMPLETADA', 'PLANIFICADA', 'RECURRENTE/TRIMESTRE']);
+    initializeDatePickerContextMenu('fecha-planificacion-cell', 'fecha_planificacion');
 
 }
 
-// Función para actualizar una fila específica en la tabla al editar una tarea
-function updateSingleTaskRow(task) {
-    // Buscar la fila existente con el ID de la tarea
-    const existingRow = document.querySelector(`tr[data-task-id="${task.id}"]`);
 
-    if (existingRow) {
-        // Si la fila ya existe, actualizar su contenido
-        existingRow.innerHTML = `
-            <td>${task.id}</td>
-            <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
-            <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
-            <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
-            <td>${task.descripcion || ''}</td>
-            <td>${task.observaciones || ''}</td>
-            <td>${task.facturable ? 'SI' : 'NO'}</td>
-            <td class="facturado-cell" 
-            data-facturado="${task.facturado || 'NO'}" 
-                 data-task-id="${task.id}">
-                 ${task.facturado || 'NO'}
-             </td>
-           
-            <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>${task.fecha_imputacion ? new Date(task.fecha_imputacion).toLocaleDateString() : 'Sin fecha'}</td>
-           
-            <td style="display: none;">${task.created_at || 'Sin fecha'}</td>
-        `;
-    } else {
-        console.error(`No se encontró una fila con el ID de la tarea: ${task.id}`);
-    }
-
-    // Añadir el evento de doble clic a la fila actualizada (si es necesario)
-    addDoubleClickEventToRows();
-    // Configuración dinámica de columnas para el menú contextual
-    const columnsConfig = [
-        {
-            class: 'facturado-cell',
-            field: 'facturado',
-            options: ['SI', 'NO', 'NUNCA'],
-        },
-        {
-            class: 'facturable-cell',
-            field: 'facturable',
-            options: ['1', '0'], // Representar como 1 (Sí) y 0 (No)
-        },
-        {
-            class: 'estado-cell',
-            field: 'estado',
-            options: ['PENDIENTE', 'ENESPERA', 'COMPLETADA'],
-        },
-        {
-            class: 'planificacion-cell',
-            field: 'fecha_planificacion',
-            options: ['Hoy', 'Mañana', 'Semana Siguiente'], // Puedes añadir opciones personalizadas
-        },
-    ];
-
-    // Inicializar el menú contextual dinámico con la configuración de columnas
-    initializeDynamicContextMenu(columnsConfig);
-}
 
 
 

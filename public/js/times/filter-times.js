@@ -90,9 +90,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Extraer fechas del rango de planificación desde el formulario
         const fechaPlanificacionInput = document.getElementById('filter-fecha-planificacion').value || '';
-        const [fechaPlanificacionInicio, fechaPlanificacionFin] = fechaPlanificacionInput
-            ? fechaPlanificacionInput.split(' - ')
-            : ['', ''];
+        const [fechaPlanificacionInicio, fechaPlanificacionFin] = fechaPlanificacionInput === 'past'
+            ? ['past', 'past'] // Manejar "past" como caso especial
+            : fechaPlanificacionInput.split(' - ');
 
         const filterData = {
             cliente: document.getElementById('filter-cliente-ids').value || '', // Usar los IDs de clientes seleccionados

@@ -177,20 +177,30 @@ function loadInitialTasks(tasks) {
         row.innerHTML = `
             <td>${task.id}</td>
             <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
-            <td>
-             ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-             </td> 
+            <td class="fecha-planificacion-cell" 
+                data-fecha_planificacion="${task.fecha_planificacion || ''}" 
+                data-task-id="${task.id}">
+                ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+            </td>
             <td class="col-cliente">${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
             <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
-            <td>${task.facturable ? 'SI' : 'NO'}</td>
+            <td class="facturable-cell" 
+                data-facturable="${task.facturable ? 'SI' : 'NO'}" 
+                data-task-id="${task.id}">
+                ${task.facturable ? 'SI' : 'NO'}
+            </td>
             <td class="facturado-cell" 
                 data-facturado="${task.facturado || 'NO'}" 
                 data-task-id="${task.id}">
                 ${task.facturado || 'NO'}
             </td>
-            <td>${task.estado}</td>
+            <td class="estado-cell" 
+                data-estado="${task.estado || 'PENDIENTE'}" 
+                data-task-id="${task.id}">
+                ${task.estado || 'PENDIENTE'}
+            </td>
             <td>${task.tipo ? task.tipo.nombre : 'Sin tipo'}</td>
             <td>${task.fecha_inicio ? new Date(task.fecha_inicio).toLocaleDateString() : 'Sin fecha'}</td>
         `;
@@ -198,106 +208,13 @@ function loadInitialTasks(tasks) {
 
         // Añadir el evento de doble clic a las filas de la tabla
         addDoubleClickEventToRows();
-        // Inicializar el evento de clic derecho en las celdas de "Facturado"
-        initializeFacturadoContextMenu();
+
     });
+    // Inicializar eventos de clic derecho para cada columna dinámica
+    initializeContextMenu('facturado-cell', 'facturado', ['SI', 'NO', 'NUNCA']);
+    initializeContextMenu('facturable-cell', 'facturable', ['1', '0']);
+    initializeContextMenu('estado-cell', 'estado', ['PENDIENTE', 'ENESPERA', 'COMPLETADA', 'PLANIFICADA', 'RECURRENTE/TRIMESTRE']);
+    initializeDatePickerContextMenu('fecha-planificacion-cell', 'fecha_planificacion');
+
 }
 
-
-
-function initializeFacturadoContextMenu() {
-    const tableBody = document.querySelector('table tbody');
-
-    tableBody.addEventListener('contextmenu', function (event) {
-        const targetCell = event.target;
-
-        // Verificar si el clic fue en una celda de "Facturado"
-        if (targetCell.classList.contains('facturado-cell')) {
-            event.preventDefault(); // Prevenir el menú contextual predeterminado
-
-            // Limpiar cualquier otro select abierto
-            const existingSelect = document.querySelector('.facturado-select');
-            if (existingSelect) existingSelect.remove();
-
-            // Crear un menú desplegable (select)
-            const currentValue = targetCell.getAttribute('data-facturado');
-            const taskId = targetCell.getAttribute('data-task-id');
-
-            const select = document.createElement('select');
-            select.classList.add('facturado-select');
-            ['SI', 'NO', 'NUNCA'].forEach(optionValue => {
-                const option = document.createElement('option');
-                option.value = optionValue;
-                option.textContent = optionValue;
-                if (optionValue === currentValue) option.selected = true;
-                select.appendChild(option);
-            });
-
-            // Posicionar el select cerca del cursor
-            select.style.position = 'absolute';
-            select.style.left = `${event.pageX}px`;
-            select.style.top = `${event.pageY}px`;
-            document.body.appendChild(select);
-
-            // Manejar el cambio de selección
-            select.addEventListener('change', function () {
-                const newValue = select.value;
-                updateTaskFacturado(taskId, newValue, targetCell, select);
-            });
-
-            // Cerrar el select al hacer clic fuera
-            document.addEventListener('click', function closeSelect(e) {
-                if (!select.contains(e.target)) {
-                    select.remove();
-                    document.removeEventListener('click', closeSelect);
-                }
-            });
-        }
-    });
-}
-
-// Función para actualizar la columna "Facturado"
-function updateTaskFacturado(taskId, newValue, targetCell, select) {
-    const formData = new FormData();
-    formData.append('_method', 'PUT'); // Simular un método PUT
-    formData.append('facturado', newValue);
-
-    fetch(`/tareas/${taskId}`, {
-        method: 'POST', // Usamos POST para enviar datos al backend
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        },
-    })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => {
-                    console.error("Error en la respuesta:", err);
-                    throw new Error('Error en la respuesta del servidor');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Actualizar la celda con el nuevo valor
-                targetCell.setAttribute('data-facturado', newValue);
-                targetCell.textContent = newValue;
-
-                loadTasks(1, 'fecha_planificacion', 'asc');
-                // Mostrar notificación de éxito
-                showNotification('Columna Facturado actualizada correctamente', 'info');
-            } else {
-                console.error('Errores de validación:', data.errors);
-                showNotification('Error al actualizar la columna', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error al actualizar la columna:', error);
-            showNotification('Error al actualizar la columna', 'error');
-        })
-        .finally(() => {
-            // Remover el select una vez completado
-            select.remove();
-        });
-}

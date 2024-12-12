@@ -1,4 +1,209 @@
+//Filtros Planificación
+function sincronizarBotonesConFecha() {
+    const dateRangePicker = document.getElementById('filter-fecha-planificacion');
+    const dateRangeValue = dateRangePicker.value || '';
+    const [fechaInicio, fechaFin] = dateRangeValue === 'past'
+        ? ['past', 'past'] // Caso especial para "Pasadas"
+        : dateRangeValue.split(' - ');
+
+    const buttons = document.querySelectorAll('.btn-filter-planificacion');
+    let botonSeleccionado = false;
+
+    // Limpiar clases activas de todos los botones
+    buttons.forEach(button => button.classList.remove('active', 'active-red'));
+
+    buttons.forEach(button => {
+        const botonFecha = button.getAttribute('data-fecha');
+
+        if (botonFecha === 'past' && fechaInicio === 'past' && fechaFin === 'past') {
+            // Activar "Pasadas"
+            button.classList.add('active-red');
+            botonSeleccionado = true;
+        } else if (botonFecha === '' && fechaInicio === '' && fechaFin === '') {
+            // Activar "Todas"
+            button.classList.add('active');
+            botonSeleccionado = true;
+        } else if (fechaInicio === botonFecha && fechaFin === botonFecha) {
+            // Activar fechas específicas
+            button.classList.add('active');
+            botonSeleccionado = true;
+        }
+    });
+
+    if (!botonSeleccionado) {
+        console.log('No hay botón correspondiente para el rango de fechas seleccionado.');
+    }
+}
+
+// Función para restablecer el filtro rápido de planificación
+function resetFiltroRapidoPlanificacion() {
+    // Obtener el botón actualmente activo
+    const activeButton = document.querySelector('.btn-filter-planificacion.active, .btn-filter-planificacion.active-red');
+
+    // Si ya hay un botón activo, no hacer nada
+    if (activeButton) {
+        console.log('No se resetea el filtro rápido porque ya hay un botón activo.');
+        return;
+    }
+
+    // Si no hay botón activo, establecer "Todas" como activo
+    const botonTodas = document.querySelector('.btn-filter-planificacion[data-fecha=""]');
+    if (botonTodas) {
+        botonTodas.classList.add('active');
+    }
+}
+
+
+
 document.addEventListener('DOMContentLoaded', function () {
+
+
+
+
+    $(document).ready(function () {
+        const today = new Date().toISOString().split('T')[0];
+
+        // Inicialización para el campo del formulario (Filter Form)
+        const formFechaPlanificacionInput = $('#filter-fecha-planificacion');
+
+        formFechaPlanificacionInput.daterangepicker({
+            autoUpdateInput: true,
+            startDate: today,
+            endDate: today,
+            locale: {
+                format: 'YYYY-MM-DD',
+                separator: ' - ',
+                applyLabel: 'Aplicar',
+                cancelLabel: 'Cancelar',
+                fromLabel: 'Desde',
+                toLabel: 'Hasta',
+                customRangeLabel: 'Personalizado',
+            },
+            drops: 'up', // Mostrar por encima
+        });
+
+
+
+        formFechaPlanificacionInput.on('apply.daterangepicker', function (ev, picker) {
+            ev.stopPropagation(); // Evitar que el formulario se cierre
+            $(this).val(`${picker.startDate.format('YYYY-MM-DD')} - ${picker.endDate.format('YYYY-MM-DD')}`);
+            // Las fechas seleccionadas ya se reflejan en el campo input del formulario
+
+        });
+
+        formFechaPlanificacionInput.on('cancel.daterangepicker', function () {
+            $(this).val(''); // Limpiar el campo si se cancela la selección
+        });
+
+        // Inicializar el campo vacío
+        formFechaPlanificacionInput.val(''); // Campo sin valor inicial (null en términos funcionales)
+    });
+
+    // Filtro según la planificación
+    const planificacionFilterContainer = document.getElementById('planificacion-filter-buttons');
+
+    // Función para obtener los días de la semana a partir de hoy
+    function obtenerDiasFiltrado() {
+        const diasSemana = ["L", "M", "X", "J", "V"];
+        const hoy = new Date();
+        const hoyIndex = hoy.getDay();
+        const diasRestantes = [];
+
+        diasRestantes.push({ nombre: "Todas", fecha: "" }); // Opción para ver todas las tareas
+
+        for (let i = 0; i < 7 - hoyIndex; i++) {
+            const nuevoDia = new Date(hoy);
+            nuevoDia.setDate(hoy.getDate() + i);
+            const diaSemana = nuevoDia.getDay();
+
+            // Excluir sábado y domingo
+            if (diaSemana === 0 || diaSemana === 6) continue;
+
+            const nombreDia = i === 0 ? "Hoy" : i === 1 ? "Mañana" : diasSemana[diaSemana - 1];
+            diasRestantes.push({
+                nombre: nombreDia,
+                fecha: nuevoDia.toISOString().split('T')[0]
+            });
+        }
+
+
+
+        return diasRestantes;
+    }
+
+    // Función para generar los botones de filtro de planificación
+    function generarBotonesFiltroPlanificacion() {
+        planificacionFilterContainer.innerHTML = ""; // Limpiar botones previos
+        const diasRestantes = obtenerDiasFiltrado();
+
+        diasRestantes.forEach(dia => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.classList.add('btn-filter-planificacion');
+            button.textContent = dia.nombre;
+            button.setAttribute('data-fecha', dia.fecha);
+            button.onclick = () => filtrarTareasPorPlanificacion(dia.fecha);
+
+            planificacionFilterContainer.appendChild(button);
+        });
+
+        // Crear el botón de "Pasadas"
+        const botonPasadas = document.createElement('button');
+        botonPasadas.type = 'button';
+        botonPasadas.classList.add('btn-filter-planificacion', 'btn-pasadas'); // Añadimos una clase específica
+        botonPasadas.textContent = 'Pasadas';
+        botonPasadas.setAttribute('data-fecha', 'past');
+        botonPasadas.onclick = () => filtrarTareasPorPlanificacion('past');
+        planificacionFilterContainer.appendChild(botonPasadas);
+        
+        
+        sincronizarBotonesConFecha();
+
+        // Seleccionar "Todas" inicialmente
+        const botonTodas = document.querySelector('.btn-filter-planificacion[data-fecha=""]');
+        if (botonTodas) {
+            botonTodas.classList.add('active');
+        }
+
+        // Llamar a la sincronización después de generar todos los botones
+
+    }
+
+
+
+
+
+    // Función para gestionar el filtrado de tareas
+    function filtrarTareasPorPlanificacion(fecha, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
+        console.log('filtrarTareasPorPlanificacion llamada desde:', new Error().stack);
+
+        // Actualizar la interfaz de botones
+        document.querySelectorAll('.btn-filter-planificacion').forEach(btn => {
+            btn.classList.remove('active', 'active-red'); // Limpiar clases activas y rojas
+        });
+
+
+
+        // Actualizar el campo date range picker
+        const dateRangePicker = document.getElementById('filter-fecha-planificacion');
+        if (fecha === 'past') {
+            // Establecer el valor del daterangepicker como "past"
+            dateRangePicker.value = 'past';
+        } else if (fecha === '') {
+            // Vaciar el daterangepicker para "Todas"
+            dateRangePicker.value = '';
+        } else {
+            // Establecer el rango de fechas seleccionado
+            dateRangePicker.value = `${fecha} - ${fecha}`;
+        }
+
+        sincronizarBotonesConFecha(); // Actualizar la selección de botones
+        loadFilteredTasks(1, sortKey, sortDirection); // Cargar tareas con los filtros
+    }
+
+
+    // Generar los botones de filtro de planificación al cargar la página
+    generarBotonesFiltroPlanificacion();
 
 
     // Filtros rápidos en encabezados
@@ -580,3 +785,189 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 });
+
+
+// Edición rápida desde la tabla
+
+function initializeContextMenu(columnClass, dataKey, options) {
+    const tableBody = document.querySelector('table tbody');
+
+    tableBody.addEventListener('contextmenu', function (event) {
+        const targetCell = event.target;
+
+        // Verificar si el clic fue en una celda de la columna especificada
+        if (targetCell.classList.contains(columnClass)) {
+            event.preventDefault(); // Prevenir el menú contextual predeterminado
+
+            // Limpiar cualquier otro select abierto
+            const existingSelect = document.querySelector('.dynamic-select');
+            if (existingSelect) existingSelect.remove();
+
+            // Crear un menú desplegable (select)
+            const currentValue = targetCell.getAttribute(`data-${dataKey}`);
+            const taskId = targetCell.getAttribute('data-task-id');
+
+            const select = document.createElement('select');
+            select.classList.add('dynamic-select');
+            options.forEach(optionValue => {
+                const option = document.createElement('option');
+                option.value = optionValue;
+
+                // Etiquetas personalizadas por columna
+                if (columnClass === 'facturable-cell') {
+                    option.textContent = optionValue === '1' ? 'SI' : 'NO';
+                } else if (columnClass === 'facturado-cell' || columnClass === 'estado-cell') {
+                    option.textContent = optionValue; // Mostrar el valor tal cual (e.g., "PENDIENTE", "SI", "NO", etc.)
+                }
+
+                // Seleccionar la opción actual
+                if (optionValue === currentValue) {
+                    option.selected = true;
+                }
+
+                select.appendChild(option);
+            });
+
+
+
+            // Posicionar el select cerca del cursor
+            select.style.position = 'absolute';
+            select.style.left = `${event.pageX}px`;
+            select.style.top = `${event.pageY}px`;
+            document.body.appendChild(select);
+
+            // Manejar el cambio de selección
+            select.addEventListener('change', function () {
+                const newValue = select.value;
+                updateTaskColumn(taskId, newValue, targetCell, select, dataKey);
+            });
+
+            // Cerrar el select al hacer clic fuera
+            document.addEventListener('click', function closeSelect(e) {
+                if (!select.contains(e.target)) {
+                    select.remove();
+                    document.removeEventListener('click', closeSelect);
+                }
+            });
+            // Cerrar el select al hacer scroll en la tabla
+            const scrollContainer = document.querySelector('.table-container'); // Contenedor de scroll
+            // Cerrar select al hacer scroll
+            const handleScroll = () => {
+                if (document.body.contains(select)) {
+                    document.body.removeChild(select);
+                }
+                scrollContainer.removeEventListener('scroll', handleScroll);
+            };
+            scrollContainer.addEventListener('scroll', handleScroll);
+        }
+    });
+}
+
+function initializeDatePickerContextMenu(columnClass, dataKey) {
+    const tableBody = document.querySelector('table tbody');
+
+    tableBody.addEventListener('contextmenu', function (event) {
+        const targetCell = event.target;
+
+        // Verificar si el clic fue en una celda de la columna especificada
+        if (targetCell.classList.contains(columnClass)) {
+            event.preventDefault(); // Prevenir el menú contextual predeterminado
+
+            // Limpiar cualquier otro editor abierto
+            const existingPicker = document.querySelector('.dynamic-datepicker');
+            if (existingPicker) existingPicker.remove();
+
+            // Obtener la fecha actual del atributo data
+            const currentValue = targetCell.getAttribute(`data-${dataKey}`);
+            const taskId = targetCell.getAttribute('data-task-id');
+
+            // Crear el input date
+            const dateInput = document.createElement('input');
+            dateInput.type = 'date';
+            dateInput.classList.add('dynamic-datepicker');
+            dateInput.value = currentValue || ''; // Establecer la fecha actual si existe
+
+            // Posicionar el input cerca del cursor
+            dateInput.style.position = 'absolute';
+            dateInput.style.left = `${event.pageX}px`;
+            dateInput.style.top = `${event.pageY}px`;
+            document.body.appendChild(dateInput);
+
+            // Enfocar el input para abrir el datepicker
+            dateInput.focus();
+
+            // Manejar el cambio de fecha
+            dateInput.addEventListener('change', function () {
+                const newValue = dateInput.value;
+                updateTaskColumn(taskId, newValue, targetCell, dateInput, dataKey);
+            });
+
+            // Cerrar el input al hacer clic fuera
+            const closeDatePicker = (e) => {
+                if (!dateInput.contains(e.target)) {
+                    dateInput.remove();
+                    document.removeEventListener('click', closeDatePicker);
+                }
+            };
+            document.addEventListener('click', closeDatePicker);
+
+            // Cerrar el input al hacer scroll
+            const scrollContainer = document.querySelector('.table-container');
+            const handleScroll = () => {
+                if (document.body.contains(dateInput)) {
+                    dateInput.remove();
+                }
+                scrollContainer.removeEventListener('scroll', handleScroll);
+            };
+            scrollContainer.addEventListener('scroll', handleScroll);
+        }
+    });
+}
+
+
+function updateTaskColumn(taskId, newValue, targetCell, select, columnKey) {
+    const formData = new FormData();
+    formData.append('_method', 'PUT'); // Simular un método PUT
+    formData.append(columnKey, newValue);
+
+    fetch(`/tareas/${taskId}`, {
+        method: 'POST', // Usamos POST para enviar datos al backend
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    console.error("Error en la respuesta:", err);
+                    throw new Error('Error en la respuesta del servidor');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Actualizar la celda con el nuevo valor
+                targetCell.setAttribute(`data-${columnKey}`, newValue);
+                targetCell.textContent = newValue;
+
+                loadTasks(1, 'fecha_planificacion', 'asc');
+                // Mostrar notificación de éxito
+                showNotification(`Columna ${columnKey} actualizada correctamente`, 'info');
+            } else {
+                console.error('Errores de validación:', data.errors);
+                showNotification(`Error al actualizar la columna ${columnKey}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error(`Error al actualizar la columna ${columnKey}:`, error);
+            showNotification(`Error al actualizar la columna ${columnKey}`, 'error');
+        })
+        .finally(() => {
+            // Remover el select una vez completado
+            select.remove();
+        });
+}
+
+

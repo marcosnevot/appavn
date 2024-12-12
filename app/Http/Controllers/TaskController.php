@@ -75,6 +75,14 @@ class TaskController extends Controller
                 $query->addSelect('tipos.nombre as tipo_nombre'); // Alias para tipo
                 $sortKey = 'tipos.nombre';
             }
+            if ($sortKey === 'users.name') {
+                $query->leftJoin('tarea_user', 'tareas.id', '=', 'tarea_user.tarea_id')
+                    ->leftJoin('users', 'tarea_user.user_id', '=', 'users.id')
+                    ->groupBy('tareas.id') // Asegura que no haya duplicados
+                    ->addSelect(DB::raw("GROUP_CONCAT(users.name SEPARATOR ', ') as user_names")); // Concatenar nombres
+                $sortKey = 'user_names'; // Ordenar por el alias
+            }
+
 
 
 
@@ -182,7 +190,16 @@ class TaskController extends Controller
 
 
             // Filtros específicos de planificación
-            if (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+            if (
+                !empty($filters['fecha_planificacion_inicio']) &&
+                !empty($filters['fecha_planificacion_fin']) &&
+                $filters['fecha_planificacion_inicio'] === 'past' &&
+                $filters['fecha_planificacion_fin'] === 'past'
+            ) {
+                // Caso especial para "past"
+                $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                    ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
+            } elseif (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
                 // Filtrar por rango si ambas fechas están definidas
                 $query->whereBetween('fecha_planificacion', [
                     $filters['fecha_planificacion_inicio'],
@@ -423,7 +440,16 @@ class TaskController extends Controller
             }
 
             // Filtros específicos de planificación
-            if (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+            if (
+                !empty($filters['fecha_planificacion_inicio']) &&
+                !empty($filters['fecha_planificacion_fin']) &&
+                $filters['fecha_planificacion_inicio'] === 'past' &&
+                $filters['fecha_planificacion_fin'] === 'past'
+            ) {
+                // Caso especial para "past"
+                $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                    ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
+            } elseif (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
                 // Filtrar por rango si ambas fechas están definidas
                 $query->whereBetween('fecha_planificacion', [
                     $filters['fecha_planificacion_inicio'],
@@ -601,8 +627,8 @@ class TaskController extends Controller
                 }
             }
 
-             // Filtrar por cliente (múltiples IDs)
-             if (!empty($filters['cliente'])) {
+            // Filtrar por cliente (múltiples IDs)
+            if (!empty($filters['cliente'])) {
                 $clienteValues = explode(',', $filters['cliente']); // Dividir los valores por comas
 
                 // Dividir los valores entre números (IDs) y texto (nombres parciales)
@@ -689,7 +715,16 @@ class TaskController extends Controller
 
 
             // Filtros específicos de planificación
-            if (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+            if (
+                !empty($filters['fecha_planificacion_inicio']) &&
+                !empty($filters['fecha_planificacion_fin']) &&
+                $filters['fecha_planificacion_inicio'] === 'past' &&
+                $filters['fecha_planificacion_fin'] === 'past'
+            ) {
+                // Caso especial para "past"
+                $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                    ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
+            } elseif (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
                 // Filtrar por rango si ambas fechas están definidas
                 $query->whereBetween('fecha_planificacion', [
                     $filters['fecha_planificacion_inicio'],
@@ -1104,7 +1139,16 @@ class TaskController extends Controller
             }
 
             // Filtros específicos de planificación
-            if (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+            if (
+                !empty($filters['fecha_planificacion_inicio']) &&
+                !empty($filters['fecha_planificacion_fin']) &&
+                $filters['fecha_planificacion_inicio'] === 'past' &&
+                $filters['fecha_planificacion_fin'] === 'past'
+            ) {
+                // Caso especial para "past"
+                $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                    ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
+            } elseif (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
                 // Filtrar por rango si ambas fechas están definidas
                 $query->whereBetween('fecha_planificacion', [
                     $filters['fecha_planificacion_inicio'],
@@ -1125,6 +1169,7 @@ class TaskController extends Controller
                     $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
                 }
             }
+
 
             foreach (['descripcion', 'observaciones'] as $field) {
                 if (!empty($filters[$field])) {
@@ -1505,6 +1550,29 @@ class TaskController extends Controller
             } elseif ($request->has('facturadoEdit')) {
                 $updateData['facturado'] = $request->input('facturadoEdit');
             }
+
+            // Manejar el campo "facturable" (priorizar celda sobre formulario)
+            if ($request->has('facturable')) {
+                $updateData['facturable'] = $request->input('facturable');
+            } elseif ($request->has('facturableEdit')) {
+                $updateData['facturable'] = $request->input('facturableEdit');
+            }
+
+            // Manejar el campo "estado" (priorizar celda sobre formulario)
+            if ($request->has('estado')) {
+                $updateData['estado'] = $request->input('estado');
+            } elseif ($request->has('estadoEdit')) {
+                $updateData['estado'] = $request->input('estadoEdit');
+            }
+
+            // Manejar el campo "fecha_planificacion" (priorizar celda sobre formulario)
+            if ($request->has('fecha_planificacion')) {
+                $updateData['fecha_planificacion'] = $request->input('fecha_planificacion');
+            } elseif ($request->has('fecha_planificacionEdit')) {
+                $updateData['fecha_planificacion'] = $request->input('fecha_planificacionEdit');
+            }
+
+
 
             // Verificar si se debe crear o asociar un cliente
             if (isset($validated['cliente_nombreEdit']) && !$request->filled('cliente_idEdit')) {

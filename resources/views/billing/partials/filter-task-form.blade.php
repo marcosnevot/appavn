@@ -215,7 +215,15 @@
 
         <!-- Fila 4: Fechas, Tiempo Previsto, Tiempo Real -->
         <div class="form-row" style="margin-bottom:30px">
-
+            <div class="form-group grow">
+                <label for="filter-fecha-planificacion">Fecha de Planificación:</label>
+                <input type="text"
+                    id="filter-fecha-planificacion"
+                    name="filter_fecha_planificacion"
+                    class="form-control"
+                    readonly
+                    placeholder="Seleccionar rango de fechas">
+            </div>
 
 
             <div class="form-group grow">
@@ -228,10 +236,7 @@
                 <input type="date" name="filter_fecha_vencimiento" id="filter-fecha-vencimiento">
             </div>
 
-            <div class="form-group grow">
-                <label for="filter-fecha-planificacion">Fecha de Planificación:</label>
-                <input type="date" name="filter_fecha_planificacion" id="filter-fecha-planificacion">
-            </div>
+
 
 
 

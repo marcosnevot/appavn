@@ -15,6 +15,11 @@ function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirect
     if (isLoading) return; // Salir si ya hay una solicitud en curso
     isLoading = true; // Marcar que una solicitud está en curso
 
+    const fechaPlanificacionInput = document.getElementById('filter-fecha-planificacion').value || '';
+    const [fechaPlanificacionInicio, fechaPlanificacionFin] = fechaPlanificacionInput === 'past'
+        ? ['past', 'past'] // Manejar "past" como caso especial
+        : fechaPlanificacionInput.split(' - ');
+
     const filterData = {
         cliente: document.getElementById('filter-cliente-ids').value || '', // Usar los IDs de clientes seleccionados
         asunto: document.getElementById('filter-asunto-ids').value || '',  // Usar los IDs/nombres de asuntos seleccionados
@@ -24,7 +29,8 @@ function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirect
         usuario: document.getElementById('filter-user-ids').value || '',
         fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
         fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
-        fecha_planificacion: document.getElementById('filter-fecha-planificacion').value || '',
+        fecha_planificacion_inicio: fechaPlanificacionInicio || '',
+        fecha_planificacion_fin: fechaPlanificacionFin || '',
         tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
         tiempo_real: document.getElementById('filter-tiempo-real').value || '',
         descripcion: document.getElementById('filter-descripcion-input').value || '', // Nuevo campo para descripción
@@ -39,6 +45,9 @@ function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirect
 
     // Actualizar el panel con los filtros actuales
     updateFilterInfoPanel(filterData);
+
+    sincronizarBotonesConFecha(); // Sincronizar botones antes de resetear
+    resetFiltroRapidoPlanificacion(); // Ajustar estado solo si es necesario
 
     // Realizar la solicitud al servidor para filtrar las tareas
     fetch(`/tareas/filtrar?page=${page}`, {  // <-- Asegúrate de pasar el número de página
@@ -153,18 +162,7 @@ let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute
         return string.charAt(0).toUpperCase() + string.slice(1).replace('_', ' ');
     }
 
-    // Función para restablecer el filtro rápido de planificación
-    function resetFiltroRapidoPlanificacion() {
-        // Remover la clase 'active' de todos los botones
-        document.querySelectorAll('.btn-filter-planificacion').forEach(btn => btn.classList.remove('active'));
-
-        // Marcar el botón de "Todas" como activo
-        const botonTodas = document.querySelector('.btn-filter-planificacion[data-fecha=""]');
-        if (botonTodas) {
-            botonTodas.classList.add('active');
-        }
-    }
-
+  
 
     // Función para cerrar el formulario
     function closeFilterTaskForm() {
@@ -756,153 +754,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-
-
-
-
-
-
-    // Filtro según la planificación
-    const planificacionFilterContainer = document.getElementById('planificacion-filter-buttons');
-
-    // Función para obtener los días de la semana a partir de hoy
-    function obtenerDiasFiltrado() {
-        const diasSemana = ["L", "M", "X", "J", "V"];
-        const hoy = new Date();
-        const hoyIndex = hoy.getDay();
-        const diasRestantes = [];
-
-        diasRestantes.push({ nombre: "Todas", fecha: "" }); // Opción para ver todas las tareas
-
-        for (let i = 0; i < 7 - hoyIndex; i++) {
-            const nuevoDia = new Date(hoy);
-            nuevoDia.setDate(hoy.getDate() + i);
-            const diaSemana = nuevoDia.getDay();
-
-            // Excluir sábado y domingo
-            if (diaSemana === 0 || diaSemana === 6) continue;
-
-            const nombreDia = i === 0 ? "Hoy" : i === 1 ? "Mañana" : diasSemana[diaSemana - 1];
-            diasRestantes.push({
-                nombre: nombreDia,
-                fecha: nuevoDia.toISOString().split('T')[0]
-            });
-        }
-
-
-
-        return diasRestantes;
-    }
-
-    // Función para generar los botones de filtro de planificación
-    function generarBotonesFiltroPlanificacion() {
-        planificacionFilterContainer.innerHTML = ""; // Limpiar botones previos
-        const diasRestantes = obtenerDiasFiltrado();
-
-        diasRestantes.forEach(dia => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.classList.add('btn-filter-planificacion');
-            button.textContent = dia.nombre;
-            button.setAttribute('data-fecha', dia.fecha);
-            button.onclick = () => filtrarTareasPorPlanificacion(dia.fecha);
-
-            planificacionFilterContainer.appendChild(button);
-
-            // Marcar "Todas" como activa al inicio
-            if (dia.nombre === "Todas") {
-                button.classList.add('active');
-                // filtrarTareasPorPlanificacion(dia.fecha);
-            }
-        });
-        // Crear el botón de "Pasadas"
-        const botonPasadas = document.createElement('button');
-        botonPasadas.type = 'button';
-        botonPasadas.classList.add('btn-filter-planificacion', 'btn-pasadas'); // Añadimos una clase específica
-        botonPasadas.textContent = 'Pasadas';
-        botonPasadas.setAttribute('data-fecha', 'past');
-        botonPasadas.onclick = () => filtrarTareasPorPlanificacion('past');
-        planificacionFilterContainer.appendChild(botonPasadas);
-
-    }
-
-    // Función para gestionar el filtrado de tareas
-    function filtrarTareasPorPlanificacion(fecha) {
-        // Actualizar la interfaz de botones
-        document.querySelectorAll('.btn-filter-planificacion').forEach(btn => {
-            btn.classList.remove('active', 'active-red'); // Limpiar clases activas y rojas
-        });
-
-        const selectedButton = document.querySelector(`.btn-filter-planificacion[data-fecha="${fecha}"]`);
-        if (selectedButton) {
-            if (fecha === 'past') {
-                selectedButton.classList.add('active-red'); // Usar una clase especial para "Pasadas"
-            } else {
-                selectedButton.classList.add('active');
-            }
-        }
-
-        // Preparar los datos de filtro, combinando los filtros rápidos con los filtros del formulario principal
-        const filterData = {
-            cliente: document.getElementById('filter-cliente-ids').value || '', // Usar los IDs de clientes seleccionados
-            asunto: document.getElementById('filter-asunto-ids').value || '',  // Usar los IDs/nombres de asuntos seleccionados
-            tipo: document.getElementById('filter-tipo-ids').value || '',
-            subtipo: document.getElementById('filter-subtipo')?.value || '',
-            estado: document.getElementById('filter-estado-ids').value || '', // Predeterminar a "PENDIENTE, ENESPERA"
-            usuario: document.getElementById('filter-user-ids')?.value || '',
-            archivo: document.getElementById('filter-archivo')?.value || '',
-
-            precio: document.getElementById('filter-precio')?.value || '',
-            suplido: document.getElementById('filter-suplido')?.value || '',
-            coste: document.getElementById('filter-coste')?.value || '',
-            fecha_inicio: document.getElementById('filter-fecha-inicio')?.value || '',
-            fecha_vencimiento: document.getElementById('filter-fecha-vencimiento')?.value || '',
-            fecha_planificacion: fecha === "past" ? "past" : fecha, // Este valor viene del filtro rápido de planificación
-            tiempo_previsto: document.getElementById('filter-tiempo-previsto')?.value || '',
-            tiempo_real: document.getElementById('filter-tiempo-real')?.value || '',
-            descripcion: document.getElementById('filter-descripcion-input').value || '', // Nuevo campo para descripción
-            observaciones: document.getElementById('filter-observaciones-input').value || '', // Nuevo campo para observaciones
-            // Filtros por defecto para la vista de Facturación
-            facturable: true,
-            facturado: 'NO'
-        };
-
-        console.log('Datos de filtro:', filterData);
-
-        // Actualizar el panel con los filtros actuales
-        updateFilterInfoPanel(filterData);
-
-        // Realizar la solicitud al servidor para filtrar las tareas
-        fetch(`/tareas/filtrar`, {
-            method: 'POST',
-            body: JSON.stringify(filterData),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log("Tareas filtradas recibidas:", data.filteredTasks);
-
-                    updateTaskTable(data.filteredTasks); // Actualizar la tabla con las tareas filtradas
-                    updatePagination(data.pagination, loadFilteredTasks);  // Pasar loadFilteredTasks para paginación si es necesario
-                } else {
-                    console.error('Error al filtrar tareas:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error en la solicitud:', error.message);
-            });
-    }
-
-
-
-
-
-    // Generar los botones de filtro de planificación al cargar la página
-    generarBotonesFiltroPlanificacion();
 
     // Checklists de los campos Estado, Subtipo, facturable y Facturado
 

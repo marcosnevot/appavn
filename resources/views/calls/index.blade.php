@@ -74,7 +74,7 @@
 @endsection
 
 @section('scripts')
-
+<script src="{{ asset(path: 'js/common.js') }}"></script>
 <script src="{{ asset('js/calls/common-calls.js') }}"></script>
 <script src="{{ asset('js/tasks/add-tasks.js') }}"></script>
 <script src="{{ asset('js/calls/calls.js') }}"></script>
