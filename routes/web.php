@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ClientController;
@@ -46,6 +47,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    });
+
+    
     Route::get('/tareas', [TaskController::class, 'index'])->name('tasks.index');
     Route::post('/tareas', [TaskController::class, 'store'])->name('tasks.store');
     Route::post('/tareas/filtrar', [TaskController::class, 'filter'])->name('tareas.filtrar');
@@ -72,7 +78,7 @@ Route::middleware('auth')->group(function () {
         $notifications = auth()->user()->unreadNotifications()->latest()->take(30)->get();
         return response()->json($notifications);
     });
-    
+
     Route::post('/notifications/{id}/read', function ($id) {
         $notification = auth()->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
@@ -95,7 +101,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/clientes/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
     Route::put('/clientes/{id}', [ClientController::class, 'update'])->name('clients.update');
     Route::post('/clientes/export', [ClientController::class, 'exportFilteredCustomers'])->name('clientes.export');
-
 });
 
 require __DIR__ . '/auth.php';

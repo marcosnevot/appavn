@@ -82,119 +82,119 @@ function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirect
 
 let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
-    // Función para actualizar el panel de filtros
-    function updateFilterInfoPanel(filters) {
-        const filterInfoContent = document.getElementById('filter-info-content');
-        const filterInfoPanel = document.getElementById('filter-info-panel');
+// Función para actualizar el panel de filtros
+function updateFilterInfoPanel(filters) {
+    const filterInfoContent = document.getElementById('filter-info-content');
+    const filterInfoPanel = document.getElementById('filter-info-panel');
 
-        filterInfoContent.innerHTML = ''; // Limpiar contenido anterior
+    filterInfoContent.innerHTML = ''; // Limpiar contenido anterior
 
-        // Filtrar las entradas con valores no vacíos
-        const filterEntries = Object.entries(filters).filter(([key, value]) => value !== '');
+    // Filtrar las entradas con valores no vacíos
+    const filterEntries = Object.entries(filters).filter(([key, value]) => value !== '');
 
-        if (filterEntries.length === 0) {
-            // Ocultar el panel cuando no hay filtros aplicados
-            filterInfoPanel.classList.add('hide');
-        } else {
-            filterEntries.forEach(([key, value]) => {
-                const p = document.createElement('p');
+    if (filterEntries.length === 0) {
+        // Ocultar el panel cuando no hay filtros aplicados
+        filterInfoPanel.classList.add('hide');
+    } else {
+        filterEntries.forEach(([key, value]) => {
+            const p = document.createElement('p');
 
-                if (key === 'cliente') {
-                    // Manejo para clientes
-                    const clienteIds = value.split(',').map(id => parseInt(id));
-                    const clienteNames = clienteIds
-                        .map(id => {
-                            const cliente = clientesData.find(cliente => cliente.id === id);
-                            return cliente ? cliente.nombre_fiscal : 'Desconocido';
-                        })
-                        .join(', ');
+            if (key === 'cliente') {
+                // Manejo para clientes
+                const clienteIds = value.split(',').map(id => parseInt(id));
+                const clienteNames = clienteIds
+                    .map(id => {
+                        const cliente = clientesData.find(cliente => cliente.id === id);
+                        return cliente ? cliente.nombre_fiscal : 'Desconocido';
+                    })
+                    .join(', ');
 
-                    p.textContent = `Cliente(s): ${clienteNames || 'Desconocido'}`;
-                } else if (key === 'asunto') {
-                    // Manejo para asuntos
-                    const asuntoIds = value.split(',').map(id => parseInt(id));
-                    const asuntoNames = asuntoIds
-                        .map(id => {
-                            const asunto = asuntosData.find(asunto => asunto.id === id);
-                            return asunto ? asunto.nombre : 'Desconocido';
-                        })
-                        .join(', ');
+                p.textContent = `Cliente(s): ${clienteNames || 'Desconocido'}`;
+            } else if (key === 'asunto') {
+                // Manejo para asuntos
+                const asuntoIds = value.split(',').map(id => parseInt(id));
+                const asuntoNames = asuntoIds
+                    .map(id => {
+                        const asunto = asuntosData.find(asunto => asunto.id === id);
+                        return asunto ? asunto.nombre : 'Desconocido';
+                    })
+                    .join(', ');
 
-                    p.textContent = `Asunto(s): ${asuntoNames || 'Desconocido'}`;
-                } else if (key === 'tipo') {
-                    // Manejo para tipos
-                    const tipoIds = value.split(',').map(id => parseInt(id));
-                    const tipoNames = tipoIds
-                        .map(id => {
-                            const tipo = tiposData.find(tipo => tipo.id === id);
-                            return tipo ? tipo.nombre : 'Desconocido';
-                        })
-                        .join(', ');
+                p.textContent = `Asunto(s): ${asuntoNames || 'Desconocido'}`;
+            } else if (key === 'tipo') {
+                // Manejo para tipos
+                const tipoIds = value.split(',').map(id => parseInt(id));
+                const tipoNames = tipoIds
+                    .map(id => {
+                        const tipo = tiposData.find(tipo => tipo.id === id);
+                        return tipo ? tipo.nombre : 'Desconocido';
+                    })
+                    .join(', ');
 
-                    p.textContent = `Tipo(s): ${tipoNames || 'Desconocido'}`;
-                } else if (key === 'usuario') {
-                    // Manejo para usuarios
-                    const userIds = value.split(',').map(id => parseInt(id));
-                    const userNames = userIds
-                        .map(id => {
-                            const usuario = usersData.find(usuario => usuario.id === id);
-                            return usuario ? usuario.name : 'Desconocido';
-                        })
-                        .join(', ');
+                p.textContent = `Tipo(s): ${tipoNames || 'Desconocido'}`;
+            } else if (key === 'usuario') {
+                // Manejo para usuarios
+                const userIds = value.split(',').map(id => parseInt(id));
+                const userNames = userIds
+                    .map(id => {
+                        const usuario = usersData.find(usuario => usuario.id === id);
+                        return usuario ? usuario.name : 'Desconocido';
+                    })
+                    .join(', ');
 
-                    p.textContent = `Mostrando Tareas De: ${userNames}`;
-                } else {
-                    p.textContent = `${capitalizeFirstLetter(key)}: ${value}`;
-                }
+                p.textContent = `Mostrando Tareas De: ${userNames}`;
+            } else {
+                p.textContent = `${capitalizeFirstLetter(key)}: ${value}`;
+            }
 
-                filterInfoContent.appendChild(p);
-            });
+            filterInfoContent.appendChild(p);
+        });
 
 
-            // Mostrar el panel si hay filtros
-            filterInfoPanel.classList.remove('hide');
-        }
+        // Mostrar el panel si hay filtros
+        filterInfoPanel.classList.remove('hide');
     }
+}
 
 
-    // Función para capitalizar la primera letra
-    function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1).replace('_', ' ');
+// Función para capitalizar la primera letra
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1).replace('_', ' ');
+}
+
+
+
+// Función para cerrar el formulario
+function closeFilterTaskForm() {
+    filterTaskForm.classList.remove('show');
+    filterTaskForm.classList.add('hide');
+    setTimeout(() => {
+        filterTaskForm.style.display = 'none';
+    }, 400);
+
+}
+
+
+
+// Función para actualizar el nombre de los usuarios en el título desde el formulario
+function updateSelectedUserNamesFromFilterForm() {
+    const selectedUserNamesElement = document.getElementById('selected-user-names'); // Seleccionar el span en el título
+    const selectedCheckboxes = document.querySelectorAll('#filter-user-list input.user-checkbox:checked'); // Checkboxes seleccionados
+
+    if (selectedCheckboxes.length === 0) {
+        // Si no hay usuarios seleccionados, mostrar "todos"
+        selectedUserNamesElement.textContent = 'todos';
+    } else {
+        // Obtén los nombres de los usuarios seleccionados
+        const selectedNames = Array.from(selectedCheckboxes).map(checkbox => {
+            const label = document.querySelector(`label[for="${checkbox.id}"]`);
+            return label ? label.textContent : ''; // Extrae el texto del label asociado
+        }).join(', ');
+
+        // Actualiza el contenido del span con los nombres seleccionados
+        selectedUserNamesElement.textContent = selectedNames;
     }
-
-  
-
-    // Función para cerrar el formulario
-    function closeFilterTaskForm() {
-        filterTaskForm.classList.remove('show');
-        filterTaskForm.classList.add('hide');
-        setTimeout(() => {
-            filterTaskForm.style.display = 'none';
-        }, 400);
-
-    }
-
-
-
-    // Función para actualizar el nombre de los usuarios en el título desde el formulario
-    function updateSelectedUserNamesFromFilterForm() {
-        const selectedUserNamesElement = document.getElementById('selected-user-names'); // Seleccionar el span en el título
-        const selectedCheckboxes = document.querySelectorAll('#filter-user-list input.user-checkbox:checked'); // Checkboxes seleccionados
-
-        if (selectedCheckboxes.length === 0) {
-            // Si no hay usuarios seleccionados, mostrar "todos"
-            selectedUserNamesElement.textContent = 'todos';
-        } else {
-            // Obtén los nombres de los usuarios seleccionados
-            const selectedNames = Array.from(selectedCheckboxes).map(checkbox => {
-                const label = document.querySelector(`label[for="${checkbox.id}"]`);
-                return label ? label.textContent : ''; // Extrae el texto del label asociado
-            }).join(', ');
-
-            // Actualiza el contenido del span con los nombres seleccionados
-            selectedUserNamesElement.textContent = selectedNames;
-        }
-    }
+}
 
 
 
@@ -210,7 +210,7 @@ let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute
 document.addEventListener('DOMContentLoaded', function () {
     console.log('El script de filtro ha sido cargado correctamente.');
 
-    
+
 
 
     // Mostrar el formulario de filtrar tareas
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    
+
 
     // Lógica para limpiar los campos del formulario de filtros
     clearFilterButton.addEventListener('click', function (e) {
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-   
+
 
     applyFilterButton.addEventListener('click', function (e) {
         e.preventDefault();
@@ -286,10 +286,10 @@ document.addEventListener('DOMContentLoaded', function () {
         loadFilteredTasks();
     });
 
-    
 
 
-    
+
+
 
     // Función para limpiar los usuarios seleccionados
     function resetSelectedUsers() {
@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    
+
 
 
     // Función para manejar la selección de usuarios en el formulario de filtrado
@@ -634,9 +634,9 @@ document.addEventListener('DOMContentLoaded', function () {
         checkboxes[filterCurrentFocus].focus();
     }
 
+    // Checklists de los campos Estado, Subtipo, facturable y Facturado
 
-    // Checklists de los campos Facturable y Facturado
-
+    // Checklists de los campos Estado, Facturable y Facturado
     function initializeChecklistFilter(fieldName, isBoolean = false, defaultValues = []) {
         const selectElement = document.getElementById(`filter-${fieldName}-select`);
         const listElement = document.getElementById(`filter-${fieldName}-list`);
@@ -645,8 +645,8 @@ document.addEventListener('DOMContentLoaded', function () {
         let selectedItems = [...defaultValues]; // Inicializar con valores predeterminados
         let currentFocus = -1;
 
-        // Marcar los checkboxes correspondientes a los valores predeterminados
-        const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]')); // Convertir NodeList a Array
+        // Manejar checkboxes y marcar los valores predeterminados
+        const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]'));
         checkboxes.forEach((checkbox, index) => {
             checkbox.dataset.index = index; // Asignar índice único al checkbox
             const value = isBoolean ? checkbox.value === "1" : checkbox.value;
@@ -658,8 +658,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Manejar selección/deselección
             checkbox.addEventListener('change', function () {
-                const value = isBoolean ? this.value === "1" : this.value;
-
                 if (this.checked) {
                     selectedItems.push(value);
                 } else {
@@ -690,7 +688,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Alternar visibilidad de la lista
         selectElement.addEventListener('click', function (event) {
-            event.stopPropagation(); // Evitar que se cierre inmediatamente
+            event.stopPropagation();
             toggleListVisibility();
         });
 
@@ -704,7 +702,6 @@ document.addEventListener('DOMContentLoaded', function () {
         // Función para mostrar u ocultar la lista
         function toggleListVisibility() {
             listElement.style.display = listElement.style.display === 'block' ? 'none' : 'block';
-
             if (listElement.style.display === 'block') {
                 currentFocus = -1; // Reiniciar la selección cuando se vuelve a abrir
                 focusNextCheckbox(1); // Foco en el primer checkbox al abrir
@@ -738,187 +735,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Función para manejar el enfoque de los checkboxes
         function focusNextCheckbox(direction) {
-            currentFocus = (currentFocus + direction + checkboxes.length) % checkboxes.length; // Calcular el índice
+            currentFocus = (currentFocus + direction + checkboxes.length) % checkboxes.length;
             checkboxes[currentFocus].focus();
         }
 
-        // Actualizar la visualización inicial con valores predeterminados
+        // Inicializar el input oculto y la visualización con los valores predeterminados
         hiddenInput.value = selectedItems.join(',');
         updateSelectedDisplay(selectedContainer, selectedItems, isBoolean);
-    }
 
-
-    initializeChecklistFilter('facturado', false, ['NO']); // Facturado predeterminado a "NO"
-    initializeChecklistFilter('facturable', true, [true]); // Facturable predeterminado a true
-
-
-
-
-
-    // Checklists de los campos Estado, Subtipo, facturable y Facturado
-
-    function initializeChecklistFilter(fieldName, isBoolean = false) {
-        const selectElement = document.getElementById(`filter-${fieldName}-select`);
-        const listElement = document.getElementById(`filter-${fieldName}-list`);
-        const hiddenInput = document.getElementById(`filter-${fieldName}-ids`);
-        const selectedContainer = document.getElementById(`filter-selected-${fieldName}s`);
-        let selectedItems = [];
-        let currentFocus = -1;
-
-        // Alternar visibilidad de la lista desplegable
-        selectElement.addEventListener('click', function (event) {
-            event.stopPropagation(); // Evitar que se cierre inmediatamente
-            toggleListVisibility();
-        });
-
-        // Manejar selección de checkboxes
-        const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]')); // Convertir NodeList a Array
-        checkboxes.forEach((checkbox, index) => {
-            checkbox.dataset.index = index; // Asignar índice único al checkbox
-
-            checkbox.addEventListener('change', function () {
-                const value = isBoolean ? this.value === "1" : this.value;
-
-                if (this.checked) {
-                    selectedItems.push(value);
-                } else {
-                    selectedItems = selectedItems.filter(item => item !== value);
+        // Al final de initializeChecklistFilter
+        listElement.querySelectorAll('li').forEach(li => {
+            li.addEventListener('click', function (e) {
+                // Evitar interferir si se hace clic directamente en el <label> o el <input>
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') {
+                    return;
                 }
 
-                hiddenInput.value = selectedItems.join(',');
-                updateSelectedDisplay(selectedContainer, selectedItems, isBoolean);
-            });
-
-            // Manejar el foco de los checkboxes
-            checkbox.addEventListener('keydown', function (e) {
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    focusNextCheckbox(1);
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    focusNextCheckbox(-1);
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    checkboxes[currentFocus].click(); // Simular clic para seleccionar/deseleccionar
-                } else if (e.key === 'Escape') {
-                    listElement.style.display = 'none';
-                    selectElement.focus(); // Devolver el foco al select principal
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked; // Alternar estado
+                    checkbox.dispatchEvent(new Event('change')); // Disparar evento `change`
                 }
             });
         });
-
-        // Alternar visibilidad de la lista
-        function toggleListVisibility() {
-            if (listElement.style.display === 'block') {
-                listElement.style.display = 'none';
-            } else {
-                listElement.style.display = 'block';
-                currentFocus = -1; // Reiniciar la selección cuando se vuelve a abrir
-                focusNextCheckbox(1); // Foco en el primer checkbox al abrir
-            }
-        }
-
-        // Actualizar visualización de ítems seleccionados
-        function updateSelectedDisplay(container, items, isBoolean) {
-            container.innerHTML = '';
-            if (items.length === 0) {
-                const placeholder = document.createElement('span');
-                placeholder.textContent = 'Cualquiera...';
-                placeholder.style.color = '#aaa';
-                placeholder.style.fontStyle = 'italic';
-                container.appendChild(placeholder);
-            } else {
-                items.forEach(item => {
-                    const span = document.createElement('span');
-                    span.textContent = isBoolean ? (item === true ? 'Sí' : 'No') : item;
-                    span.style.backgroundColor = '#f0f0f0';
-                    span.style.color = '#333';
-                    span.style.padding = '3px 8px';
-                    span.style.borderRadius = '15px';
-                    span.style.fontSize = '12px';
-                    span.style.lineHeight = '1.5';
-                    span.style.border = '1px solid #ddd';
-                    container.appendChild(span);
-                });
-            }
-        }
-
-        // Función para manejar el enfoque de los checkboxes
-        function focusNextCheckbox(direction) {
-            const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]'));
-            currentFocus = (currentFocus + direction + checkboxes.length) % checkboxes.length; // Calcular el índice
-            checkboxes[currentFocus].focus();
-        }
-
-        // Cerrar la lista al hacer clic fuera
-        document.addEventListener('click', function (e) {
-            if (!e.target.closest(`#filter-${fieldName}-list`) && e.target !== selectElement) {
-                listElement.style.display = 'none';
-            }
-        });
     }
 
-    // Inicializar checklists
-    ['estado'].forEach(field => {
-        initializeChecklistFilter(field);
-    });
-
-    // Inicializar valores predeterminados para Facturable
-    const facturableDefault = ['1']; // "1" representa "Sí"
-    const hiddenFacturableInput = document.getElementById('filter-facturable-ids');
-    hiddenFacturableInput.value = facturableDefault.join(',');
-
-    // Marcar las casillas de Facturable predeterminadas
-    facturableDefault.forEach(facturable => {
-        const checkbox = document.getElementById(`filter-facturable-${facturable}`);
-        if (checkbox) {
-            checkbox.checked = true;
-        }
-    });
-
-    // Visualizar los valores seleccionados de Facturable
-    const selectedFacturablesContainer = document.getElementById('filter-selected-facturables');
-    facturableDefault.forEach(facturable => {
-        const span = document.createElement('span');
-        span.textContent = facturable === '1' ? 'Sí' : 'No';
-        span.style.backgroundColor = '#f0f0f0';
-        span.style.color = '#333';
-        span.style.padding = '3px 8px';
-        span.style.borderRadius = '15px';
-        span.style.fontSize = '12px';
-        span.style.lineHeight = '1.5';
-        span.style.border = '1px solid #ddd';
-        selectedFacturablesContainer.appendChild(span);
-    });
-
-    // Inicializar valores predeterminados para Facturado
-    const facturadoDefault = ['NO']; // "NO" es el valor predeterminado
-    const hiddenFacturadoInput = document.getElementById('filter-facturado-ids');
-    hiddenFacturadoInput.value = facturadoDefault.join(',');
-
-    // Marcar las casillas de Facturado predeterminadas
-    facturadoDefault.forEach(facturado => {
-        const checkbox = document.getElementById(`filter-facturado-${facturado.toLowerCase()}`);
-        if (checkbox) {
-            checkbox.checked = true;
-        }
-    });
-
-    // Visualizar los valores seleccionados de Facturado
-    const selectedFacturadosContainer = document.getElementById('filter-selected-facturados');
-    facturadoDefault.forEach(facturado => {
-        const span = document.createElement('span');
-        span.textContent = facturado;
-        span.style.backgroundColor = '#f0f0f0';
-        span.style.color = '#333';
-        span.style.padding = '3px 8px';
-        span.style.borderRadius = '15px';
-        span.style.fontSize = '12px';
-        span.style.lineHeight = '1.5';
-        span.style.border = '1px solid #ddd';
-        selectedFacturadosContainer.appendChild(span);
-    });
-
+    // Inicializar los filtros con valores predeterminados
+    initializeChecklistFilter('facturable', true, [true]); // Predeterminado a "Sí"
+    initializeChecklistFilter('facturado', false, ['NO']); // Predeterminado a "NO"
+    initializeChecklistFilter('estado', false, []); // Sin valores predeterminados para "estado"
 
 
 });

@@ -83,11 +83,11 @@
                         <ul>
                             <li>
                                 <input class="user-checkbox" type="checkbox" id="filter-facturable-1" value="1">
-                                <label for="filter-facturable-1">Sí</label>
+                                <label for="filter-facturable-1">SI</label>
                             </li>
                             <li>
                                 <input class="user-checkbox" type="checkbox" id="filter-facturable-0" value="0">
-                                <label for="filter-facturable-0">No</label>
+                                <label for="filter-facturable-0">NO</label>
                             </li>
                         </ul>
                     </div>
@@ -104,8 +104,8 @@
                     </div>
                     <div id="filter-facturado-list" class="dropdown-list" style="display: none;">
                         <ul>
-                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-si" value="SI"><label for="filter-facturado-si">Sí</label></li>
-                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-no" value="NO"><label for="filter-facturado-no">No</label></li>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-si" value="SI"><label for="filter-facturado-si">SI</label></li>
+                            <li><input class="user-checkbox" type="checkbox" id="filter-facturado-no" value="NO"><label for="filter-facturado-no">NO</label></li>
                             <li><input class="user-checkbox" type="checkbox" id="filter-facturado-nunca" value="NUNCA"><label for="filter-facturado-nunca">Nunca</label></li>
                         </ul>
                     </div>

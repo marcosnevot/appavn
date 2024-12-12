@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     document.getElementById('add-task-form').reset(); // Resetear el formulario
                     generarBotonesPlanificacion();
-                    resetSelectedUsers();
+                    preselectSessionUser();
                 } else {
                     console.error('Errores de validación:', data.errors);
                 }
@@ -538,19 +538,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Preseleccionar el usuario de sesión si está en la lista
     function preselectSessionUser() {
-        const sessionUserCheckbox = document.querySelector(`#user-${sessionUserId}`);
+        // Limpiar el array de usuarios seleccionados
+        selectedUsers = [];
 
+        // Desmarcar todos los checkboxes
+        userList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Reiniciar el campo oculto de IDs de usuarios seleccionados
+        userIdsInput.value = '';
+
+        // Limpiar la visualización de usuarios seleccionados
+        updateSelectedUsersDisplay();
+
+        // Ahora seleccionar el usuario de sesión
+        const sessionUserCheckbox = document.querySelector(`#user-${sessionUserId}`);
         if (sessionUserCheckbox) {
             sessionUserCheckbox.checked = true;
 
-            // Obtener el nombre del usuario y añadirlo a los seleccionados
+            // Añadir el usuario de sesión al array
             const userName = sessionUserCheckbox.nextElementSibling.textContent;
             selectedUsers.push({ id: sessionUserId, name: userName });
 
+            // Actualizar la visualización y el campo oculto
             updateSelectedUsersDisplay();
             updateUserIdsInput();
         }
     }
+
 
     preselectSessionUser();
 
@@ -594,6 +610,44 @@ document.addEventListener('DOMContentLoaded', function () {
             userSelect.focus(); // Devolver el foco al select principal
         });
     });
+
+    // Manejar la selección de usuarios
+    userList.querySelectorAll('li').forEach(li => {
+        li.addEventListener('click', function (e) {
+            // Evitar procesamiento duplicado si el clic fue en el checkbox
+            if (e.target.tagName === 'INPUT') return;
+
+            // Buscar el checkbox dentro del <li>
+            const checkbox = li.querySelector('input[type="checkbox"]');
+            if (!checkbox) return;
+
+            // Si el clic fue en el label, no alternar el estado manualmente
+            if (e.target.tagName === 'LABEL') {
+                return; // El label ya alternará el estado del checkbox automáticamente
+            }
+
+            // Alternar el estado del checkbox manualmente si el clic fue en el <li> (fuera del label)
+            checkbox.checked = !checkbox.checked;
+
+            // Obtener datos del usuario
+            const userId = checkbox.value;
+            const userName = checkbox.nextElementSibling.textContent;
+
+            if (checkbox.checked) {
+                // Agregar usuario a la lista de seleccionados
+                selectedUsers.push({ id: userId, name: userName });
+            } else {
+                // Eliminar usuario de la lista de seleccionados
+                selectedUsers = selectedUsers.filter(user => user.id !== userId);
+            }
+
+            // Actualizar la visualización y los datos ocultos
+            updateSelectedUsersDisplay();
+            updateUserIdsInput();
+        });
+    });
+
+
 
     // Función para actualizar la visualización de los usuarios seleccionados
     function updateSelectedUsersDisplay() {

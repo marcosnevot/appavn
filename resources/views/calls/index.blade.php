@@ -1,4 +1,5 @@
 @extends('layouts.app')
+<meta name="user-session-id" content="{{ auth()->user()->id }}">
 
 @section('content')
 <div class="header-tareas">

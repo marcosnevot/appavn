@@ -53,6 +53,8 @@
 
 
 
+
+
             <hr class="border-gray-700">
 
 
@@ -92,6 +94,7 @@
     <!-- Bottom Section (User and Logout) -->
     <div class="user-section">
 
+
         <!-- Notification Button -->
         <div id="notification-toggle" class="notification-toggle">
 
@@ -126,8 +129,23 @@
                 </div>
             </div>
         </div>
-        <hr class="border-gray-700" style="margin-bottom: 20px; ">
 
+        @if(auth()->user()->hasRole('admin'))
+        <a href="{{ route('admin.index') }}" class="option-item admin-button" title="Panel de Administración">
+
+            <span>Admin</span>
+        </a>
+        @else
+        <div class="option-item date-display" title="Fecha de hoy">
+
+            <span>{{ \Carbon\Carbon::now()->format('d/m/Y') }}</span>
+        </div>
+        @endif
+
+
+
+
+        <hr class="border-gray-700" style="margin-bottom: 20px; ">
         <div class="user-info">
             <div class="user-avatar">
                 <span>{{ substr(Auth::user()->name, 0, 1) }}</span>
@@ -355,23 +373,36 @@
 
         // Mark individual notification as read
         notificationList.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON') {
+            if (e.target.classList.contains('mark-as-read-btn')) {
                 const notificationId = e.target.getAttribute('data-id');
+                const notificationItem = e.target.closest('.notification-item'); // Encuentra el contenedor completo
+
                 fetch(`/notifications/${notificationId}/read`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    },
-                }).then(() => {
-                    e.target.parentElement.remove();
-                    const remaining = notificationList.childElementCount;
-                    notificationCounter.textContent = remaining;
-                    if (remaining === 0) {
-                        noNotifications.classList.remove('hidden');
-                    }
-                });
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                    })
+                    .then(() => {
+                        if (notificationItem) {
+                            notificationItem.remove(); // Elimina toda la notificación
+                        }
+
+                        // Actualizar el contador
+                        const remaining = notificationList.querySelectorAll('.notification-item').length;
+                        notificationCounter.textContent = remaining;
+
+                        // Mostrar "No tienes notificaciones pendientes" si no hay más
+                        if (remaining === 0) {
+                            noNotifications.classList.remove('hidden');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error al marcar la notificación como leída:', error);
+                    });
             }
         });
+
 
         // Función para formatear la fecha de la notificación
         function formatNotificationDate(dateString) {
@@ -537,7 +568,6 @@
     /* Notification Toggle Button */
     .notification-toggle {
         position: relative;
-        margin-bottom: 10px;
     }
 
     .notification-btn {
@@ -548,6 +578,9 @@
         align-items: center;
         color: #FFFFFF;
         font-size: 1rem;
+        bottom: -35px;
+        position: absolute;
+
     }
 
     .notification-btn svg {
@@ -574,7 +607,7 @@
         position: absolute;
         bottom: 100%;
         /* Aparece justo encima del botón */
-        left: 50%;
+        left: 110px;
         /* Centrar el panel respecto al botón */
         transform: translate(-50%, 20px);
         /* Posición inicial más abajo */
@@ -859,6 +892,102 @@
         animation: slideInFromLeft 1s ease-out forwards, fadeOut 3s 2.5s ease-in forwards;
         /* Deslizarse y luego desvanecer */
     }
+
+
+    .options {
+        justify-content: space-between;
+    }
+
+    /* Botón de opciones */
+    .admin-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Centra el contenido */
+        gap: 8px;
+        padding: 8px 13px;
+        font-size: 14px;
+        font-weight: 500;
+        color: white;
+        /* Gris oscuro */
+        background-color: rgba(229, 231, 235, 0.1);
+        /* Color más claro con transparencia */
+        border: 1px solid rgba(209, 213, 219, 0.7);
+        /* Gris claro con transparencia */
+        border-radius: 6px;
+        text-decoration: none;
+        transition: background-color 0.3s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+        /* Sombra más sutil */
+        margin-bottom: 10px;
+        position: relative;
+        left: 69%;
+        width: 70px;
+        cursor: pointer;
+        /* Indica que es interactivo */
+    }
+
+    .admin-button:hover {
+        background-color: rgba(229, 231, 235, 0.3);
+        /* Fondo ligeramente más oscuro al pasar el ratón */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        /* Incrementa la sombra */
+    }
+
+    .admin-button:active {
+        background-color: rgba(229, 231, 235, 0.5);
+        /* Fondo más oscuro al hacer clic */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        /* Reduce la sombra */
+        transform: scale(0.95);
+        /* Hace el botón ligeramente más pequeño */
+    }
+
+    .admin-button .icon-admin {
+        width: 20px;
+        height: 20px;
+        stroke: #6b7280;
+        transition: stroke 0.3s ease;
+    }
+
+    .admin-button:hover .icon-admin {
+        stroke: #374151;
+    }
+
+    .option-item.date-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        /* Espaciado entre el ícono y el texto */
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #374151;
+        color: #374151;
+        font-size: 0.9rem;
+        text-align: center;
+        width: 100px;
+        left: 55%;
+        position: relative;
+        /* Asegurar que no se desborde */
+        box-sizing: border-box;
+        transition: background-color 0.3s ease;
+        margin-bottom: 10px;
+
+    }
+
+    .option-item.date-display:hover {
+        background-color: #444444;
+    }
+
+
+
+    .option-item.date-display span {
+        font-weight: 500;
+        color: #FFFFFF;
+    }
+
+
 
     /* Animación para deslizarse desde la izquierda */
     @keyframes slideInFromLeft {

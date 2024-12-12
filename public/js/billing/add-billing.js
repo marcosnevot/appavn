@@ -90,17 +90,12 @@ document.addEventListener('DOMContentLoaded', function () {
             subtipo: document.querySelector('select[name="subtipo"]').value,
             estado: document.querySelector('select[name="estado"]').value,
             users: selectedUsers, // Lista de IDs de los usuarios seleccionados
-            archivo: document.querySelector('input[name="archivo"]').value,
             descripcion: document.querySelector('textarea[name="descripcion"]').value,
             observaciones: document.querySelector('textarea[name="observaciones"]').value,
             facturable: document.querySelector('input[name="facturable"]').checked ? 1 : 0,
             facturado: document.querySelector('select[name="facturado"]').value,
-            precio: document.querySelector('input[name="precio"]').value,
-            suplido: document.querySelector('input[name="suplido"]').value,
-            coste: document.querySelector('input[name="coste"]').value,
             fecha_inicio: document.querySelector('input[name="fecha_inicio"]').value,
             fecha_vencimiento: document.querySelector('input[name="fecha_vencimiento"]').value,
-            fecha_imputacion: document.querySelector('input[name="fecha_imputacion"]').value,
             tiempo_previsto: document.querySelector('input[name="tiempo_previsto"]').value,
             tiempo_real: document.querySelector('input[name="tiempo_real"]').value,
             planificacion: document.querySelector('input[name="planificacion"]').value
@@ -144,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     showNotification("Tarea creada exitosamente", "success");
                     // Resetear determinados campos
                     document.getElementById('add-task-form').reset(); // Resetear el formulario
-                    resetSelectedUsers();
+                    preselectSessionUser();
                     generarBotonesPlanificacion();
 
                 } else {
@@ -180,23 +175,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // Función para limpiar los usuarios seleccionados
-    function resetSelectedUsers() {
-        const selectedUsersContainer = document.getElementById('selected-users');
-        const userIdsInput = document.getElementById('user-ids');
-
-        // Limpiar el contenedor visual de los usuarios seleccionados
-        selectedUsersContainer.innerHTML = '';
-
-        // Limpiar el campo oculto de los IDs de los usuarios seleccionados
-        userIdsInput.value = '';
-
-        // Desmarcar todos los checkboxes
-        const checkboxes = document.querySelectorAll('#user-list input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-    }
 
 
     // Manejar el evento de envío del formulario
@@ -700,15 +678,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Preseleccionar el usuario de sesión si está en la lista
     function preselectSessionUser() {
-        const sessionUserCheckbox = document.querySelector(`#user-${sessionUserId}`);
+        // Limpiar el array de usuarios seleccionados
+        selectedUsers = [];
 
+        // Desmarcar todos los checkboxes
+        userList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Reiniciar el campo oculto de IDs de usuarios seleccionados
+        userIdsInput.value = '';
+
+        // Limpiar la visualización de usuarios seleccionados
+        updateSelectedUsersDisplay();
+
+        // Ahora seleccionar el usuario de sesión
+        const sessionUserCheckbox = document.querySelector(`#user-${sessionUserId}`);
         if (sessionUserCheckbox) {
             sessionUserCheckbox.checked = true;
 
-            // Obtener el nombre del usuario y añadirlo a los seleccionados
+            // Añadir el usuario de sesión al array
             const userName = sessionUserCheckbox.nextElementSibling.textContent;
             selectedUsers.push({ id: sessionUserId, name: userName });
 
+            // Actualizar la visualización y el campo oculto
             updateSelectedUsersDisplay();
             updateUserIdsInput();
         }
@@ -756,6 +749,44 @@ document.addEventListener('DOMContentLoaded', function () {
             userSelect.focus(); // Devolver el foco al select principal
         });
     });
+
+    // Manejar la selección de usuarios
+    userList.querySelectorAll('li').forEach(li => {
+        li.addEventListener('click', function (e) {
+            // Evitar procesamiento duplicado si el clic fue en el checkbox
+            if (e.target.tagName === 'INPUT') return;
+
+            // Buscar el checkbox dentro del <li>
+            const checkbox = li.querySelector('input[type="checkbox"]');
+            if (!checkbox) return;
+
+            // Si el clic fue en el label, no alternar el estado manualmente
+            if (e.target.tagName === 'LABEL') {
+                return; // El label ya alternará el estado del checkbox automáticamente
+            }
+
+            // Alternar el estado del checkbox manualmente si el clic fue en el <li> (fuera del label)
+            checkbox.checked = !checkbox.checked;
+
+            // Obtener datos del usuario
+            const userId = checkbox.value;
+            const userName = checkbox.nextElementSibling.textContent;
+
+            if (checkbox.checked) {
+                // Agregar usuario a la lista de seleccionados
+                selectedUsers.push({ id: userId, name: userName });
+            } else {
+                // Eliminar usuario de la lista de seleccionados
+                selectedUsers = selectedUsers.filter(user => user.id !== userId);
+            }
+
+            // Actualizar la visualización y los datos ocultos
+            updateSelectedUsersDisplay();
+            updateUserIdsInput();
+        });
+    });
+
+
 
     // Función para actualizar la visualización de los usuarios seleccionados
     function updateSelectedUsersDisplay() {

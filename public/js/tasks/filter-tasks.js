@@ -337,33 +337,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // Inicializar estados predeterminados
-    const estadoDefault = ['PENDIENTE', 'ENESPERA']; // Valores predeterminados
-    const hiddenEstadoInput = document.getElementById('filter-estado-ids');
-    hiddenEstadoInput.value = estadoDefault.join(',');
-
-    // Marcar las casillas de los estados predeterminados
-    estadoDefault.forEach(estado => {
-        const checkbox = document.getElementById(`filter-estado-${estado.toLowerCase()}`);
-        if (checkbox) {
-            checkbox.checked = true;
-        }
-    });
-
-    // Inicializar visualización de estados seleccionados
-    const selectedEstadosContainer = document.getElementById('filter-selected-estados');
-    estadoDefault.forEach(estado => {
-        const span = document.createElement('span');
-        span.textContent = estado;
-        span.style.backgroundColor = '#f0f0f0';
-        span.style.color = '#333';
-        span.style.padding = '3px 8px';
-        span.style.borderRadius = '15px';
-        span.style.fontSize = '12px';
-        span.style.lineHeight = '1.5';
-        span.style.border = '1px solid #ddd';
-        selectedEstadosContainer.appendChild(span);
-    });
 
 
 
@@ -727,13 +700,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Checklists de los campos Estado, Subtipo, facturable y Facturado
 
-    function initializeChecklistFilter(fieldName, isBoolean = false) {
+    function initializeChecklistFilter(fieldName, isBoolean = false, defaultValues = []) {
         const selectElement = document.getElementById(`filter-${fieldName}-select`);
         const listElement = document.getElementById(`filter-${fieldName}-list`);
         const hiddenInput = document.getElementById(`filter-${fieldName}-ids`);
         const selectedContainer = document.getElementById(`filter-selected-${fieldName}s`);
-        let selectedItems = [];
+        let selectedItems = [...defaultValues]; // Incluir los valores predeterminados
         let currentFocus = -1;
+
+        // Marcar las casillas de los valores predeterminados
+        if (defaultValues.length > 0) {
+            defaultValues.forEach(value => {
+                const checkbox = document.querySelector(`#filter-${fieldName}-list input[value="${value}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        // Configurar el campo oculto con los valores predeterminados
+        hiddenInput.value = selectedItems.join(',');
+
+        // Renderizar los valores predeterminados en el contenedor
+        updateSelectedDisplay(selectedContainer, selectedItems, isBoolean);
 
         // Alternar visibilidad de la lista desplegable
         selectElement.addEventListener('click', function (event) {
@@ -750,7 +739,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const value = isBoolean ? this.value === "1" : this.value;
 
                 if (this.checked) {
-                    selectedItems.push(value);
+                    if (!selectedItems.includes(value)) {
+                        selectedItems.push(value);
+                    }
                 } else {
                     selectedItems = selectedItems.filter(item => item !== value);
                 }
@@ -800,7 +791,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 items.forEach(item => {
                     const span = document.createElement('span');
-                    span.textContent = isBoolean ? (item === true ? 'Sí' : 'No') : item;
+                    span.textContent = isBoolean ? (item === true ? 'SI' : 'NO') : item;
                     span.style.backgroundColor = '#f0f0f0';
                     span.style.color = '#333';
                     span.style.padding = '3px 8px';
@@ -826,14 +817,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 listElement.style.display = 'none';
             }
         });
+
+        // Al final de initializeChecklistFilter
+        listElement.querySelectorAll('li').forEach(li => {
+            li.addEventListener('click', function (e) {
+                // Evitar interferir si se hace clic directamente en el <label> o el <input>
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') {
+                    return;
+                }
+
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked; // Alternar estado
+                    checkbox.dispatchEvent(new Event('change')); // Disparar evento `change`
+                }
+            });
+        });
+
+
+
     }
 
-    // Inicializar checklists
-    ['estado', 'subtipo', 'facturado'].forEach(field => {
-        initializeChecklistFilter(field);
-    });
+   
 
-    // Inicializar el campo booleano "facturable"
+    // Inicializar checklists con valores predeterminados
+    initializeChecklistFilter('estado', false, ['PENDIENTE', 'ENESPERA']);
+    initializeChecklistFilter('subtipo');
+    initializeChecklistFilter('facturado');
     initializeChecklistFilter('facturable', true);
 
 

@@ -45,6 +45,7 @@ class TaskController extends Controller
         // Pasar las tareas y los datos adicionales a la vista
         return view('tasks.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
     }
+    
     public function getTasks(Request $request)
     {
         try {
@@ -348,6 +349,13 @@ class TaskController extends Controller
                 $query->addSelect('tipos.nombre as tipo_nombre');
                 $sortKey = 'tipos.nombre';
             }
+            if ($sortKey === 'users.name') {
+                $query->leftJoin('tarea_user', 'tareas.id', '=', 'tarea_user.tarea_id')
+                    ->leftJoin('users', 'tarea_user.user_id', '=', 'users.id')
+                    ->groupBy('tareas.id') // Asegura que no haya duplicados
+                    ->addSelect(DB::raw("GROUP_CONCAT(users.name SEPARATOR ', ') as user_names")); // Concatenar nombres
+                $sortKey = 'user_names'; // Ordenar por el alias
+            }
 
             // Filtros dinámicos para múltiples valores
             foreach (['subtipo', 'estado'] as $filter) {
@@ -595,6 +603,13 @@ class TaskController extends Controller
                 $query->leftJoin('tipos', 'tareas.tipo_id', '=', 'tipos.id');
                 $query->addSelect('tipos.nombre as tipo_nombre'); // Alias para tipo
                 $sortKey = 'tipos.nombre';
+            }
+            if ($sortKey === 'users.name') {
+                $query->leftJoin('tarea_user', 'tareas.id', '=', 'tarea_user.tarea_id')
+                    ->leftJoin('users', 'tarea_user.user_id', '=', 'users.id')
+                    ->groupBy('tareas.id') // Asegura que no haya duplicados
+                    ->addSelect(DB::raw("GROUP_CONCAT(users.name SEPARATOR ', ') as user_names")); // Concatenar nombres
+                $sortKey = 'user_names'; // Ordenar por el alias
             }
 
 
