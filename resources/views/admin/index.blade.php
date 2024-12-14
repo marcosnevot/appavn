@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="header-admin">
-    <h2 class="title">
+<div class="header-tareas" style="margin-bottom:20px">
+    <h2 class="title" style="padding-top: 20px;">
         Panel de Administrador
     </h2>
 </div>
@@ -10,9 +10,20 @@
 
 <!-- Contenedor Principal -->
 <div class="admin-panel">
-    <!-- Sección: Modificar Datos -->
-    @include('admin.partials.modify-data')
+    <!-- Tarjeta 1: Modificar Datos -->
+    <div class="admin-card modify-data">
+        <h3>Modificar Datos</h3>
+        <!-- Contenido de la sección -->
+        @include('admin.partials.modify-data')
+    </div>
+
+    <!-- Placeholder para futuras secciones -->
+    <div class="admin-card">
+        <h3>Futura Sección</h3>
+        <p>Contenido o funcionalidades adicionales.</p>
+    </div>
 </div>
+
 @endsection
 
 @section('scripts')

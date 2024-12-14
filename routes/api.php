@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TaskController;
+use App\Models\Asunto;
+use App\Models\Tipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,3 +23,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/asuntos', function () {
+        logger('Acceso a /api/asuntos');
+        return response()->json(Asunto::all(['id', 'nombre']));
+    });
+
+
+    Route::get('/tipos', function () {
+        return response()->json(Tipo::all(['id', 'nombre']));
+    });
+});

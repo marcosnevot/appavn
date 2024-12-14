@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Asunto;
+use App\Models\Tipo;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -14,5 +16,15 @@ class AdminController extends Controller
     public function index()
     {
         return view('admin.index');
+    }
+
+    public function getAsuntos()
+    {
+        return response()->json(Asunto::all(['id', 'nombre']));
+    }
+
+    public function getTipos()
+    {
+        return response()->json(Tipo::all(['id', 'nombre']));
     }
 }
