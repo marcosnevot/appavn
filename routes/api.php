@@ -30,8 +30,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return response()->json(Asunto::all(['id', 'nombre']));
     });
 
-
     Route::get('/tipos', function () {
         return response()->json(Tipo::all(['id', 'nombre']));
     });
+
+    // Rutas dinámicas para actualización y eliminación
+    Route::put('/{entity}/{id}', [AdminController::class, 'update'])
+        ->whereIn('entity', ['asuntos', 'tipos']);
+    Route::delete('/{entity}/{id}', [AdminController::class, 'destroy'])
+        ->whereIn('entity', ['asuntos', 'tipos']);
 });

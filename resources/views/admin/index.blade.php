@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="header-tareas" style="margin-bottom:20px">
     <h2 class="title" style="padding-top: 20px;">
         Panel de Administrador

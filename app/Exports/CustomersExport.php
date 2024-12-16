@@ -51,7 +51,9 @@ class CustomersExport implements FromCollection, WithHeadings
             'Nombre Fiscal',
             'NIF',
             'Móvil',
+            'Segundo Teléfono',
             'Fijo',
+            'Persona de Contacto',
             'Email',
             'Dirección',
             'Código Postal',
@@ -64,8 +66,6 @@ class CustomersExport implements FromCollection, WithHeadings
             'Subclase',
             'Puntaje',
             'Código Sage',
-            'Segundo Teléfono',
-            'Persona de Contacto',
             'Fecha de Creación',
         ];
     }

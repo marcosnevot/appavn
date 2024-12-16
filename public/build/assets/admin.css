@@ -209,18 +209,9 @@
 }
 
 
-.actions {
-    display: flex;
-    gap: 5px;
-    justify-content: flex-end;
-    /* Alinea los botones a la derecha */
-}
 
-.icon-edit,
-.icon-delete {
-    width: 16px;
-    height: 16px;
-}
+
+
 
 /* Ítems individuales */
 .data-item {
@@ -239,18 +230,25 @@
     background-color: #e5e7eb;
 }
 
+.data-name {
+    flex: 0 1 85%; /* 85% del espacio */
+    overflow: hidden;
 
-.data-item .actions {
+}
+
+.admin-actions {
+    flex: 0 0 15%; /* 15% del espacio */
     display: flex;
-    gap: 10px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    justify-content: flex-end; /* Alinea los botones hacia la derecha */
+    gap: 5px; /* Separación entre botones */
+    opacity: 0; /* Ocultar inicialmente */
+    transition: opacity 0.2s ease; /* Transición suave */
 }
 
-.data-item:hover .actions {
-    opacity: 1;
-    /* Muestra los botones al pasar el ratón */
+.data-item:hover .admin-actions {
+    opacity: 1; /* Mostrar al pasar el ratón */
 }
+
 
 .btn-refresh {
     display: flex;
@@ -277,6 +275,23 @@
 .icon-delete {
     width: 16px;
     height: 16px;
+}
+
+.confirmation-message {
+    flex: 1; /* Ocupa todo el espacio disponible */
+    text-align: center;
+    font-weight: bold;
+    color: #e53e3e; /* Rojo para advertencia */
+}
+
+.btn-refresh.confirm {
+    background-color: #38a169; /* Verde para confirmar */
+    color: white;
+}
+
+.btn-refresh.cancel {
+    background-color: #e53e3e; /* Rojo para cancelar */
+    color: white;
 }
 
 
