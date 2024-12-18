@@ -381,35 +381,100 @@ class ClientController extends Controller
 
             // Filtrar por nombre fiscal del cliente
             if (!empty($filters['nombre_fiscal'])) {
-                $query->where('nombre_fiscal', 'like', '%' . $filters['nombre_fiscal'] . '%');
+                $nombreFiscales = explode(',', $filters['nombre_fiscal']); // Separar valores por comas
+                $query->where(function ($subQuery) use ($nombreFiscales) {
+                    foreach ($nombreFiscales as $nombre) {
+                        $subQuery->orWhere('nombre_fiscal', 'like', '%' . trim($nombre) . '%');
+                    }
+                });
             }
 
             // Filtrar por NIF
             if (!empty($filters['nif'])) {
-                $query->where('nif', 'like', '%' . $filters['nif'] . '%');
+                $nifs = explode(',', $filters['nif']); // Separar valores por comas
+                $query->where(function ($subQuery) use ($nifs) {
+                    foreach ($nifs as $nif) {
+                        $subQuery->orWhere('nif', 'like', '%' . trim($nif) . '%');
+                    }
+                });
             }
+
 
             // Filtrar por tipo de cliente
             if (!empty($filters['tipo_cliente'])) {
-                $tipoCliente = TipoCliente::where('nombre', 'like', '%' . $filters['tipo_cliente'] . '%')->first();
-                if ($tipoCliente) {
-                    $query->where('tipo_cliente_id', $tipoCliente->id);
+                $tipoValues = explode(',', $filters['tipo_cliente']); // Dividir los valores por comas
+
+                // Buscar por IDs exactos
+                $tiposById = TipoCliente::whereIn('id', $tipoValues)
+                    ->pluck('id')
+                    ->toArray();
+
+                // Buscar por nombres parciales
+                $tiposByName = TipoCliente::where(function ($query) use ($tipoValues) {
+                    foreach ($tipoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+
+                // Combinar resultados y aplicar el filtro
+                $tipos = array_unique(array_merge($tiposById, $tiposByName));
+
+                if (!empty($tipos)) {
+                    $query->whereIn('tipo_cliente_id', $tipos);
                 }
             }
 
+
+
+
             // Filtrar por clasificación
             if (!empty($filters['clasificacion'])) {
-                $clasificacion = Clasificacion::where('nombre', 'like', '%' . $filters['clasificacion'] . '%')->first();
-                if ($clasificacion) {
-                    $query->where('clasificacion_id', $clasificacion->id);
+                $clasificacionValues = explode(',', $filters['clasificacion']); // Dividir los valores por comas
+
+                // Buscar por IDs exactos
+                $clasificacionesById = Clasificacion::whereIn('id', $clasificacionValues)
+                    ->pluck('id')
+                    ->toArray();
+
+                // Buscar por nombres parciales
+                $clasificacionesByName = Clasificacion::where(function ($query) use ($clasificacionValues) {
+                    foreach ($clasificacionValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+
+                // Combinar resultados y aplicar el filtro
+                $clasificaciones = array_unique(array_merge($clasificacionesById, $clasificacionesByName));
+
+                if (!empty($clasificaciones)) {
+                    $query->whereIn('clasificacion_id', $clasificaciones);
                 }
             }
 
             // Filtrar por tributación
             if (!empty($filters['tributacion'])) {
-                $tributacion = Tributacion::where('nombre', 'like', '%' . $filters['tributacion'] . '%')->first();
-                if ($tributacion) {
-                    $query->where('tributacion_id', $tributacion->id);
+                $tributacionValues = explode(',', $filters['tributacion']); // Dividir los valores por comas
+
+                // Buscar por IDs exactos
+                $tributacionesById = Tributacion::whereIn('id', $tributacionValues)
+                    ->pluck('id')
+                    ->toArray();
+
+                // Buscar por nombres parciales
+                $tributacionesByName = Tributacion::where(function ($query) use ($tributacionValues) {
+                    foreach ($tributacionValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+
+                // Combinar resultados y aplicar el filtro
+                $tributaciones = array_unique(array_merge($tributacionesById, $tributacionesByName));
+
+                if (!empty($tributaciones)) {
+                    $query->whereIn('tributacion_id', $tributaciones);
                 }
             }
 
@@ -418,6 +483,29 @@ class ClientController extends Controller
                 $situacion = Situacion::where('nombre', 'like', '%' . $filters['situacion'] . '%')->first();
                 if ($situacion) {
                     $query->where('situacion_id', $situacion->id);
+                }
+            }
+            if (!empty($filters['situacion'])) {
+                $situacionValues = explode(',', $filters['situacion']); // Dividir los valores por comas
+
+                // Buscar por IDs exactos
+                $situacionesById = Situacion::whereIn('id', $situacionValues)
+                    ->pluck('id')
+                    ->toArray();
+
+                // Buscar por nombres parciales
+                $situacionesByName = Situacion::where(function ($query) use ($situacionValues) {
+                    foreach ($situacionValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+
+                // Combinar resultados y aplicar el filtro
+                $situaciones = array_unique(array_merge($situacionesById, $situacionesByName));
+
+                if (!empty($situaciones)) {
+                    $query->whereIn('situacion_id', $situaciones);
                 }
             }
             // Filtrar por móvil

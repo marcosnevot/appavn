@@ -121,3 +121,11 @@
     text-align: center;
     font-weight: 600;
 }
+
+/* Estilo específico para .row1 */
+.form-group.row2 {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 25%;
+    box-sizing: border-box;
+}

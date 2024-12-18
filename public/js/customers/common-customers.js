@@ -1,5 +1,11 @@
 window.currentFilters = {}; // Variable global para los filtros activos
-
+ // Obtener los datos de clientes, asuntos y tipos desde los atributos data
+ let clasificacionesData = JSON.parse(document.getElementById('clasificaciones-data').getAttribute('data-clasificaciones'));
+ let tributacionesData = JSON.parse(document.getElementById('tributaciones-data').getAttribute('data-tributaciones'));
+ let situacionesData = JSON.parse(document.getElementById('situaciones-data').getAttribute('data-situaciones'));
+ let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+ let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
+ 
 // Función para actualizar la paginación
 function updatePagination(pagination, loadFunction, isFiltered = false) {
     const paginationContainer = document.getElementById('pagination-controls');
