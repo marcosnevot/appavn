@@ -41,6 +41,11 @@
     "src": "resources/css/customers.css",
     "isEntry": true
   },
+  "resources/css/customer-mail.css": {
+    "file": "assets/customer-mail.css",
+    "src": "resources/css/customer-mail.css",
+    "isEntry": true
+  },
   "resources/css/admin.css": {
     "file": "assets/admin.css",
     "src": "resources/css/admin.css",

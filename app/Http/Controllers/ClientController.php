@@ -657,6 +657,231 @@ class ClientController extends Controller
     }
 
 
+    /**
+     * Fetch emails based on current filters.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function fetchEmails(Request $request)
+    {
+        // Validar los filtros entrantes
+        // Obtener los filtros enviados desde el frontend
+        $filters = $request->all();
+
+        // Crear una consulta base para filtrar los clientes
+        $query = Cliente::with(['clasificacion', 'tipoCliente', 'tributacion', 'situacion', 'users']); // Asegurarse de cargar las relaciones necesarias
+
+        // Filtrar por nombre fiscal del cliente
+        if (!empty($filters['nombre_fiscal'])) {
+            $nombreFiscales = explode(',', $filters['nombre_fiscal']); // Separar valores por comas
+            $query->where(function ($subQuery) use ($nombreFiscales) {
+                foreach ($nombreFiscales as $nombre) {
+                    $subQuery->orWhere('nombre_fiscal', 'like', '%' . trim($nombre) . '%');
+                }
+            });
+        }
+
+        // Filtrar por NIF
+        if (!empty($filters['nif'])) {
+            $nifs = explode(',', $filters['nif']); // Separar valores por comas
+            $query->where(function ($subQuery) use ($nifs) {
+                foreach ($nifs as $nif) {
+                    $subQuery->orWhere('nif', 'like', '%' . trim($nif) . '%');
+                }
+            });
+        }
+
+
+        // Filtrar por tipo de cliente
+        if (!empty($filters['tipo_cliente'])) {
+            $tipoValues = explode(',', $filters['tipo_cliente']); // Dividir los valores por comas
+
+            // Buscar por IDs exactos
+            $tiposById = TipoCliente::whereIn('id', $tipoValues)
+                ->pluck('id')
+                ->toArray();
+
+            // Buscar por nombres parciales
+            $tiposByName = TipoCliente::where(function ($query) use ($tipoValues) {
+                foreach ($tipoValues as $value) {
+                    $query->orWhere('nombre', 'like', '%' . $value . '%');
+                }
+            })->pluck('id')
+                ->toArray();
+
+            // Combinar resultados y aplicar el filtro
+            $tipos = array_unique(array_merge($tiposById, $tiposByName));
+
+            if (!empty($tipos)) {
+                $query->whereIn('tipo_cliente_id', $tipos);
+            }
+        }
+
+
+
+
+        // Filtrar por clasificación
+        if (!empty($filters['clasificacion'])) {
+            $clasificacionValues = explode(',', $filters['clasificacion']); // Dividir los valores por comas
+
+            // Buscar por IDs exactos
+            $clasificacionesById = Clasificacion::whereIn('id', $clasificacionValues)
+                ->pluck('id')
+                ->toArray();
+
+            // Buscar por nombres parciales
+            $clasificacionesByName = Clasificacion::where(function ($query) use ($clasificacionValues) {
+                foreach ($clasificacionValues as $value) {
+                    $query->orWhere('nombre', 'like', '%' . $value . '%');
+                }
+            })->pluck('id')
+                ->toArray();
+
+            // Combinar resultados y aplicar el filtro
+            $clasificaciones = array_unique(array_merge($clasificacionesById, $clasificacionesByName));
+
+            if (!empty($clasificaciones)) {
+                $query->whereIn('clasificacion_id', $clasificaciones);
+            }
+        }
+
+        // Filtrar por tributación
+        if (!empty($filters['tributacion'])) {
+            $tributacionValues = explode(',', $filters['tributacion']); // Dividir los valores por comas
+
+            // Buscar por IDs exactos
+            $tributacionesById = Tributacion::whereIn('id', $tributacionValues)
+                ->pluck('id')
+                ->toArray();
+
+            // Buscar por nombres parciales
+            $tributacionesByName = Tributacion::where(function ($query) use ($tributacionValues) {
+                foreach ($tributacionValues as $value) {
+                    $query->orWhere('nombre', 'like', '%' . $value . '%');
+                }
+            })->pluck('id')
+                ->toArray();
+
+            // Combinar resultados y aplicar el filtro
+            $tributaciones = array_unique(array_merge($tributacionesById, $tributacionesByName));
+
+            if (!empty($tributaciones)) {
+                $query->whereIn('tributacion_id', $tributaciones);
+            }
+        }
+
+        // Filtrar por situación
+        if (!empty($filters['situacion'])) {
+            $situacion = Situacion::where('nombre', 'like', '%' . $filters['situacion'] . '%')->first();
+            if ($situacion) {
+                $query->where('situacion_id', $situacion->id);
+            }
+        }
+        if (!empty($filters['situacion'])) {
+            $situacionValues = explode(',', $filters['situacion']); // Dividir los valores por comas
+
+            // Buscar por IDs exactos
+            $situacionesById = Situacion::whereIn('id', $situacionValues)
+                ->pluck('id')
+                ->toArray();
+
+            // Buscar por nombres parciales
+            $situacionesByName = Situacion::where(function ($query) use ($situacionValues) {
+                foreach ($situacionValues as $value) {
+                    $query->orWhere('nombre', 'like', '%' . $value . '%');
+                }
+            })->pluck('id')
+                ->toArray();
+
+            // Combinar resultados y aplicar el filtro
+            $situaciones = array_unique(array_merge($situacionesById, $situacionesByName));
+
+            if (!empty($situaciones)) {
+                $query->whereIn('situacion_id', $situaciones);
+            }
+        }
+        // Filtrar por móvil
+        if (!empty($filters['movil'])) {
+            $query->where('movil', 'like', '%' . $filters['movil'] . '%');
+        }
+
+        // Filtrar por fijo
+        if (!empty($filters['fijo'])) {
+            $query->where('fijo', 'like', '%' . $filters['fijo'] . '%');
+        }
+
+        // Filtrar por email
+        if (!empty($filters['email'])) {
+            $query->where('email', 'like', '%' . $filters['email'] . '%');
+        }
+
+        // Filtrar por dirección
+        if (!empty($filters['direccion'])) {
+            $query->where('direccion', 'like', '%' . $filters['direccion'] . '%');
+        }
+
+        // Filtrar por código postal
+        if (!empty($filters['codigo_postal'])) {
+            $query->where('codigo_postal', 'like', '%' . $filters['codigo_postal'] . '%');
+        }
+
+        // Filtrar por población
+        if (!empty($filters['poblacion'])) {
+            $query->where('poblacion', 'like', '%' . $filters['poblacion'] . '%');
+        }
+
+        // Filtrar por usuario responsable asignado
+        if (!empty($filters['usuario'])) {
+            $userIds = explode(',', $filters['usuario']);
+            $query->whereHas('users', function ($q) use ($userIds) {
+                $q->whereIn('users.id', $userIds);
+            });
+        }
+
+        // Filtrar por datos bancarios
+        if (!empty($filters['datos_bancarios'])) {
+            $query->where('datos_bancarios', 'like', '%' . $filters['datos_bancarios'] . '%');
+        }
+
+        // Filtrar por subclase
+        if (!empty($filters['subclase'])) {
+            $query->where('subclase', 'like', '%' . $filters['subclase'] . '%');
+        }
+
+        // Filtrar por puntaje
+        if (!empty($filters['puntaje'])) {
+            $query->where('puntaje', '=', $filters['puntaje']);
+        }
+
+        // Filtrar por código SAGE
+        if (!empty($filters['codigo_sage'])) {
+            $query->where('codigo_sage', 'like', '%' . $filters['codigo_sage'] . '%');
+        }
+
+        // Filtrar por segundo teléfono
+        if (!empty($filters['segundo_telefono'])) {
+            $query->where('segundo_telefono', 'like', '%' . $filters['segundo_telefono'] . '%');
+        }
+
+        // Filtrar por persona de contacto
+        if (!empty($filters['persona_contacto'])) {
+            $query->where('persona_contacto', 'like', '%' . $filters['persona_contacto'] . '%');
+        }
+
+        // Añadir el orden por fecha de creación, de más reciente a más antigua
+        $query->orderBy('created_at', 'desc');
+
+        // Obtener los correos de los clientes
+        $emails = $query->pluck('email')->filter()->values()->toArray();
+
+        
+        return response()->json([
+            'success' => true,
+            'emails' => $emails, // Asegúrate de convertirlo en arreglo
+        ]);
+    }
+
     public function update(Request $request, $id)
     {
         try {

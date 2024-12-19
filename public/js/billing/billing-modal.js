@@ -590,11 +590,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             rowToUpdate.innerHTML = `
                     <td>${task.id}</td>
-                    <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+                    <td>${task.fecha_vencimiento ? formatFechaGenerica(task.fecha_vencimiento, "Vencimiento") : 'Sin fecha'}</td>
                     <td class="fecha-planificacion-cell" 
                         data-fecha_planificacion="${task.fecha_planificacion || ''}" 
                         data-task-id="${task.id}">
-                        ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+                        ${task.fecha_planificacion ? formatFechaGenerica(task.fecha_planificacion, "Planificación") : 'Sin fecha'}
                     </td>
                     <td>${cliente}</td>
                     <td>${asunto}</td>

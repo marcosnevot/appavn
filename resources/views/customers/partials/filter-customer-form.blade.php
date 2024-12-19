@@ -8,7 +8,7 @@
         @csrf
         <!-- Fila 1: Nombre Fiscal, NIF, Móvil, Fijo, Email -->
         <div class="form-row">
-            <div class="form-group wide">
+            <div class="form-group row3">
                 <label for="filter-nombrefiscal-input">Nombre Fiscal:</label>
                 <div class="autocomplete">
                     <input type="text" id="filter-nombrefiscal-input" name="filter_nombrefiscal" class="autocomplete-input" placeholder="Buscar cliente..." autocomplete="off">
@@ -19,7 +19,7 @@
             </div>
 
 
-            <div class="form-group medium">
+            <div class="form-group row3">
                 <label for="filter-nif-input">NIF:</label>
                 <div class="autocomplete">
                     <input type="text" id="filter-nif-input" name="filter_nif" class="autocomplete-input" placeholder="Buscar NIF..." autocomplete="off">
@@ -30,17 +30,17 @@
             </div>
 
 
-            <div class="form-group medium">
+            <div class="form-group row3">
                 <label for="filter-movil-input">Móvil:</label>
                 <input type="text" id="filter-movil-input" name="filter_movil" placeholder="Buscar móvil..." autocomplete="off">
             </div>
 
-            <div class="form-group medium">
+            <div class="form-group row3">
                 <label for="filter-fijo-input">Fijo:</label>
                 <input type="text" id="filter-fijo-input" name="filter_fijo" placeholder="Buscar fijo..." autocomplete="off">
             </div>
 
-            <div class="form-group wide">
+            <div class="form-group row3">
                 <label for="filter-email-input">Email:</label>
                 <input type="email" id="filter-email-input" name="filter_email" placeholder="Buscar email..." autocomplete="off">
             </div>

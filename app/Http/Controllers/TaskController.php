@@ -45,7 +45,7 @@ class TaskController extends Controller
         // Pasar las tareas y los datos adicionales a la vista
         return view('tasks.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
     }
-    
+
     public function getTasks(Request $request)
     {
         try {
@@ -299,6 +299,251 @@ class TaskController extends Controller
         // Pasar las tareas y los datos adicionales a la vista
         return view('calls.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
     }
+
+    public function expirationIndex()
+    {
+
+        // Obtener todas las tareas de la base de datos, ordenadas por las más recientes
+        $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
+            ->orderBy('fecha_vencimiento', 'asc') // Ordenar por la fecha de creación, de más reciente a más antigua
+            ->get();
+
+        // Obtener datos adicionales necesarios para el formulario
+        $clientes = Cliente::all();
+        $asuntos = Asunto::all();
+        $tipos = Tipo::all();
+        $usuarios = User::all();
+
+        // Pasar las tareas y los datos adicionales a la vista
+        return view('expiration.index', compact('tasks', 'clientes', 'asuntos', 'tipos', 'usuarios'));
+    }
+
+    public function getExpiration(Request $request)
+    {
+        try {
+
+            $userId = $request->query('user_id'); // Usuario actual
+            $filters = $request->all(); // Capturar todos los filtros enviados
+
+            // Determinar los criterios de ordenación
+            $sortKey = $request->query('sortKey', ''); // Usar 'fecha_planificacion' por defecto
+            $sortDirection = $request->query('sortDirection', ''); // Dirección predeterminada
+
+            $query = Tarea::query()
+            ->select('tareas.*')
+            ->with(['cliente', 'asunto', 'tipo', 'users']) // Cargar relaciones necesarias
+            ->whereNotNull('fecha_vencimiento');
+            
+            // Ordenación en relaciones
+            if ($sortKey === 'asunto.nombre') {
+                $query->leftJoin('asuntos', 'tareas.asunto_id', '=', 'asuntos.id');
+                $query->addSelect('asuntos.nombre as asunto_nombre'); // Alias para asunto
+                $sortKey = 'asuntos.nombre';
+            }
+            if ($sortKey === 'cliente.nombre_fiscal') {
+                $query->leftJoin('clientes', 'tareas.cliente_id', '=', 'clientes.id');
+                $query->addSelect('clientes.nombre_fiscal as cliente_nombre_fiscal'); // Alias para cliente
+                $sortKey = 'clientes.nombre_fiscal';
+            }
+            if ($sortKey === 'tipo.nombre') {
+                $query->leftJoin('tipos', 'tareas.tipo_id', '=', 'tipos.id');
+                $query->addSelect('tipos.nombre as tipo_nombre'); // Alias para tipo
+                $sortKey = 'tipos.nombre';
+            }
+            if ($sortKey === 'users.name') {
+                $query->leftJoin('tarea_user', 'tareas.id', '=', 'tarea_user.tarea_id')
+                    ->leftJoin('users', 'tarea_user.user_id', '=', 'users.id')
+                    ->groupBy('tareas.id') // Asegura que no haya duplicados
+                    ->addSelect(DB::raw("GROUP_CONCAT(users.name SEPARATOR ', ') as user_names")); // Concatenar nombres
+                $sortKey = 'user_names'; // Ordenar por el alias
+            }
+
+
+
+
+
+            // Filtros dinámicos para múltiples valores
+            foreach (['subtipo', 'facturado', 'estado'] as $filter) {
+                if (!empty($filters[$filter])) {
+                    $values = explode(',', $filters[$filter]); // Dividir la cadena en un array
+                    $query->whereIn($filter, $values); // Usar whereIn para múltiples valores
+                }
+            }
+
+            // Filtros dinámicos para booleanos
+            foreach (['facturable'] as $booleanField) {
+                if (!empty($filters[$booleanField])) {
+                    // Convertir el valor recibido en booleano estricto
+                    $values = array_map(function ($value) {
+                        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                    }, explode(',', $filters[$booleanField]));
+
+                    $query->whereIn($booleanField, $values);
+                }
+            }
+
+            // Filtros dinámicos para valores únicos
+            foreach (['precio', 'tiempo_previsto', 'tiempo_real'] as $filter) {
+                if (!empty($filters[$filter])) {
+                    $query->where($filter, $filters[$filter]);
+                }
+            }
+
+            // Filtrar por cliente (múltiples IDs)
+            if (!empty($filters['cliente'])) {
+                $clienteValues = explode(',', $filters['cliente']); // Dividir los valores por comas
+                $clientesById = Cliente::whereIn('id', $clienteValues)
+                    ->pluck('id')
+                    ->toArray();
+                $clientesByName = Cliente::where(function ($query) use ($clienteValues) {
+                    foreach ($clienteValues as $value) {
+                        $query->orWhere('nombre_fiscal', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $clientes = array_unique(array_merge($clientesById, $clientesByName));
+
+                if (!empty($clientes)) {
+                    $query->whereIn('cliente_id', $clientes);
+                }
+            }
+            // Filtrar por asuntos (múltiples IDs o nombres)
+            if (!empty($filters['asunto'])) {
+                $asuntoValues = explode(',', $filters['asunto']); // Dividir los valores por comas
+                $asuntosById = Asunto::whereIn('id', $asuntoValues)
+                    ->pluck('id')
+                    ->toArray();
+                $asuntosByName = Asunto::where(function ($query) use ($asuntoValues) {
+                    foreach ($asuntoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $asuntos = array_unique(array_merge($asuntosById, $asuntosByName));
+                if (!empty($asuntos)) {
+                    $query->whereIn('asunto_id', $asuntos);
+                }
+            }
+            // Filtrar por tipo (múltiples IDs o nombres)
+            if (!empty($filters['tipo'])) {
+                $tipoValues = explode(',', $filters['tipo']); // Dividir los valores por comas
+                $tiposById = Tipo::whereIn('id', $tipoValues)
+                    ->pluck('id')
+                    ->toArray();
+                $tiposByName = Tipo::where(function ($query) use ($tipoValues) {
+                    foreach ($tipoValues as $value) {
+                        $query->orWhere('nombre', 'like', '%' . $value . '%');
+                    }
+                })->pluck('id')
+                    ->toArray();
+                $tipos = array_unique(array_merge($tiposById, $tiposByName));
+                if (!empty($tipos)) {
+                    $query->whereIn('tipo_id', $tipos);
+                }
+            }
+
+            // Filtro por usuario asignado
+            if (!empty($filters['usuario'])) {
+                // Si se filtra explícitamente por usuario desde el frontend
+                $userIds = explode(',', $filters['usuario']);
+                $query->whereHas('users', function ($q) use ($userIds) {
+                    $q->whereIn('users.id', $userIds);
+                });
+            } elseif ($userId) {
+                // Si no hay un filtro explícito de usuario, aplicar el usuario logueado
+                $query->whereHas('users', function ($q) use ($userId) {
+                    $q->where('users.id', $userId);
+                });
+            }
+
+            // Filtros de rangos de fechas
+            foreach (['fecha_inicio' => '>=', 'fecha_vencimiento' => '<=', 'fecha_imputacion' => '='] as $field => $operator) {
+                if (!empty($filters[$field])) {
+                    $query->whereDate($field, $operator, $filters[$field]);
+                }
+            }
+
+
+            // Filtros específicos de planificación
+            if (
+                !empty($filters['fecha_planificacion_inicio']) &&
+                !empty($filters['fecha_planificacion_fin']) &&
+                $filters['fecha_planificacion_inicio'] === 'past' &&
+                $filters['fecha_planificacion_fin'] === 'past'
+            ) {
+                // Caso especial para "past"
+                $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                    ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
+            } elseif (!empty($filters['fecha_planificacion_inicio']) && !empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar por rango si ambas fechas están definidas
+                $query->whereBetween('fecha_planificacion', [
+                    $filters['fecha_planificacion_inicio'],
+                    $filters['fecha_planificacion_fin']
+                ]);
+            } elseif (!empty($filters['fecha_planificacion_inicio'])) {
+                // Filtrar desde una fecha de inicio
+                $query->whereDate('fecha_planificacion', '>=', $filters['fecha_planificacion_inicio']);
+            } elseif (!empty($filters['fecha_planificacion_fin'])) {
+                // Filtrar hasta una fecha de fin
+                $query->whereDate('fecha_planificacion', '<=', $filters['fecha_planificacion_fin']);
+            } elseif (!empty($filters['fecha_planificacion'])) {
+                // Filtrar por un día en específico
+                if ($filters['fecha_planificacion'] === 'past') {
+                    $query->whereDate('fecha_planificacion', '<', now()->toDateString())
+                        ->whereIn('estado', ['PENDIENTE', 'ENESPERA']);
+                } else {
+                    $query->whereDate('fecha_planificacion', $filters['fecha_planificacion']);
+                }
+            }
+
+            foreach (['descripcion', 'observaciones'] as $field) {
+                if (!empty($filters[$field])) {
+                    $query->where($field, 'like', '%' . $filters[$field] . '%');
+                }
+            }
+
+            
+            if ($sortKey === '') {
+                $sortKey = 'fecha_vencimiento';
+                $sortDirection = 'asc';
+            }
+            $query->distinct()->orderBy($sortKey, $sortDirection);
+
+
+            // Clonar el query para usarlo en el cálculo de totales
+            $totalQuery = clone $query;
+
+
+            // Paginación
+            $tasks = $query->paginate(50);
+
+            // Calcular los totales
+            $totalTiempoPrevisto = $totalQuery->sum('tiempo_previsto');
+            $totalTiempoReal = $totalQuery->sum('tiempo_real');
+
+
+            return response()->json([
+                'success' => true,
+                'tasks' => $tasks->items(),
+                'pagination' => [
+                    'current_page' => $tasks->currentPage(),
+                    'last_page' => $tasks->lastPage(),
+                    'per_page' => $tasks->perPage(),
+                    'total' => $tasks->total(),
+                ],
+                'totalTiempoPrevisto' => $totalTiempoPrevisto,
+                'totalTiempoReal' => $totalTiempoReal,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener tareas: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor.',
+            ], 500);
+        }
+    }
+
+
 
 
 
@@ -947,6 +1192,7 @@ class TaskController extends Controller
                 'tiempo_real' => $validated['tiempo_real'] ?? null,
             ]);
 
+
             // Asignar usuarios a la tarea
             if (!empty($validated['users'])) {
                 $task->users()->sync($validated['users']);
@@ -956,6 +1202,7 @@ class TaskController extends Controller
                 foreach ($assignedUsers as $user) {
                     // Excluir al usuario autenticado
                     if ($user->id !== auth()->id()) {
+                        $task->load(['cliente', 'asunto', 'tipo', 'users']);
                         $user->notify(new TaskAssignedNotification($task, auth()->user()));
                     }
                 }

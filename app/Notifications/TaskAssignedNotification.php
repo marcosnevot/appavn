@@ -49,6 +49,7 @@ class TaskAssignedNotification extends Notification implements ShouldQueue
             'task_id' => $this->task->id,
             'task_title' => $this->task->asunto->nombre ?? 'Sin asunto',
             'assigned_by' => $this->assignedBy->name, // Ahora usa $this->assignedBy
+            'client' => $this->task->cliente->nombre_fiscal ?? 'Sin cliente', // Relación con cliente
             'url' => route('tasks.index'),
             'created_at' => $this->task->created_at ? $this->task->created_at->toISOString() : now()->toISOString(),
         ];
@@ -66,6 +67,7 @@ class TaskAssignedNotification extends Notification implements ShouldQueue
             'task_id' => $this->task->id,
             'task_title' => $this->task->asunto->nombre ?? 'Sin asunto',
             'assigned_by' => $this->assignedBy->name, // Ahora usa $this->assignedBy
+            'client' => $this->task->cliente->nombre_fiscal ?? 'Sin cliente', // Relación con cliente
             'url' => route('tasks.index'),
             'created_at' => $this->task->created_at ? $this->task->created_at->toISOString() : now()->toISOString(),
         ]);

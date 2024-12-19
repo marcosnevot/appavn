@@ -182,15 +182,17 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('click', function (event) {
         const isInsideForm = filterCustomerForm.contains(event.target); // Verifica si el clic fue dentro del formulario
         const isfilterCustomerButton = document.getElementById('filter-customer-button').contains(event.target);
+        const isSelectedItem = event.target.closest('.selected-item'); // Verifica si el clic fue dentro de un item seleccionado
 
         // Verifica si el clic no es dentro del formulario o dentro del botón de abrir el formulario
-        if (!isInsideForm && !isfilterCustomerButton) {
+        if (!isInsideForm && !isfilterCustomerButton && !isSelectedItem) {
             if (filterCustomerForm.classList.contains('show')) {
                 closeFilterCustomerForm();
             }
         }
     });
 
+  
 
 
 

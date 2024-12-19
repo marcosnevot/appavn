@@ -93,87 +93,6 @@ function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirect
         });
 }
 
-let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
-
-function updateFilterInfoPanel(filters) {
-    const filterInfoContent = document.getElementById('filter-info-content');
-    const filterInfoPanel = document.getElementById('filter-info-panel');
-
-    filterInfoContent.innerHTML = ''; // Limpiar contenido anterior
-
-    // Filtrar las entradas con valores no vacíos
-    const filterEntries = Object.entries(filters).filter(([key, value]) => value !== '');
-
-    if (filterEntries.length === 0) {
-        // Ocultar el panel cuando no hay filtros aplicados
-        filterInfoPanel.classList.add('hide');
-    } else {
-        filterEntries.forEach(([key, value]) => {
-            const p = document.createElement('p');
-
-            if (key === 'cliente') {
-                // Manejo para clientes
-                const clienteIds = value.split(',').map(id => parseInt(id));
-                const clienteNames = clienteIds
-                    .map(id => {
-                        const cliente = clientesData.find(cliente => cliente.id === id);
-                        return cliente ? cliente.nombre_fiscal : 'Desconocido';
-                    })
-                    .join(', ');
-
-                p.textContent = `Cliente(s): ${clienteNames || 'Desconocido'}`;
-            } else if (key === 'asunto') {
-                // Manejo para asuntos
-                const asuntoIds = value.split(',').map(id => parseInt(id));
-                const asuntoNames = asuntoIds
-                    .map(id => {
-                        const asunto = asuntosData.find(asunto => asunto.id === id);
-                        return asunto ? asunto.nombre : 'Desconocido';
-                    })
-                    .join(', ');
-
-                p.textContent = `Asunto(s): ${asuntoNames || 'Desconocido'}`;
-            } else if (key === 'tipo') {
-                // Manejo para tipos
-                const tipoIds = value.split(',').map(id => parseInt(id));
-                const tipoNames = tipoIds
-                    .map(id => {
-                        const tipo = tiposData.find(tipo => tipo.id === id);
-                        return tipo ? tipo.nombre : 'Desconocido';
-                    })
-                    .join(', ');
-
-                p.textContent = `Tipo(s): ${tipoNames || 'Desconocido'}`;
-            } else if (key === 'usuario') {
-                // Manejo para usuarios
-                const userIds = value.split(',').map(id => parseInt(id));
-                const userNames = userIds
-                    .map(id => {
-                        const usuario = usersData.find(usuario => usuario.id === id);
-                        return usuario ? usuario.name : 'Desconocido';
-                    })
-                    .join(', ');
-
-                p.textContent = `Mostrando Tareas De: ${userNames}`;
-            } else {
-                p.textContent = `${capitalizeFirstLetter(key)}: ${value}`;
-            }
-
-            filterInfoContent.appendChild(p);
-        });
-
-
-        // Mostrar el panel si hay filtros
-        filterInfoPanel.classList.remove('hide');
-    }
-}
-
-
-// Función para capitalizar la primera letra
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1).replace('_', ' ');
-}
-
 
 
 
@@ -222,7 +141,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Obtener los datos de clientes, asuntos y tipos desde los atributos data
 
-
+    // Obtener el estado desde la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const asuntoDesdeUrl = urlParams.get('asunto') ? urlParams.get('asunto').split(',') : []; // Dividir en array si existen varios asuntos
+    const estadoDesdeUrl = urlParams.get('estado');
+    
     // Mostrar el formulario de filtrar tareas
     filterTaskButton.addEventListener('click', function () {
         filterTaskForm.style.display = 'block';
@@ -358,8 +281,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-
-
     // Autocompletar para cliente, asunto, tipo (igual que en add-task)
     // Autocompletar para Cliente
     setupAutocomplete(
@@ -391,6 +312,42 @@ document.addEventListener('DOMContentLoaded', function () {
         item => item.nombre, // Mostrar nombre
         item => item.nombre // Comparar con el nombre
     );
+
+    // Preseleccionar valores en el campo de asunto desde la URL
+    if (asuntoDesdeUrl.length > 0) {
+        const asuntoHiddenInput = document.getElementById('filter-asunto-ids');
+        const asuntoSelectedContainer = document.getElementById('filter-asunto-selected');
+
+        const preselectedAsuntos = asuntosData.filter(asunto => asuntoDesdeUrl.includes(asunto.nombre));
+
+        preselectedAsuntos.forEach(asunto => {
+            // Crear elemento visual para el asunto seleccionado
+            const span = document.createElement('span');
+            span.classList.add('selected-item');
+            span.textContent = asunto.nombre;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'x';
+            removeBtn.addEventListener('click', () => {
+                // Remover el asunto seleccionado
+                preselectedAsuntos.splice(preselectedAsuntos.indexOf(asunto), 1);
+                span.remove();
+                updateHiddenInput(asuntoHiddenInput, preselectedAsuntos);
+            });
+
+            span.appendChild(removeBtn);
+            asuntoSelectedContainer.appendChild(span);
+        });
+
+        // Actualizar el campo oculto
+        updateHiddenInput(asuntoHiddenInput, preselectedAsuntos);
+    }
+    // Función para actualizar el campo oculto con los valores seleccionados
+    function updateHiddenInput(hiddenInput, selectedItems) {
+        hiddenInput.value = selectedItems.map(item => item.nombre).join(',');
+        console.log(`Valores para el filtro de asuntos: ${hiddenInput.value}`);
+    }
+
 
 
     document.addEventListener('click', function (e) {
@@ -838,10 +795,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     }
 
-   
+
 
     // Inicializar checklists con valores predeterminados
-    initializeChecklistFilter('estado', false, ['PENDIENTE', 'ENESPERA']);
+    // Valores predeterminados según el estado en la URL
+    // Determinar valores predeterminados para estados
+    let estadosPredeterminados = [];
+    if (!urlParams.has('asunto')) {
+        // Si no es "Citas y Llamadas", usar los predeterminados para "Tareas"
+        estadosPredeterminados = estadoDesdeUrl ? [estadoDesdeUrl] : ['PENDIENTE', 'ENESPERA'];
+    }
+    // Inicializar el checklist de estados con los valores dinámicos
+    initializeChecklistFilter('estado', false, estadosPredeterminados);
     initializeChecklistFilter('subtipo');
     initializeChecklistFilter('facturado');
     initializeChecklistFilter('facturable', true);

@@ -800,6 +800,7 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
     }
     // Usar los filtros globales si no se pasan como argumento
     const filtersToApply = currentFilters || window.currentFilters;
+    updateFilterInfoPanel(filtersToApply);
     console.log('Filtros actuales a aplicar:', filtersToApply);
     // Convertir el parámetro `tasks` a un array si es un solo objeto
     const tasksArray = isSingleTask ? [tasks] : tasks;
@@ -820,10 +821,12 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
 
         row.innerHTML = `
             <td>${task.id}</td>
-            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
             <td>
-            ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
-            </td>             
+            ${task.fecha_vencimiento ? formatFechaGenerica(task.fecha_vencimiento, "Vencimiento") : 'Sin fecha'}
+            </td>        
+            <td>
+                ${task.fecha_planificacion ? formatFechaGenerica(task.fecha_planificacion, "Planificación") : 'Sin fecha'}
+            </td>           
             <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
             <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
                         <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>

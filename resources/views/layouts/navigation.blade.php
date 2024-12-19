@@ -15,7 +15,7 @@
         <!-- Navigation Links -->
         <div class="menu-links">
             <a href="{{ route('tasks.index') }}"
-                class="menu-link {{ request()->routeIs('tasks.index') ? 'active' : '' }}">
+                class="menu-link {{ request()->routeIs('tasks.index') && !request()->query('estado') && !request()->query('asunto') ? 'active' : '' }}">
                 <span class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m-7-8h8M7 20h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -40,8 +40,42 @@
                 {{ __('Facturación') }}
             </a>
 
-            <a href="{{ route('calls.index') }}"
-                class="menu-link {{ request()->routeIs('calls.index') ? 'active' : '' }}">
+            <a href="{{ route('expiration.index') }}" class="menu-link {{ request()->routeIs('expiration.index') ? 'active' : '' }}">
+                <span class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <!-- Contorno del Calendario -->
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <!-- Líneas de separación del calendario -->
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                        <!-- Reloj en la esquina -->
+                        <circle cx="18" cy="15" r="4" />
+                        <line x1="18" y1="13" x2="18" y2="15.5" />
+                        <line x1="18" y1="15" x2="19.5" y2="16" />
+                    </svg>
+                </span>
+                {{ __('Vencimientos') }}
+            </a>
+
+            <a href="{{ route('tasks.index', ['estado' => 'ENESPERA']) }}"
+                class="menu-link {{ request()->fullUrlIs('*estado=ENESPERA*') ? 'active' : '' }}">
+                <span class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <!-- Contorno de la mano -->
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v8M9 3v8M15 3v8M6 8v8a4 4 0 004 4h4a4 4 0 004-4v-8" />
+                    </svg>
+
+                </span>
+
+
+                {{ __('En Espera') }}
+            </a>
+
+
+
+            <a href="{{ route('tasks.index', ['asunto' => 'CITA,LLAMADA TELEFONICA']) }}"
+                class="menu-link {{ request()->query('asunto') === 'CITA,LLAMADA TELEFONICA' ? 'active' : '' }}">
                 <span class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 01-2.18 2 19.86 19.86 0 01-8.63-3.1 19.5 19.5 0 01-6-6A19.86 19.86 0 012.08 4.18 2 2 0 014.06 2h3a2 2 0 012 1.72c.13.94.37 1.85.7 2.73a2 2 0 01-.45 2.11l-1.27 1.27a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.88.33 1.79.57 2.73.7a2 2 0 011.72 2z" />
@@ -233,33 +267,33 @@
                 }, 3000);
 
 
+                const clientName = notification.client || 'Sin cliente';
 
                 // Crear un nuevo elemento de notificación con la estructura HTML adecuada
                 const notificationItem = document.createElement('li');
                 notificationItem.className = 'notification-item';
+                notificationItem.dataset.id = notification.id; // Usar un identificador único
                 notificationItem.innerHTML = `
-                                                <p class="notification-content">
-                                                    <strong>${notification.assigned_by}</strong> te asignó la tarea: 
-                                                            <a href="{{ route('tasks.index') }}" class="notification-link" title="Ver tarea">
-                                                                                ${notification.task_title || 'Sin asunto'}
-                                                             </a>                                               
-                                                </p>
-                                                <div class="notification-footer">
-                                                    <span class="notification-date">${formatNotificationDate(notification.created_at)}</span>
-                                                    <button class="mark-as-read-btn" data-id="${notification.id}" title="Marcar como leída">
-                                                        Borrar
-                                                    </button>
-                                                </div>
-                                                `;
+                <p class="notification-content">
+                    <strong>${notification.assigned_by}</strong> te asignó la tarea: 
+                            <a href="{{ route('tasks.index') }}" class="notification-link" title="Ver tarea">
+                                ${notification.task_title || 'Sin asunto'}
+                            </a> de ${clientName}                                             
+                </p>
+                <div class="notification-footer">
+                    <span class="notification-date">${formatNotificationDate(notification.created_at)}</span>
+                    <button class="mark-as-read-btn" data-id="${notification.id}" title="Marcar como leída">
+                        Borrar
+                    </button>
+                </div>
+                `;
 
                 // Añadir la notificación al inicio de la lista
                 notificationList.prepend(notificationItem);
 
-
                 // Actualizar el contador de notificaciones
-                if (notificationCounter) {
-                    notificationCounter.textContent = parseInt(notificationCounter.textContent || 0) + 1;
-                }
+                const currentCount = parseInt(notificationCounter.textContent || 0);
+                updateNotificationCounter(currentCount + 1);
 
                 // Asegurarse de ocultar el mensaje "No tienes notificaciones pendientes"
                 if (!noNotifications.classList.contains('hidden')) {
@@ -309,6 +343,7 @@
         fetch('/notifications')
             .then((response) => response.json())
             .then((notifications) => {
+
                 // Obtener elementos del DOM
                 const notificationList = document.getElementById('notification-list');
                 const notificationCounter = document.getElementById('notification-counter');
@@ -336,7 +371,7 @@
                         <strong>${notification.data.assigned_by}</strong> te asignó la tarea: 
                         <a href="{{ route('tasks.index') }}" class="notification-link" title="Ver tarea">
                             ${notification.data.task_title || 'Sin asunto'}
-                        </a>
+                        </a> de ${notification.data.client || 'Sin cliente'}
                     </p>
                      <div class="notification-footer">
                         <span class="notification-date">${formatNotificationDate(notification.created_at)}</span>
@@ -346,11 +381,18 @@
                     </div>
                 `;
 
-                    notificationList.appendChild(notificationItem);
-                });
+                    // Añadir la notificación al panel
+                    notificationList.prepend(notificationItem);
 
-                // Actualizar el contador de notificaciones
-                notificationCounter.textContent = notifications.length;
+                    // Actualizar el contador de notificaciones
+                    const currentCount = parseInt(notificationCounter.textContent || 0);
+                    updateNotificationCounter(currentCount + 1);
+
+                    // Asegurarse de ocultar el mensaje "No tienes notificaciones pendientes"
+                    if (!noNotifications.classList.contains('hidden')) {
+                        noNotifications.classList.add('hidden');
+                    }
+                });
             })
             .catch((error) => {
                 console.error('Error al cargar las notificaciones:', error);

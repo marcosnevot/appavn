@@ -51,7 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
     });
 
-    
+
     Route::get('/tareas', [TaskController::class, 'index'])->name('tasks.index');
     Route::post('/tareas', [TaskController::class, 'store'])->name('tasks.store');
     Route::post('/tareas/filtrar', [TaskController::class, 'filter'])->name('tareas.filtrar');
@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/billing', [TaskController::class, 'billingIndex'])->name('billing.index');
     Route::get('/billing/getBilling', [TaskController::class, 'getBilling'])->name('billing.get');
 
+    Route::get('/expiration', [TaskController::class, 'expirationIndex'])->name('expiration.index');
+    Route::get('/expiration/getExpiration', [TaskController::class, 'getExpiration'])->name('expiration.get');
 
     Route::get('/calls', [TaskController::class, 'callsIndex'])->name('calls.index');
 
@@ -101,6 +103,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/clientes/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
     Route::put('/clientes/{id}', [ClientController::class, 'update'])->name('clients.update');
     Route::post('/clientes/export', [ClientController::class, 'exportFilteredCustomers'])->name('clientes.export');
+    // Rutas relacionadas con los correos
+    Route::post('/clientes/emails', [ClientController::class, 'fetchEmails'])->name('clientes.fetchEmails');
 });
 
 require __DIR__ . '/auth.php';

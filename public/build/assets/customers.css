@@ -126,6 +126,13 @@
 .form-group.row2 {
     flex: 0 0 auto;
     width: 100%;
-    max-width: 25%;
+    max-width: 24.5%;
+    box-sizing: border-box;
+}
+
+.form-group.row3 {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 19.5%;
     box-sizing: border-box;
 }

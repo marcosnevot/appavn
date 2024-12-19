@@ -957,11 +957,11 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
 
         row.innerHTML = `
             <td>${task.id}</td>
-            <td>${task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toLocaleDateString() : 'Sin fecha'}</td>
+            <td>${task.fecha_vencimiento ? formatFechaGenerica(task.fecha_vencimiento, "Vencimiento") : 'Sin fecha'}</td>
             <td class="fecha-planificacion-cell" 
                 data-fecha_planificacion="${task.fecha_planificacion || ''}" 
                 data-task-id="${task.id}">
-                ${task.fecha_planificacion ? formatFechaPlanificacion(task.fecha_planificacion) : 'Sin fecha'}
+                ${task.fecha_planificacion ? formatFechaGenerica(task.fecha_planificacion, "Planificación") : 'Sin fecha'}
             </td> 
             <td class="col-cliente">${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
             <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>

@@ -155,8 +155,8 @@ document.addEventListener('DOMContentLoaded', function () {
         botonPasadas.setAttribute('data-fecha', 'past');
         botonPasadas.onclick = () => filtrarTareasPorPlanificacion('past');
         planificacionFilterContainer.appendChild(botonPasadas);
-        
-        
+
+
         sincronizarBotonesConFecha();
 
         // Seleccionar "Todas" inicialmente
@@ -969,5 +969,76 @@ function updateTaskColumn(taskId, newValue, targetCell, select, columnKey) {
             select.remove();
         });
 }
+
+
+
+function formatFechaGenerica(fecha, tipo) {
+    const hoy = new Date();
+    const manana = new Date();
+    manana.setDate(hoy.getDate() + 1);
+    const fechaObjetivo = new Date(fecha);
+
+    // Verificar si la fecha es válida
+    if (isNaN(fechaObjetivo.getTime())) {
+        return 'Fecha no válida';
+    }
+
+    // Lógica para `fecha_vencimiento`
+    if (tipo === "Vencimiento") {
+        // Si la fecha es hoy, formatearla en azul
+        if (
+            fechaObjetivo.getDate() === hoy.getDate() &&
+            fechaObjetivo.getMonth() === hoy.getMonth() &&
+            fechaObjetivo.getFullYear() === hoy.getFullYear()
+        ) {
+            return `<span style="color: blue;">${fechaObjetivo.toLocaleDateString()}</span>`;
+        }
+
+        // Si la fecha es anterior a hoy, formatearla en rojo
+        if (fechaObjetivo < hoy) {
+            return `<span style="color: red;">${fechaObjetivo.toLocaleDateString()}</span>`;
+        }
+
+        // Mostrar solo la fecha para fechas futuras
+        return fechaObjetivo.toLocaleDateString();
+    }
+
+    // Lógica para `fecha_planificacion`
+    if (tipo === "Planificación") {
+        // Array con los nombres de los días de la semana
+        const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+        // Si la fecha es hoy
+        if (
+            fechaObjetivo.getDate() === hoy.getDate() &&
+            fechaObjetivo.getMonth() === hoy.getMonth() &&
+            fechaObjetivo.getFullYear() === hoy.getFullYear()
+        ) {
+            return "HOY";
+        }
+
+        // Si la fecha es mañana
+        if (
+            fechaObjetivo.getDate() === manana.getDate() &&
+            fechaObjetivo.getMonth() === manana.getMonth() &&
+            fechaObjetivo.getFullYear() === manana.getFullYear()
+        ) {
+            return "MAÑANA";
+        }
+
+        // Si la fecha es anterior a hoy, formatearla en rojo
+        if (fechaObjetivo < hoy) {
+            return `<span style="color: red;">${fechaObjetivo.toLocaleDateString()}</span>`;
+        }
+
+        // Mostrar el nombre del día para fechas de esta semana
+        const diaSemana = diasSemana[fechaObjetivo.getDay()];
+        return diaSemana + ", " + fechaObjetivo.toLocaleDateString();
+    }
+
+    // Si el tipo no es reconocido
+    return fechaObjetivo.toLocaleDateString();
+}
+
 
 

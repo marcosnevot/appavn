@@ -1,0 +1,220 @@
+/* Redesigned CSS inspired by Outlook */
+
+.customer-mail-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(1px);
+    opacity: 0; /* Comienza invisible */
+    transition: opacity 0.3s ease; /* Transición suave */
+}
+
+.customer-mail-modal.show {
+    opacity: 1; /* Totalmente visible */
+}
+
+.customer-mail-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 80%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transform: scale(0.95); /* Tamaño inicial reducido */
+    opacity: 0; /* Comienza invisible */
+    transition: transform 0.3s ease, opacity 0.3s ease; /* Transición suave */
+}
+
+.customer-mail-container.show {
+    transform: scale(1); /* Tamaño original */
+    opacity: 1; /* Totalmente visible */
+}
+
+.customer-mail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #0078d4;
+    padding: 15px;
+    color: #ffffff;
+}
+
+.customer-mail-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.close-button:hover {
+    transform: scale(1.2);
+}
+
+.customer-mail-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: #f3f4f6;
+}
+
+.mail-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.mail-field label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #374151;
+}
+/* Redesigned CSS for CCO Input with Tags */
+.recipients-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+    min-height: 50px;
+    max-height: 150px; /* Altura máxima del contenedor */
+    overflow-y: auto;  /* Habilita el scroll vertical */
+}
+
+
+.recipient-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 16px;
+    background-color: #e5e7eb;
+    color: #1f2937;
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+.remove-recipient {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #ef4444;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: color 0.2s;
+}
+
+.remove-recipient:hover {
+    color: #b91c1c;
+}
+
+.recipient-input {
+    flex: 1;
+    border: none !important;
+    outline: none !important; /* Asegura que el borde desaparezca */
+    font-size: 14px;
+    background-color: #f9fafb !important; /* Coincide con las etiquetas */
+    color: #1f2937; /* Color del texto */
+    height: 30px; /* Altura consistente */
+    min-width: 100px; /* Espacio mínimo para escribir */
+    border-radius: 16px; /* Igual que las etiquetas */
+}
+
+.recipient-input:focus {
+    outline: none !important; /* Elimina cualquier borde adicional */
+    box-shadow: none !important; /* Asegura que no haya sombras */
+    background-color: #f9fafb !important; /* Coincide con las etiquetas */
+}
+
+
+.recipient-input::placeholder {
+    color: #9ca3af;
+}
+
+
+
+.email-cc, .email-subject {
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #ffffff;
+    transition: border-color 0.3s;
+}
+
+.email-cc:focus, .email-subject:focus {
+    border-color: #0078d4;
+    outline: none;
+}
+
+.email-body {
+    min-height: 200px;
+    padding: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #ffffff;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.customer-mail-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background-color: #f9fafb;
+    border-top: 1px solid #d1d5db;
+}
+
+.cancel-button {
+    background-color: transparent;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.cancel-button:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.send-button {
+    background-color: #0078d4;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.send-button:hover {
+    background-color: #005a9e;
+}
+
+.hidden {
+    display: none;
+}

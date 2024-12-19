@@ -22,7 +22,7 @@
 
 
     <!-- Scripts -->
-    @vite(['resources/css/panel.css','resources/js/websockets.js','resources/css/admin.css','resources/css/tareas.css','resources/css/detailed-task.css','resources/css/customers.css','resources/css/detailed-customer.css', 'resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/panel.css','resources/js/websockets.js','resources/css/admin.css','resources/css/tareas.css','resources/css/detailed-task.css','resources/css/customer-mail.css','resources/css/customers.css','resources/css/detailed-customer.css', 'resources/css/app.css', 'resources/js/app.js'])
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 
 </head>

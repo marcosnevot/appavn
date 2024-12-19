@@ -67,7 +67,93 @@ window.currentFilters = {
 let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
 let asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
 let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
+let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
+function updateFilterInfoPanel(filters) {
+    const filterInfoContent = document.getElementById('filter-info-content');
+    const filterInfoPanel = document.getElementById('filter-info-panel');
+
+    filterInfoContent.innerHTML = ''; // Limpiar contenido anterior
+
+    // Filtrar las entradas con valores no vacíos
+    const filterEntries = Object.entries(filters).filter(([key, value]) => value !== '');
+
+    if (filterEntries.length === 0) {
+        // Ocultar el panel cuando no hay filtros aplicados
+        filterInfoPanel.classList.add('hide');
+    } else {
+        filterEntries.forEach(([key, value]) => {
+            const p = document.createElement('p');
+
+            if (key === 'cliente') {
+                // Manejo para clientes
+                const clienteValues = value.split(',');
+                const clienteNames = clienteValues
+                    .map(value => {
+                        const cliente = clientesData.find(cliente =>
+                            cliente.id == value || cliente.nombre_fiscal.toLowerCase() === value.toLowerCase()
+                        );
+                        return cliente ? cliente.nombre_fiscal : 'Desconocido';
+                    })
+                    .join(', ');
+
+                p.textContent = `Cliente(s): ${clienteNames || 'Desconocido'}`;
+            } else if (key === 'asunto') {
+                // Manejo para asuntos
+                const asuntoValues = value.split(',');
+                const asuntoNames = asuntoValues
+                    .map(value => {
+                        const asunto = asuntosData.find(asunto =>
+                            asunto.id == value || asunto.nombre.toLowerCase() === value.toLowerCase()
+                        );
+                        return asunto ? asunto.nombre : 'Desconocido';
+                    })
+                    .join(', ');
+
+                p.textContent = `Asunto(s): ${asuntoNames || 'Desconocido'}`;
+            } else if (key === 'tipo') {
+                // Manejo para tipos
+                const tipoValues = value.split(',');
+                const tipoNames = tipoValues
+                    .map(value => {
+                        const tipo = tiposData.find(tipo =>
+                            tipo.id == value || tipo.nombre.toLowerCase() === value.toLowerCase()
+                        );
+                        return tipo ? tipo.nombre : 'Desconocido';
+                    })
+                    .join(', ');
+
+                p.textContent = `Tipo(s): ${tipoNames || 'Desconocido'}`;
+            } else if (key === 'usuario') {
+                // Manejo para usuarios
+                const userValues = value.split(',');
+                const userNames = userValues
+                    .map(value => {
+                        const usuario = usersData.find(usuario =>
+                            usuario.id == value || usuario.name.toLowerCase() === value.toLowerCase()
+                        );
+                        return usuario ? usuario.name : 'Desconocido';
+                    })
+                    .join(', ');
+
+                p.textContent = `Mostrando Tareas De: ${userNames}`;
+            } else {
+                p.textContent = `${capitalizeFirstLetter(key)}: ${value}`;
+            }
+
+            filterInfoContent.appendChild(p);
+        });
+
+        // Mostrar el panel si hay filtros
+        filterInfoPanel.classList.remove('hide');
+    }
+}
+
+
+// Función para capitalizar la primera letra
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1).replace('_', ' ');
+}
 
 // Función para abrir el modal con los detalles de la tarea
 function openTasksModal(taskId) {

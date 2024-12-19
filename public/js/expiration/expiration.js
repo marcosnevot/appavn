@@ -10,21 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentSortDirection = ''; // Dirección de orden actual
     const sessionUserId = document.getElementById('user-session-id').value;
 
-    // Leer los parámetros de la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const estado = urlParams.get('estado'); // Leer estado de la URL, sin valor predeterminado
-    const asuntoDesdeUrl = urlParams.get('asunto'); // Obtener el filtro de asunto desde la URL
-
-    // Establecer los filtros iniciales
-    window.currentFilters = {
-        ...window.currentFilters,
-        estado: estado || window.currentFilters.estado || 'PENDIENTE,ENESPERA', // Sobrescribir si viene de la URL
-        asunto: asuntoDesdeUrl || window.currentFilters.asunto || '', // Usar el valor de la URL o el predeterminado
-
-    };
-
     // Cargar tareas inicialmente
-    loadTasks(1, 'fecha_planificacion', 'asc');
+    loadTasks(1, 'fecha_vencimiento', 'asc');
 
 
 
@@ -146,58 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-function formatFechaPlanificacion(fecha) {
-    const hoy = new Date();
-    const manana = new Date();
-    manana.setDate(hoy.getDate() + 1);
-    const fechaPlanificacion = new Date(fecha);
 
-    // Array con los nombres de los días de la semana
-    const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-
-    // Verificar si la fecha es hoy
-    if (
-        fechaPlanificacion.getDate() === hoy.getDate() &&
-        fechaPlanificacion.getMonth() === hoy.getMonth() &&
-        fechaPlanificacion.getFullYear() === hoy.getFullYear()
-    ) {
-        return "HOY";
-    }
-
-    // Verificar si la fecha es mañana
-    if (
-        fechaPlanificacion.getDate() === manana.getDate() &&
-        fechaPlanificacion.getMonth() === manana.getMonth() &&
-        fechaPlanificacion.getFullYear() === manana.getFullYear()
-    ) {
-        return "MAÑANA";
-    }
-
-    // Calcular el último día laborable de esta semana (viernes)
-    const diaHoy = hoy.getDay();
-    const diasHastaViernes = 5 - diaHoy; // 5 es viernes
-    const viernesDeEstaSemana = new Date(hoy);
-    viernesDeEstaSemana.setDate(hoy.getDate() + diasHastaViernes);
-
-    // Excluir sábado y domingo
-    const diaSemanaPlanificacion = fechaPlanificacion.getDay();
-    if (diaSemanaPlanificacion === 0 || diaSemanaPlanificacion === 6) {
-        return fechaPlanificacion.toLocaleDateString();
-    }
-
-    // Verificar si la fecha está en esta semana y es entre lunes y viernes
-    if (fechaPlanificacion <= viernesDeEstaSemana && fechaPlanificacion > hoy) {
-        return diasSemana[diaSemanaPlanificacion];
-    }
-
-    // Si la fecha es anterior a hoy, formatearla en rojo
-    if (fechaPlanificacion < hoy) {
-        return `<span style="color: red;">${fechaPlanificacion.toLocaleDateString()}</span>`;
-    }
-
-    // Mostrar la fecha en formato normal para cualquier otra condición
-    return fechaPlanificacion.toLocaleDateString();
-}
 
 // Función para cargar las tareas mediante AJAX con paginación
 function loadTasks(page = 1, sortKey, sortDirection) {
@@ -222,7 +158,7 @@ function loadTasks(page = 1, sortKey, sortDirection) {
     console.log(currentFilters); // Verifica qué se está enviando al servidor
 
 
-    fetch(`/tareas/getTasks?${params.toString()}`, {
+    fetch(`/expiration/getExpiration?${params.toString()}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -273,10 +209,12 @@ function loadInitialTasks(tasks) {
 
         row.innerHTML = `
         <td>${task.id}</td>
-        <td>${task.fecha_vencimiento ? formatFechaGenerica(task.fecha_vencimiento, "Vencimiento") : 'Sin fecha'}</td>
         <td>
-        ${task.fecha_planificacion ? formatFechaGenerica(task.fecha_planificacion, "Planificación") : 'Sin fecha'}
-        </td> 
+            ${task.fecha_vencimiento ? formatFechaGenerica(task.fecha_vencimiento, "Vencimiento") : 'Sin fecha'}
+        </td>
+        <td>
+            ${task.fecha_planificacion ? formatFechaGenerica(task.fecha_planificacion, "Planificación") : 'Sin fecha'}
+        </td>
         <td>${task.users && task.users.length > 0 ? task.users.map(user => user.name).join(', ') : 'Sin asignación'}</td>
         <td>${task.cliente ? task.cliente.nombre_fiscal : 'Sin cliente'}</td>
         <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>

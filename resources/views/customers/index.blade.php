@@ -22,6 +22,14 @@
                 <option value="situacion">Situación</option>
             </select>
         </div>
+
+        <!-- Botón de Enviar Correo -->
+        <button id="open-mail-modal" class="btn-excel">
+        <img src="{{ asset('images/outlook-icon.png') }}" alt="Outlook">
+
+        </button>
+
+
         <button id="export-customers-button" class="btn-excel">
             <img src="{{ asset('images/excel-icon.png') }}" alt="Excel">
         </button>
@@ -53,6 +61,8 @@
 <div id="usuarios-data" data-usuarios='@json($usuarios)'></div>
 <div id="clientes-data" data-clientes='@json($clientes)'></div>
 
+<!-- Incluir la interfaz de email -->
+@include('customers.partials.customer-mail')
 
 <!-- Incluir el formulario de nuevo cliente -->
 @include('customers.partials.customer-form')
@@ -73,5 +83,7 @@
 <script src="{{ asset('js/customers/customers.js') }}"></script>
 <script src="{{ asset('js/customers/filter-customers.js') }}"></script>
 <script src="{{ asset('js/customers/customer-modal.js') }}"></script>
+<script src="{{ asset('js/customers/customer-mail.js') }}"></script>
+
 
 @endsection
