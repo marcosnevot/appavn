@@ -53,6 +53,30 @@ function resetFiltroRapidoPlanificacion() {
     }
 }
 
+// Actualizar visualización de ítems seleccionados
+function updateSelectedDisplay(container, items, isBoolean) {
+    container.innerHTML = '';
+    if (items.length === 0) {
+        const placeholder = document.createElement('span');
+        placeholder.textContent = 'Seleccionar...';
+        placeholder.style.color = '#aaa';
+        placeholder.style.fontStyle = 'italic';
+        container.appendChild(placeholder);
+    } else {
+        items.forEach(item => {
+            const span = document.createElement('span');
+            span.textContent = isBoolean ? (item === true ? 'Sí' : 'No') : item;
+            span.style.backgroundColor = '#f0f0f0';
+            span.style.color = '#333';
+            span.style.padding = '3px 8px';
+            span.style.borderRadius = '15px';
+            span.style.fontSize = '12px';
+            span.style.lineHeight = '1.5';
+            span.style.border = '1px solid #ddd';
+            container.appendChild(span);
+        });
+    }
+}
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -299,7 +323,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (originalCheckbox) {
                     originalCheckbox.checked = checkbox.checked; // Sincronizar estado del checkbox
                 }
+
+                const cleanField = field.replace('filter-', '');
+
+                // Obtener el contenedor de ítems seleccionados correspondiente
+                const idMap = {
+                    estado: 'filter-selected-estados',
+                    facturable: 'filter-selected-facturables',
+                    facturado: 'filter-selected-facturados'
+                };
+
+                const selectedContainer = document.getElementById(idMap[cleanField]);
+                if (!selectedContainer) {
+                    console.warn(`No se encontró el contenedor seleccionado para el campo: ${field}`);
+                    return; // Salir si el contenedor no existe
+                }
+                const selectedItems = Array.from(dropdownList.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+
                 updateHiddenField(field, dropdownList);
+                updateSelectedDisplay(selectedContainer, selectedItems, field === 'facturable');
                 applyFilterOnChange(); // Activar el filtrado automáticamente
             });
             // Manejar clic en el texto asociado
@@ -331,6 +374,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }, 0);
     }
+
+
 
     function showInputField(header, inputField) {
         hideAllDropdownLists(); // Ocultar cualquier lista desplegada

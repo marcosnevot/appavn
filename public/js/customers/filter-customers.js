@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-  
+
 
 
 
@@ -333,8 +333,8 @@ document.addEventListener('DOMContentLoaded', function () {
         closeAutocompleteListIfClickedOutside('filter-clasificacion-input', 'filter-clasificacion-list', e);
         closeAutocompleteListIfClickedOutside('filter-tributacion-input', 'filter-tributacion-list', e);
         closeAutocompleteListIfClickedOutside('filter-situacion-input', 'filter-situacion-list', e);
-
-
+        closeAutocompleteListIfClickedOutside('filter-nombrefiscal-input', 'filter-nombrefiscal-list', e);
+        closeAutocompleteListIfClickedOutside('filter-nif-input', 'filter-nif-list', e)
 
     });
 
@@ -366,8 +366,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 list.style.display = 'none';
                 return;
             }
+
+            // Filtrar elementos que tienen valores válidos según displayFormatter
+            const validItems = filtered.filter(item => {
+                const displayValue = displayFormatter(item);
+                return displayValue && displayValue.trim() !== ''; // Excluir valores nulos o vacíos
+            });
+
+            if (validItems.length === 0) {
+                list.style.display = 'none';
+                return;
+            }
+
             list.style.display = 'block';
-            filtered.forEach((item, index) => {
+            validItems.forEach((item, index) => {
                 const li = document.createElement('li');
                 li.textContent = displayFormatter(item);
                 li.setAttribute('data-id', item.id);
@@ -380,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+
         function renderSelectedItems() {
             // Mantener el ancho del contenedor igual al del input
             selectedContainer.style.width = `${input.offsetWidth}px`;
@@ -389,7 +402,9 @@ document.addEventListener('DOMContentLoaded', function () {
             selectedItems.forEach(item => {
                 const span = document.createElement('span');
                 span.classList.add('selected-item');
-                span.textContent = item.nombre || item.nombre_fiscal || item.nif || 'Valor desconocido';
+                // Orden de prioridad para mostrar el texto
+                const displayText = item.nif || item.nombre_fiscal || item.nombre || 'Valor desconocido';
+                span.textContent = displayText;
 
                 const removeBtn = document.createElement('button');
                 removeBtn.textContent = 'x';
@@ -403,13 +418,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function updateHiddenInput() {
-            hiddenInput.value = selectedItems
-                .map(item => item.nombre || item.nombre_fiscal || item.nif || '')
-                .filter(value => value) // Eliminar valores vacíos
-                .join(',');
+            let value = '';
+
+            // Determinar el tipo de filtro según el inputId
+            if (input.id.includes('nif')) {
+                // Enviar solo los NIFs
+                value = selectedItems.map(item => item.nif).filter(v => v).join(',');
+            } else if (input.id.includes('nombrefiscal')) {
+                // Enviar solo los nombres fiscales
+                value = selectedItems.map(item => item.nombre_fiscal).filter(v => v).join(',');
+            } else {
+                // Para otros casos (clasificación, tributación, etc.), enviar nombre
+                value = selectedItems.map(item => item.nombre).filter(v => v).join(',');
+            }
+
+            hiddenInput.value = value;
 
             console.log(`Valores actualizados para el filtro: ${hiddenInput.value}`);
         }
+
 
 
         function selectItem(item) {
@@ -420,10 +447,11 @@ document.addEventListener('DOMContentLoaded', function () {
             );
 
             if (!exists) {
-                // Si el elemento tiene id, mantenerlo, si no, usar solo el valor de nombre
+                // Crear un nuevo objeto con las propiedades relevantes
                 const newItem = {
                     id: item.id || null,
-                    nombre: item.nombre || item.nombre_fiscal || item.nif || ''
+                    nombre_fiscal: item.nombre_fiscal || '',
+                    nif: item.nif || '' // Asegurarse de capturar el NIF correctamente
                 };
                 selectedItems.push(newItem);
                 renderSelectedItems();
@@ -526,6 +554,9 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('filter-clasificacion-list').style.display = 'none';
         document.getElementById('filter-tributacion-list').style.display = 'none';
         document.getElementById('filter-situacion-list').style.display = 'none';
+        document.getElementById('filter-nombrefiscal-list').style.display = 'none';
+        document.getElementById('filter-nif-list').style.display = 'none';
+
     }
 
 

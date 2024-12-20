@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelButton = document.getElementById('discard-email');
     const ccoContainer = document.getElementById('recipients-container');
     const addRecipientInput = document.getElementById('add-recipient-input');
+    const sendEmailButton =  document.getElementById('send-email');
 
     // Open the email modal
     openMailButton.addEventListener('click', async () => {
@@ -16,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Muestra el fondo negro con animación de opacidad
             mailModal.classList.remove('hidden');
-            mailModal.classList.add('show'); 
+            mailModal.classList.add('show');
             const mailContainer = mailModal.querySelector('.customer-mail-container');
             setTimeout(() => mailContainer.classList.add('show'), 10); // Activa la animación del contenedor
         } catch (error) {
@@ -114,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Validate email format
     function validateEmail(email) {
-        var email =  /^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$/;
+        var email = /^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$/;
         return email
     }
 
@@ -131,8 +132,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Deshabilitar el botón
+        sendEmailButton.disabled = true;
+        sendEmailButton.classList.add('disabled');
+
         const mailtoLink = `mailto:?bcc=${encodeURIComponent(recipients.join(';'))}&subject=${encodeURIComponent(subject)}`;
         window.location.href = mailtoLink;
+
+        // Reactivar el botón cuando el usuario interactúe de nuevo con la página
+        window.addEventListener('focus', () => {
+            sendEmailButton.disabled = false;
+            sendEmailButton.classList.remove('disabled');
+        }, { once: true }); // Se ejecuta solo una vez
     });
 
 });

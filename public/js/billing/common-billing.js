@@ -61,6 +61,7 @@ function handleError(message) {
 
 window.currentFilters = {
     ...window.currentFilters,
+    estado: 'COMPLETADA', // Estados predeterminados
 
 }; // Variable global para los filtros activos
 

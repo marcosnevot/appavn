@@ -10,6 +10,15 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentSortKey = ''; // Almacena la clave de ordenación actual
     let currentSortDirection = ''; // Dirección de orden actual
 
+
+    // Establecer los filtros iniciales
+    window.currentFilters = {
+        ...window.currentFilters,
+        estado: estado || window.currentFilters.estado || 'COMPLETADA', // Sobrescribir si viene de la URL
+
+    };
+
+
     // Cargar tareas inicialmente
     loadTasks(1, 'fecha_planificacion', 'asc');
 
@@ -132,6 +141,8 @@ function loadTasks(page = 1, sortKey, sortDirection) {
         user_id: sessionUserId, // Usuario actual
         facturable: '1', // Usar el filtro activo o el valor predeterminado
         facturado: 'NO', // Usar el filtro activo o el valor predeterminado
+        estado: 'COMPLETADA', // Predeterminado
+
     });
     fetch(`/billing/getBilling?${params.toString()}`, {
         method: 'GET',

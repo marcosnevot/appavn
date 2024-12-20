@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const filterData = {
-            nombre_fiscal: document.getElementById('filter-nombre-fiscal-input').value || '',
+            nombre_fiscal: document.getElementById('filter-nombrefiscal-input').value || '',
             nif: document.getElementById('filter-nif-input').value || '',
             movil: document.getElementById('filter-movil-input').value || '',
             fijo: document.getElementById('filter-fijo-input').value || '',
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
             direccion: document.getElementById('filter-direccion-input').value || '',
             codigo_postal: document.getElementById('filter-codigo-postal-input').value || '',
             poblacion: document.getElementById('filter-poblacion-input').value || '',
-            tipo_cliente: document.getElementById('filter-tipo-cliente-input').value || '',
+            tipo_cliente: document.getElementById('filter-tipocliente-input').value || '',
             clasificacion: document.getElementById('filter-clasificacion-input').value || '',
             tributacion: document.getElementById('filter-tributacion-input').value || '',
             situacion: document.getElementById('filter-situacion-input').value || '',

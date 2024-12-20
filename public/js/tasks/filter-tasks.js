@@ -736,31 +736,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Actualizar visualización de ítems seleccionados
-        function updateSelectedDisplay(container, items, isBoolean) {
-            container.innerHTML = '';
-            if (items.length === 0) {
-                const placeholder = document.createElement('span');
-                placeholder.textContent = 'Cualquiera...';
-                placeholder.style.color = '#aaa';
-                placeholder.style.fontStyle = 'italic';
-                container.appendChild(placeholder);
-            } else {
-                items.forEach(item => {
-                    const span = document.createElement('span');
-                    span.textContent = isBoolean ? (item === true ? 'SI' : 'NO') : item;
-                    span.style.backgroundColor = '#f0f0f0';
-                    span.style.color = '#333';
-                    span.style.padding = '3px 8px';
-                    span.style.borderRadius = '15px';
-                    span.style.fontSize = '12px';
-                    span.style.lineHeight = '1.5';
-                    span.style.border = '1px solid #ddd';
-                    container.appendChild(span);
-                });
-            }
-        }
-
+      
         // Función para manejar el enfoque de los checkboxes
         function focusNextCheckbox(direction) {
             const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]'));
