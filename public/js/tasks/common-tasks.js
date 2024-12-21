@@ -202,6 +202,7 @@ function openTasksModal(taskId) {
             console.error('Error al cargar los detalles de la tarea:', error);
         });
 }
+window.openTasksModal = openTasksModal;
 
 // Función para cerrar el modal
 function closeTasksModal() {

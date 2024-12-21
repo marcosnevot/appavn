@@ -77,7 +77,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/notifications', function () {
-        $notifications = auth()->user()->unreadNotifications()->latest()->take(30)->get();
+        $notifications = auth()->user()->unreadNotifications()->orderBy('created_at', 'asc')->take(30)->get();
         return response()->json($notifications);
     });
 

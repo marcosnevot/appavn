@@ -15,7 +15,7 @@
         <!-- Navigation Links -->
         <div class="menu-links">
             <a href="{{ route('tasks.index') }}"
-                class="menu-link {{ request()->routeIs('tasks.index') && !request()->query('estado') && !request()->query('asunto') ? 'active' : '' }}">
+                class="menu-link {{ request()->routeIs('tasks.index') && !request()->query('estado') && !request()->query('asunto') && !request()->query('task_id') ? 'active' : '' }}">
                 <span class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m-7-8h8M7 20h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -276,9 +276,14 @@
                 notificationItem.innerHTML = `
                 <p class="notification-content">
                     <strong>${notification.assigned_by}</strong> te asignó la tarea: 
-                            <a href="{{ route('tasks.index') }}" class="notification-link" title="Ver tarea">
+                            <a href="/tareas?task_id=${notification.task_id}" 
+                                data-task-id="${notification.task_id}" 
+                                class="notification-link" 
+                                title="Ver tarea">
                                 ${notification.task_title || 'Sin asunto'}
-                            </a> de ${clientName}                                             
+                            </a>
+                            <br>de ${notification.client || 'Sin cliente'}<br><p style="color:#ababab;">${notification.description || ' '}</p>
+                                           
                 </p>
                 <div class="notification-footer">
                     <span class="notification-date">${formatNotificationDate(notification.created_at)}</span>
@@ -343,6 +348,7 @@
         fetch('/notifications')
             .then((response) => response.json())
             .then((notifications) => {
+                console.log(notifications); // Inspecciona el orden aquí
 
                 // Obtener elementos del DOM
                 const notificationList = document.getElementById('notification-list');
@@ -361,6 +367,8 @@
                     notificationCounter.style.display = 'inline-block'; // Muestra el contador
                 }
 
+                notifications.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
                 // Añadir notificaciones al panel
                 notifications.forEach((notification) => {
                     const notificationItem = document.createElement('li');
@@ -369,9 +377,13 @@
                     notificationItem.innerHTML = `
                     <p class="notification-content">
                         <strong>${notification.data.assigned_by}</strong> te asignó la tarea: 
-                        <a href="{{ route('tasks.index') }}" class="notification-link" title="Ver tarea">
+                        <a href="/tareas?task_id=${notification.data.task_id}" 
+                        data-task-id="${notification.data.task_id}" 
+                        class="notification-link" 
+                        title="Ver tarea">
                             ${notification.data.task_title || 'Sin asunto'}
-                        </a> de ${notification.data.client || 'Sin cliente'}
+                        </a><br>de ${notification.data.client || 'Sin cliente'}<br><p style="color:#ababab;">${notification.data.description || ' '}</p>
+
                     </p>
                      <div class="notification-footer">
                         <span class="notification-date">${formatNotificationDate(notification.created_at)}</span>
@@ -444,6 +456,18 @@
                     });
             }
         });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('notification-link')) {
+                e.preventDefault(); // Evita la navegación predeterminada
+                const taskId = e.target.dataset.taskId; // Obtén el ID de la tarea
+                console.log('Tarea seleccionada con ID:', taskId);
+
+                // Opcional: Redirigir manualmente
+                window.location.href = `/tareas?task_id=${taskId}`;
+            }
+        });
+
 
 
         // Función para formatear la fecha de la notificación
@@ -790,6 +814,10 @@
         color: #FFFFFF;
     }
 
+    .notification-link {
+        color: cyan;
+    }
+
     /* Empty State for Notifications */
     .no-notifications {
         text-align: center;
@@ -870,6 +898,10 @@
         padding: 0px;
         text-align: left;
 
+    }
+
+    .notification-content {
+        font-size: 13px;
     }
 
 

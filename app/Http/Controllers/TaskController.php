@@ -86,6 +86,9 @@ class TaskController extends Controller
 
 
 
+            if ($request->filled('task_id')) {
+                $query->where('id', $request->input('task_id')); // Filtrar por ID de la tarea
+            }
 
 
             // Filtros dinámicos para múltiples valores
@@ -257,6 +260,7 @@ class TaskController extends Controller
             // Calcular los totales
             $totalTiempoPrevisto = $totalQuery->sum('tiempo_previsto');
             $totalTiempoReal = $totalQuery->sum('tiempo_real');
+            Log::info('Parámetros recibidos en getTasks:', $request->all());
 
             Log::debug('Parámetros de ordenación:', ['sortKey' => $sortKey, 'sortDirection' => $sortDirection]);
             Log::debug('SQL generado:', DB::getQueryLog());

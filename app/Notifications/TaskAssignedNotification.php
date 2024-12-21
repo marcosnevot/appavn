@@ -6,6 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class TaskAssignedNotification extends Notification implements ShouldQueue
 {
@@ -45,13 +47,17 @@ class TaskAssignedNotification extends Notification implements ShouldQueue
      */
     public function toArray($notifiable)
     {
+
+
         return [
             'task_id' => $this->task->id,
             'task_title' => $this->task->asunto->nombre ?? 'Sin asunto',
             'assigned_by' => $this->assignedBy->name, // Ahora usa $this->assignedBy
             'client' => $this->task->cliente->nombre_fiscal ?? 'Sin cliente', // Relación con cliente
+            'description' => Str::limit($this->task->descripcion ?? '', 15),
             'url' => route('tasks.index'),
             'created_at' => $this->task->created_at ? $this->task->created_at->toISOString() : now()->toISOString(),
+
         ];
     }
 
@@ -63,11 +69,14 @@ class TaskAssignedNotification extends Notification implements ShouldQueue
      */
     public function toBroadcast($notifiable)
     {
+
+
         return new BroadcastMessage([
             'task_id' => $this->task->id,
             'task_title' => $this->task->asunto->nombre ?? 'Sin asunto',
             'assigned_by' => $this->assignedBy->name, // Ahora usa $this->assignedBy
             'client' => $this->task->cliente->nombre_fiscal ?? 'Sin cliente', // Relación con cliente
+            'description' => Str::limit($this->task->descripcion ?? '', 15),
             'url' => route('tasks.index'),
             'created_at' => $this->task->created_at ? $this->task->created_at->toISOString() : now()->toISOString(),
         ]);

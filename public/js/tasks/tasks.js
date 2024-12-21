@@ -14,12 +14,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const estado = urlParams.get('estado'); // Leer estado de la URL, sin valor predeterminado
     const asuntoDesdeUrl = urlParams.get('asunto'); // Obtener el filtro de asunto desde la URL
+    const taskIdFromUrl = urlParams.get('task_id');
 
     // Establecer los filtros iniciales
     window.currentFilters = {
         ...window.currentFilters,
         estado: estado || window.currentFilters.estado || 'PENDIENTE,ENESPERA', // Sobrescribir si viene de la URL
         asunto: asuntoDesdeUrl || window.currentFilters.asunto || '', // Usar el valor de la URL o el predeterminado
+        task_id: taskIdFromUrl || '', // Añadir el ID de la tarea al filtro
 
     };
 
