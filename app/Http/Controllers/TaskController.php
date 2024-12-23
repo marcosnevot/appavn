@@ -49,7 +49,7 @@ class TaskController extends Controller
     public function getTasks(Request $request)
     {
         try {
-            Log::debug('Parámetros recibidos:', $request->all());
+            // Log::debug('Parámetros recibidos:', $request->all());
 
             $userId = $request->query('user_id'); // Usuario actual
             $filters = $request->all(); // Capturar todos los filtros enviados
@@ -101,10 +101,9 @@ class TaskController extends Controller
 
             // Filtros dinámicos para booleanos
             foreach (['facturable'] as $booleanField) {
-                if (!empty($filters[$booleanField])) {
-                    // Convertir el valor recibido en booleano estricto
+                if (isset($filters[$booleanField])) { // Usar isset para permitir valores "0"
                     $values = array_map(function ($value) {
-                        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                        return (int) $value; // Convertir explícitamente a entero
                     }, explode(',', $filters[$booleanField]));
 
                     $query->whereIn($booleanField, $values);
@@ -233,7 +232,7 @@ class TaskController extends Controller
 
 
 
-            DB::enableQueryLog();
+            // DB::enableQueryLog();
 
 
 
@@ -260,10 +259,10 @@ class TaskController extends Controller
             // Calcular los totales
             $totalTiempoPrevisto = $totalQuery->sum('tiempo_previsto');
             $totalTiempoReal = $totalQuery->sum('tiempo_real');
-            Log::info('Parámetros recibidos en getTasks:', $request->all());
+            // Log::info('Parámetros recibidos en getTasks:', $request->all());
 
-            Log::debug('Parámetros de ordenación:', ['sortKey' => $sortKey, 'sortDirection' => $sortDirection]);
-            Log::debug('SQL generado:', DB::getQueryLog());
+            // Log::debug('Parámetros de ordenación:', ['sortKey' => $sortKey, 'sortDirection' => $sortDirection]);
+            // Log::debug('SQL generado:', DB::getQueryLog());
             return response()->json([
                 'success' => true,
                 'tasks' => $tasks->items(),
@@ -334,10 +333,10 @@ class TaskController extends Controller
             $sortDirection = $request->query('sortDirection', ''); // Dirección predeterminada
 
             $query = Tarea::query()
-            ->select('tareas.*')
-            ->with(['cliente', 'asunto', 'tipo', 'users']) // Cargar relaciones necesarias
-            ->whereNotNull('fecha_vencimiento');
-            
+                ->select('tareas.*')
+                ->with(['cliente', 'asunto', 'tipo', 'users']) // Cargar relaciones necesarias
+                ->whereNotNull('fecha_vencimiento');
+
             // Ordenación en relaciones
             if ($sortKey === 'asunto.nombre') {
                 $query->leftJoin('asuntos', 'tareas.asunto_id', '=', 'asuntos.id');
@@ -376,10 +375,9 @@ class TaskController extends Controller
 
             // Filtros dinámicos para booleanos
             foreach (['facturable'] as $booleanField) {
-                if (!empty($filters[$booleanField])) {
-                    // Convertir el valor recibido en booleano estricto
+                if (isset($filters[$booleanField])) { // Usar isset para permitir valores "0"
                     $values = array_map(function ($value) {
-                        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                        return (int) $value; // Convertir explícitamente a entero
                     }, explode(',', $filters[$booleanField]));
 
                     $query->whereIn($booleanField, $values);
@@ -506,7 +504,7 @@ class TaskController extends Controller
                 }
             }
 
-            
+
             if ($sortKey === '') {
                 $sortKey = 'fecha_vencimiento';
                 $sortDirection = 'asc';
@@ -752,6 +750,7 @@ class TaskController extends Controller
                 $query->where('facturable', true);
             }
 
+
             // Filtro por facturado
             if (!empty($filters['facturado'])) {
                 // Si se filtra explícitamente por facturado desde el frontend
@@ -874,10 +873,9 @@ class TaskController extends Controller
 
             // Filtros dinámicos para booleanos
             foreach (['facturable'] as $booleanField) {
-                if (!empty($filters[$booleanField])) {
-                    // Convertir el valor recibido en booleano estricto
+                if (isset($filters[$booleanField])) { // Usar isset para permitir valores "0"
                     $values = array_map(function ($value) {
-                        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                        return (int) $value; // Convertir explícitamente a entero
                     }, explode(',', $filters[$booleanField]));
 
                     $query->whereIn($booleanField, $values);
@@ -1235,6 +1233,7 @@ class TaskController extends Controller
         try {
             // Obtener los filtros enviados desde el frontend
             $filters = $request->all();
+            DB::enableQueryLog(); // Habilitar el registro de consultas
 
             // Crear una consulta base para filtrar las tareas
             $query = Tarea::with(['cliente', 'asunto', 'tipo', 'users']); // Asegurarse de cargar las relaciones
@@ -1363,10 +1362,9 @@ class TaskController extends Controller
 
             // Filtros dinámicos para booleanos
             foreach (['facturable'] as $booleanField) {
-                if (!empty($filters[$booleanField])) {
-                    // Convertir el valor recibido en booleano estricto
+                if (isset($filters[$booleanField])) { // Usar isset para permitir valores "0"
                     $values = array_map(function ($value) {
-                        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                        return (int) $value; // Convertir explícitamente a entero
                     }, explode(',', $filters[$booleanField]));
 
                     $query->whereIn($booleanField, $values);
@@ -1375,18 +1373,11 @@ class TaskController extends Controller
 
 
 
-            // Filtrar por fechas
-            if (!empty($filters['fecha_inicio'])) {
-                $query->whereDate('fecha_inicio', '>=', $filters['fecha_inicio']);
-            }
-
-            if (!empty($filters['fecha_vencimiento'])) {
-                $query->whereDate('fecha_vencimiento', '<=', $filters['fecha_vencimiento']);
-            }
-
-            // Filtrar por fecha_imputacion
-            if (!empty($filters['fecha_imputacion'])) {
-                $query->whereDate('fecha_imputacion', '=', $filters['fecha_imputacion']);
+            // Filtros de rangos de fechas
+            foreach (['fecha_inicio' => '>=', 'fecha_vencimiento' => '<=', 'fecha_imputacion' => '='] as $field => $operator) {
+                if (!empty($filters[$field])) {
+                    $query->whereDate($field, $operator, $filters[$field]);
+                }
             }
 
 
@@ -1443,6 +1434,11 @@ class TaskController extends Controller
                 }
             }
 
+            if (!empty($filters['fecha_vencimiento_special']) && $filters['fecha_vencimiento_special'] === 'notnull') {
+                // Excluir tareas con fecha_vencimiento NULL
+                $query->whereNotNull('fecha_vencimiento');
+            }
+
 
             // Clonar el query para usarlo en el cálculo de totales
             $totalQuery = clone $query;
@@ -1450,9 +1446,10 @@ class TaskController extends Controller
             // Añadir el orden por fecha de planificacion, de más antigua a más reciente
             $query->distinct()->orderBy('fecha_planificacion', 'asc');
 
-
             // Ejecutar la consulta y obtener las tareas filtradas
             $filteredTasks = $query->paginate(50);
+            Log::debug('Consulta generada:', DB::getQueryLog());
+            Log::debug('Filtros recibidos:', $filters);
 
             // Calcular los totales
             $totalTiempoPrevisto = $totalQuery->sum('tiempo_previsto');

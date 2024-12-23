@@ -31,6 +31,41 @@ class UserSeeder extends Seeder
         ]);
         $nacho->assignRole('employee');
 
+        $amanda = User::create([
+            'name' => 'Amanda',
+            'email' => 'amanda@avn.com',
+            'password' => Hash::make('amanda'),
+        ]);
+        $amanda->assignRole('employee');
+
+        $estela = User::create([
+            'name' => 'Estela',
+            'email' => 'estela@avn.com',
+            'password' => Hash::make('estela'),
+        ]);
+        $estela->assignRole('employee');
+
+        $eva = User::create([
+            'name' => 'Eva',
+            'email' => 'eva@avn.com',
+            'password' => Hash::make('eva'),
+        ]);
+        $eva->assignRole('employee');
+
+        $gema = User::create([
+            'name' => 'Gema',
+            'email' => 'gema@avn.com',
+            'password' => Hash::make('gema'),
+        ]);
+        $gema->assignRole('employee');
+
+        $sergio = User::create([
+            'name' => 'Sergio',
+            'email' => 'sergio@avn.com',
+            'password' => Hash::make('sergio'),
+        ]);
+        $sergio->assignRole('employee');
+
         // Añadir más usuarios según sea necesario
     }
 }

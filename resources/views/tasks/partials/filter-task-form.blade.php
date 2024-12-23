@@ -216,6 +216,7 @@
             <div class="form-group grow">
                 <label for="filter-fecha-vencimiento">Fecha de Vencimiento:</label>
                 <input type="date" name="filter_fecha_vencimiento" id="filter-fecha-vencimiento">
+                <input type="hidden" name="filter_fecha_vencimiento_special" id="filter-fecha-vencimiento-special" value="">
             </div>
 
             <div class="form-group grow" style="display:none">

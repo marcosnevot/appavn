@@ -305,6 +305,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    const nombreFiscalInput = document.querySelector('input[name="nombre_fiscal"]');
+    if (nombreFiscalInput) {
+        nombreFiscalInput.addEventListener('input', function () {
+            this.value = this.value.toUpperCase(); // Convertir a mayúsculas
+        });
+    }
+
+
 
     // Clasificación - Autocompletado y creación de nuevos asuntos
 

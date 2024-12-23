@@ -13,10 +13,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // Cargar tareas inicialmente
     loadTasks(1, 'fecha_vencimiento', 'asc');
 
+    // Manejar la fecha vencimiento en el form filter
+    const fechaVencimientoInput = document.getElementById('filter-fecha-vencimiento');
+    const fechaVencimientoSpecial = document.getElementById('filter-fecha-vencimiento-special');
 
+    if (fechaVencimientoInput) {
+        fechaVencimientoSpecial.value = "notnull"; // Marcar como notnull por defecto
+    }
+   
 
-
-
+    console.log(fechaVencimientoSpecial);
 
     document.querySelectorAll('th[data-sort-key]').forEach(header => {
         header.addEventListener('click', function () {
@@ -220,8 +226,8 @@ function loadInitialTasks(tasks) {
         <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
         <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
         <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
-        <td>${task.facturable ? 'Sí' : 'No'}</td>
-        <td>${task.facturado || 'No facturado'}</td>
+        <td>${task.facturable ? 'SI' : 'NO'}</td>
+        <td>${task.facturado || 'NO'}</td>
         <td>${task.estado}</td>
         <td>${task.tiempo_previsto || 'N/A'}</td>
         <td>${task.tiempo_real || 'N/A'}</td>

@@ -14,9 +14,9 @@ class DatabaseSeeder extends Seeder
     {
         // Ejecutar seeders individuales
         $this->call([
-            RoleSeeder::class,
+            // RoleSeeder::class,
             UserSeeder::class,
-            ClienteSeeder::class,
+           // ClienteSeeder::class,
             // TareaSeeder::class,
             // Puedes añadir más seeders aquí si los tienes
         ]);

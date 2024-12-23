@@ -38,6 +38,7 @@ function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirect
         coste: document.getElementById('filter-coste').value || '',
         fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
         fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
+        fecha_vencimiento_special: document.getElementById('filter-fecha-vencimiento-special').value || '', // Campo especial
         // fecha_imputacion: document.getElementById('filter-fecha-imputacion').value || '',
         tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
         tiempo_real: document.getElementById('filter-tiempo-real').value || '',
@@ -145,7 +146,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const asuntoDesdeUrl = urlParams.get('asunto') ? urlParams.get('asunto').split(',') : []; // Dividir en array si existen varios asuntos
     const estadoDesdeUrl = urlParams.get('estado');
-    
+    const userIdFromUrl = urlParams.get('usuario'); // Leer el ID del usuario desde la URL
+
     // Mostrar el formulario de filtrar tareas
     filterTaskButton.addEventListener('click', function () {
         filterTaskForm.style.display = 'block';
@@ -537,22 +539,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Obtener el ID del usuario en sesión y agregarlo como seleccionado
     const sessionUserId = document.getElementById('user-session-id').value;
-    const sessionUserCheckbox = document.getElementById(`filter-user-${sessionUserId}`);
+    const selectedUserId = userIdFromUrl || sessionUserId; // Priorizar el usuario de la URL
 
-    if (sessionUserCheckbox) {
-        sessionUserCheckbox.checked = true;
-        const sessionUserName = sessionUserCheckbox.nextElementSibling.textContent;
+    // Seleccionar el checkbox correspondiente al usuario seleccionado
+    const selectedUserCheckbox = document.getElementById(`filter-user-${selectedUserId}`);
 
-        // Añadir el usuario en sesión a la lista de seleccionados al cargar la página
-        filterSelectedUsers.push({ id: sessionUserId, name: sessionUserName });
+    // Marcar el checkbox del usuario seleccionado
+    if (selectedUserCheckbox) {
+        selectedUserCheckbox.checked = true; // Marcar el checkbox como seleccionado
+        const selectedUserName = selectedUserCheckbox.nextElementSibling.textContent;
+
+        // Añadir el usuario seleccionado a la lista de seleccionados
+        filterSelectedUsers = [{ id: selectedUserId, name: selectedUserName }];
         updateFilterSelectedUsersDisplay();
         updateFilterUserIdsInput();
+
+        // Actualizar el panel de información del filtro
+        updateFilterInfoPanel({
+            usuario: selectedUserId // Define el usuario seleccionado como filtro activo
+        });
+    } else {
+        console.warn(`No se encontró el checkbox para el usuario ID: ${selectedUserId}`);
     }
 
-    // Actualiza el panel de información del filtro para mostrar el filtro del usuario en sesión
-    updateFilterInfoPanel({
-        usuario: sessionUserId  // Define el usuario en sesión como filtro activo
-    });
+
     // Llama a la función inicialmente para cargar el título al abrir la página
     updateSelectedUserNamesFromFilterForm();
 
@@ -693,7 +703,7 @@ document.addEventListener('DOMContentLoaded', function () {
             checkbox.dataset.index = index; // Asignar índice único al checkbox
 
             checkbox.addEventListener('change', function () {
-                const value = isBoolean ? this.value === "1" : this.value;
+                const value = isBoolean ? (this.value === "1" ? "1" : "0") : this.value; // Asegurar valores booleanos
 
                 if (this.checked) {
                     if (!selectedItems.includes(value)) {
@@ -736,7 +746,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-      
+
         // Función para manejar el enfoque de los checkboxes
         function focusNextCheckbox(direction) {
             const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]'));

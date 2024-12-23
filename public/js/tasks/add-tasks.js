@@ -406,6 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         input.addEventListener('input', function () {
+            this.value = this.value.toUpperCase(); // Convertir siempre a mayúsculas
             const query = this.value.toUpperCase();
             const filtered = filterData(query);
             selectedIndex = -1;
@@ -832,8 +833,8 @@ function updateTaskTable(tasks, isSingleTask = false, currentFilters = null, pag
                         <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
             <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
             <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
-            <td>${task.facturable ? 'Sí' : 'No'}</td>
-            <td>${task.facturado || 'No'}</td>
+            <td>${task.facturable ? 'SI' : 'NO'}</td>
+            <td>${task.facturado || 'NO'}</td>
             <td>${task.estado}</td>
             <td>${task.tiempo_previsto || 'N/A'}</td>
             <td>${task.tiempo_real || 'N/A'}</td>

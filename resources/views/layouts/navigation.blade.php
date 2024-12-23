@@ -15,7 +15,7 @@
         <!-- Navigation Links -->
         <div class="menu-links">
             <a href="{{ route('tasks.index') }}"
-                class="menu-link {{ request()->routeIs('tasks.index') && !request()->query('estado') && !request()->query('asunto') && !request()->query('task_id') ? 'active' : '' }}">
+                class="menu-link {{ request()->routeIs('tasks.index') && !request()->query('estado') && !request()->query('asunto') && !request()->query('task_id') && !request()->query('usuario') ? 'active' : '' }}">
                 <span class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m-7-8h8M7 20h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -23,6 +23,7 @@
                 </span>
                 {{ __('Tareas') }}
             </a>
+
             <a href="{{ route('billing.index') }}" class="menu-link {{ request()->routeIs('billing.index') ? 'active' : '' }}">
                 <span class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -121,6 +122,26 @@
                 </span>
                 {{ __('Clientes') }}
             </a>
+
+            @php
+            $user = auth()->user();
+            @endphp
+
+            @if ($user->hasRole('admin') || ($user->hasRole('employee') && $user->id === 2))
+            <hr class="border-gray-700">
+            @inject('users', 'App\Models\User')
+            <div class="user-tasks-container">
+
+                <div class="user-tasks-grid">
+                    @foreach ($users::where('id', '!=', auth()->id())->get() as $user)
+                    <a href="{{ route('tasks.index', ['usuario' => $user->id]) }}"
+                        class="user-task-link {{ request()->query('usuario') == $user->id ? 'active' : '' }}">
+                        {{ $user->name }}
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
 
         </div>
     </div>
@@ -540,7 +561,7 @@
     .menu-links {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.7rem;
         /* Espacio entre los enlaces */
     }
 
@@ -1060,6 +1081,57 @@
         font-weight: 500;
         color: #FFFFFF;
     }
+
+    /* tareas por Usuario */
+
+    .user-tasks-container {
+        border-radius: 4px;
+        margin-top: 10px;
+        overflow: hidden;
+        display: flex;
+        /* Añadido para centrar el grid */
+        justify-content: center;
+        /* Centra horizontalmente el grid */
+    }
+
+
+    .user-tasks-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 70px);
+        gap: 10px;
+        max-height: 160px;
+        overflow-y: auto;
+        justify-content: center;
+        /* Centra las columnas horizontalmente */
+        align-content: center;
+        /* Centra las filas verticalmente dentro del contenedor */
+    }
+
+    .user-task-link {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 4px 5px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #CCCCCC;
+        font-size: 14px;
+        text-align: center;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .user-task-link:hover {
+        background-color: #333333;
+        color: #FFFFFF;
+    }
+
+    .user-task-link.active {
+        background-color: #4A4A4A;
+        color: #fff;
+        font-weight: bold;
+    }
+
 
 
 

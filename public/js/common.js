@@ -330,7 +330,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const idMap = {
                     estado: 'filter-selected-estados',
                     facturable: 'filter-selected-facturables',
-                    facturado: 'filter-selected-facturados'
+                    facturado: 'filter-selected-facturados',
+                    user: 'filter-selected-users' // Añadir entrada para usuarios
+
                 };
 
                 const selectedContainer = document.getElementById(idMap[cleanField]);
@@ -338,8 +340,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.warn(`No se encontró el contenedor seleccionado para el campo: ${field}`);
                     return; // Salir si el contenedor no existe
                 }
+
                 const selectedItems = Array.from(dropdownList.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => cb.value);
+                    .map(cb => {
+                        const label = dropdownList.querySelector(`label[for="${cb.id}"]`);
+                        return label ? label.textContent : cb.value; // Mostrar el nombre del usuario si existe
+                    });
 
                 updateHiddenField(field, dropdownList);
                 updateSelectedDisplay(selectedContainer, selectedItems, field === 'facturable');

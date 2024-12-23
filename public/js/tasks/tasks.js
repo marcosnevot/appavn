@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const estado = urlParams.get('estado'); // Leer estado de la URL, sin valor predeterminado
     const asuntoDesdeUrl = urlParams.get('asunto'); // Obtener el filtro de asunto desde la URL
     const taskIdFromUrl = urlParams.get('task_id');
+    const userIdFromUrl = urlParams.get('usuario');
 
     // Establecer los filtros iniciales
     window.currentFilters = {
@@ -22,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
         estado: estado || window.currentFilters.estado || 'PENDIENTE,ENESPERA', // Sobrescribir si viene de la URL
         asunto: asuntoDesdeUrl || window.currentFilters.asunto || '', // Usar el valor de la URL o el predeterminado
         task_id: taskIdFromUrl || '', // Añadir el ID de la tarea al filtro
-
+        usuario: userIdFromUrl || '',
     };
 
     // Cargar tareas inicialmente
@@ -284,7 +285,7 @@ function loadInitialTasks(tasks) {
         <td>${task.asunto ? task.asunto.nombre : 'Sin asunto'}</td>
         <td class="col-descripcion">${task.descripcion ? truncateText(task.descripcion, 100) : ''}</td>
         <td class="col-observaciones">${task.observaciones ? truncateText(task.observaciones, 100) : ''}</td>
-        <td>${task.facturable ? 'Sí' : 'No'}</td>
+        <td>${task.facturable ? 'SI' : 'NO'}</td>
         <td>${task.facturado || 'No facturado'}</td>
         <td>${task.estado}</td>
         <td>${task.tiempo_previsto || 'N/A'}</td>
