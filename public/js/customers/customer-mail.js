@@ -115,8 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Validate email format
     function validateEmail(email) {
-        var email = /^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$/;
-        return email
+        var regex = /^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$/;
+        return regex.test(email);
     }
 
 
