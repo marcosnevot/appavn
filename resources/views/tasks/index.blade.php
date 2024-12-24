@@ -75,7 +75,7 @@
 
 @section('scripts')
 
-<script src="{{ asset('js/common.js') }}"></script>
+<script src="{{ asset(path: 'js/common.js') }}"></script>
 <script src="{{ asset('js/tasks/common-tasks.js') }}"></script>
 <script src="{{ asset('js/tasks/add-tasks.js') }}"></script>
 <script src="{{ asset('js/tasks/tasks.js') }}"></script>

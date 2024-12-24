@@ -92,6 +92,7 @@ html, body {
     max-width: 100%;
     max-height: 80vh;
     border-collapse: collapse;
+    cursor: default; /* Cursor por defecto */
 
     background-color: #f9f9f9;
     /* Fondo claro para la tabla */
@@ -180,6 +181,8 @@ html, body {
     /* Ocupará el 80% de la pantalla de forma responsiva */
     overflow-y: auto;
     overflow-x: auto;
+    cursor: default; /* Cursor por defecto */
+
 }
 
 

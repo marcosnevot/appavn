@@ -1,5 +1,5 @@
 <!-- Contenedor de la tabla con scroll -->
-<div class="table-container" style="max-height: 80vh; width: 100%; overflow-x: auto; overflow-y: auto;">
+<div id="task-table" class="table-container" style="max-height: 80vh; width: 100%; overflow-x: auto; overflow-y: auto;">
     <!-- Tabla de tareas -->
     <table class="min-w-full table-auto task-table bg-white dark:bg-gray-800">
         <thead>

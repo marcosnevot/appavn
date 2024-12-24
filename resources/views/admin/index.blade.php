@@ -8,20 +8,54 @@
     </h2>
 </div>
 <input type="hidden" id="user-session-id" value="{{ Auth::user()->id }}">
+<div id="notificationAdmin-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
 
 <!-- Contenedor Principal -->
 <div class="admin-panel">
     <!-- Tarjeta 1: Modificar Datos -->
     <div class="admin-card modify-data">
-        <h3>Modificar Datos</h3>
-        <!-- Contenido de la sección -->
-        @include('admin.partials.modify-data')
+        <div class="toggle-section" data-toggle-section>
+            <div class="section-header" data-toggle-header>
+                <h3>Modificar Datos</h3>
+                <button class="toggle-button" aria-expanded="false" data-toggle-button>
+                    <span class="icon-toggle">▼</span>
+                </button>
+            </div>
+            <div class="section-content" data-toggle-content class="modify-data-container">
+                @include('admin.partials.modify-data')
+            </div>
+        </div>
     </div>
+
+    <!-- Tarjeta: Gestión de Usuarios -->
+    <div class="admin-card manage-users">
+        <div class="toggle-section" data-toggle-section>
+            <div class="section-header" data-toggle-header>
+                <h3>Gestión de Usuarios</h3>
+                <button class="toggle-button" aria-expanded="false" data-toggle-button>
+                    <span class="icon-toggle">▼</span>
+                </button>
+            </div>
+            <div class="section-content" data-toggle-content class="manage-users-container">
+                @include('admin.partials.manage-users')
+            </div>
+        </div>
+    </div>
+
 
     <!-- Placeholder para futuras secciones -->
     <div class="admin-card">
-        <h3>Futura Sección</h3>
-        <p>Contenido o funcionalidades adicionales.</p>
+        <div class="toggle-section" data-toggle-section>
+            <div class="section-header" data-toggle-header>
+                <h3>Futura Sección</h3>
+                <button class="toggle-button" aria-expanded="false" data-toggle-button>
+                    <span class="icon-toggle">▼</span>
+                </button>
+            </div>
+            <div class="section-content" data-toggle-content class="modify-data-container">
+                <p>Contenido o funcionalidades adicionales.</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -29,4 +63,6 @@
 
 @section('scripts')
 <script src="{{ asset('js/admin/modify-data.js') }}"></script>
+<script src="{{ asset('js/admin/manage-users.js') }}"></script>
+
 @endsection

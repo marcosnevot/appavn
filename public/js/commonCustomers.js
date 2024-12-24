@@ -584,4 +584,51 @@ document.addEventListener('DOMContentLoaded', function () {
         loadFilteredCustomers(); // Invocar la función existente para actualizar la tabla
     }
 
+
+
+     // Navegar por la tabla arrastrando
+     const container = document.getElementById('customer-table');
+     let isDragging = false;
+     let startX, startY, scrollLeft, scrollTop;
+ 
+     container.style.cursor = 'default'; // Configuración inicial del cursor
+ 
+     container.addEventListener('mousedown', (e) => {
+         if (e.button === 1) { // Botón central
+             e.preventDefault();
+             isDragging = true;
+             container.style.cursor = 'grabbing'; // Cambiar a cursor de arrastre
+ 
+             startX = e.pageX - container.offsetLeft;
+             startY = e.pageY - container.offsetTop;
+             scrollLeft = container.scrollLeft;
+             scrollTop = container.scrollTop;
+         }
+     });
+ 
+     container.addEventListener('mousemove', (e) => {
+         if (!isDragging) return; // Solo mover si está arrastrando
+         e.preventDefault();
+ 
+         const x = e.pageX - container.offsetLeft;
+         const y = e.pageY - container.offsetTop;
+         const walkX = (x - startX) * 1; // Velocidad horizontal
+         const walkY = (y - startY) * 1; // Velocidad vertical
+ 
+         container.scrollLeft = scrollLeft - walkX;
+         container.scrollTop = scrollTop - walkY;
+     });
+ 
+     container.addEventListener('mouseup', (e) => {
+         if (e.button === 1) { // Botón central
+             isDragging = false;
+             container.style.cursor = 'default'; // Restaurar al cursor predeterminado
+         }
+     });
+ 
+     container.addEventListener('mouseleave', () => {
+         isDragging = false;
+         container.style.cursor = 'default'; // Restaurar al cursor predeterminado
+     });
+
 });

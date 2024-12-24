@@ -3,7 +3,11 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TaskController;
 use App\Models\Asunto;
+use App\Models\Clasificacion;
+use App\Models\Situacion;
 use App\Models\Tipo;
+use App\Models\TipoCliente;
+use App\Models\Tributacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,7 +30,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/asuntos', function () {
-        logger('Acceso a /api/asuntos');
         return response()->json(Asunto::all(['id', 'nombre']));
     });
 
@@ -34,9 +37,31 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return response()->json(Tipo::all(['id', 'nombre']));
     });
 
+    Route::get('/clasificaciones', function () {
+        return response()->json(Clasificacion::all(['id', 'nombre']));
+    });
+
+    Route::get('/situaciones', function () {
+        return response()->json(Situacion::all(['id', 'nombre']));
+    });
+
+    Route::get('/tributaciones', function () {
+        return response()->json(Tributacion::all(['id', 'nombre']));
+    });
+
+    Route::get('/tiposcliente', function () {
+        return response()->json(TipoCliente::all(['id', 'nombre']));
+    });
+
     // Rutas dinámicas para actualización y eliminación
     Route::put('/{entity}/{id}', [AdminController::class, 'update'])
-        ->whereIn('entity', ['asuntos', 'tipos']);
+        ->whereIn('entity', ['asuntos', 'tipos', 'clasificaciones', 'situaciones', 'tributaciones', 'tiposcliente']);
     Route::delete('/{entity}/{id}', [AdminController::class, 'destroy'])
-        ->whereIn('entity', ['asuntos', 'tipos']);
+        ->whereIn('entity', ['asuntos', 'tipos', 'clasificaciones', 'situaciones', 'tributaciones', 'tiposcliente']);
+
+    // Gestión de Usuarios
+    Route::get('/users', [AdminController::class, 'indexUsers']); // Cambiamos el método al correcto
+    Route::post('/users', [AdminController::class, 'storeUser']); // Método específico para crear usuarios
+    Route::put('/users/{id}', [AdminController::class, 'updateUser']); // Método específico para actualizar usuarios
+    Route::delete('/users/{id}', [AdminController::class, 'destroyUser']); // Método específico para eliminar usuarios
 });

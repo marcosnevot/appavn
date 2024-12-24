@@ -1097,9 +1097,10 @@
 
     .user-tasks-grid {
         display: grid;
-        grid-template-columns: repeat(2, 70px);
+        grid-template-columns: repeat(2, 80px);
         gap: 10px;
         max-height: 160px;
+        max-width: 500px;
         overflow-y: auto;
         justify-content: center;
         /* Centra las columnas horizontalmente */

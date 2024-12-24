@@ -1,5 +1,5 @@
 <!-- Contenedor de la tabla con scroll para clientes -->
-<div class="table-container" style="max-height: 80vh; width: 100%; overflow-x: auto; overflow-y: auto;">
+<div id="customer-table" class="table-container" style="max-height: 80vh; width: 100%; overflow-x: auto; overflow-y: auto;">
     <!-- Tabla de clientes -->
     <table class="min-w-full table-auto bg-white dark:bg-gray-800">
         <thead>

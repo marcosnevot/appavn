@@ -1,11 +1,64 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    function initializeToggleSections() {
+        const sections = document.querySelectorAll('[data-toggle-section]');
+
+        sections.forEach(section => {
+            const header = section.querySelector('[data-toggle-header]');
+            const content = section.querySelector('[data-toggle-content]');
+            const button = section.querySelector('[data-toggle-button]');
+
+            if (header && content && button) {
+                header.addEventListener('click', () => {
+                    const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+                    button.setAttribute('aria-expanded', !isExpanded);
+
+                    if (!isExpanded) {
+                        // Mostrar contenido con animación
+                        content.style.display = 'block';
+                        requestAnimationFrame(() => {
+                            content.classList.add('expanded');
+                        });
+                    } else {
+                        // Ocultar contenido tras la animación
+                        content.classList.remove('expanded');
+                        content.addEventListener(
+                            'transitionend',
+                            () => {
+                                if (!content.classList.contains('expanded')) {
+                                    content.style.display = 'none';
+                                }
+                            },
+                            { once: true }
+                        );
+                    }
+                });
+            } else {
+                console.warn('Faltan elementos en una sección toggle.');
+            }
+        });
+    }
+
+    // Inicializa todas las secciones
+    initializeToggleSections();
+
+
     const API_ENDPOINTS = {
         asuntos: '/api/asuntos',
         tipos: '/api/tipos',
+        clasificaciones: '/api/clasificaciones',
+        situaciones: '/api/situaciones',
+        tributaciones: '/api/tributaciones',
+        tiposcliente: '/api/tiposcliente',
     };
 
     let asuntosData = [];
     let tiposData = [];
+    let clasificacionesData = [];
+    let situacionesData = [];
+    let tributacionesData = [];
+    let tiposclienteData = [];
 
     async function initializeSanctum() {
         try {
@@ -191,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
         li.innerHTML = ''; // Limpiar contenido
 
         // Determinar el tipo de dato en función del key
-        const typeLabel = entity === 'asuntos' ? 'asunto' : entity === 'tipos' ? 'tipo' : 'dato';
+        const typeLabel = entity === 'asuntos' ? 'asunto' : entity === 'tipos' ? 'tipo' : entity === 'clasificaciones' ? 'clasificacion' : entity === 'situaciones' ? 'situacion' : entity === 'tipoclientes' ? 'tipocliente' : entity === 'tributaciones' ? 'tributacion' : 'dato';
 
         // Mensaje de confirmación
         const confirmationMessage = document.createElement('span');
@@ -316,6 +369,22 @@ document.addEventListener('DOMContentLoaded', () => {
         loadData(API_ENDPOINTS.tipos, 'tipos-list', 'nombre', 'tipos', tiposData);
     });
 
+    document.getElementById('refresh-clasificaciones').addEventListener('click', () => {
+        loadData(API_ENDPOINTS.clasificaciones, 'clasificaciones-list', 'nombre', 'clasificaciones', clasificacionesData);
+    });
+
+    document.getElementById('refresh-situaciones').addEventListener('click', () => {
+        loadData(API_ENDPOINTS.situaciones, 'situaciones-list', 'nombre', 'situaciones', situacionesData);
+    });
+
+    document.getElementById('refresh-tributaciones').addEventListener('click', () => {
+        loadData(API_ENDPOINTS.tributaciones, 'tributaciones-list', 'nombre', 'tributaciones', tributacionesData);
+    });
+
+    document.getElementById('refresh-tiposcliente').addEventListener('click', () => {
+        loadData(API_ENDPOINTS.tiposcliente, 'tiposcliente-list', 'nombre', 'tiposcliente', tiposclienteData);
+    });
+
     (async () => {
         await initializeSanctum();
 
@@ -325,6 +394,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setupSearch('search-asuntos', asuntosData, 'asuntos-list', 'nombre', 'asuntos');
         setupSearch('search-tipos', tiposData, 'tipos-list', 'nombre', 'tipos');
+
+        // Pasamos 'clasificaciones', 'situaciones', 'tributaciones' y 'tiposcliente' como el tipo de entidad
+        loadData(API_ENDPOINTS.clasificaciones, 'clasificaciones-list', 'nombre', 'clasificaciones', clasificacionesData);
+        loadData(API_ENDPOINTS.situaciones, 'situaciones-list', 'nombre', 'situaciones', situacionesData);
+        loadData(API_ENDPOINTS.tributaciones, 'tributaciones-list', 'nombre', 'tributaciones', tributacionesData);
+        loadData(API_ENDPOINTS.tiposcliente, 'tiposcliente-list', 'nombre', 'tiposcliente', tiposclienteData);
+
+        setupSearch('search-clasificaciones', clasificacionesData, 'clasificaciones-list', 'nombre', 'clasificaciones');
+        setupSearch('search-situaciones', situacionesData, 'situaciones-list', 'nombre', 'situaciones');
+        setupSearch('search-tributaciones', tributacionesData, 'tributaciones-list', 'nombre', 'tributaciones');
+        setupSearch('search-tiposcliente', tiposclienteData, 'tiposcliente-list', 'nombre', 'tiposcliente');
+
     })();
 
 
