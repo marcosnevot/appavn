@@ -63,10 +63,47 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 400);
     }
 
+    const periodicidadSelect = document.querySelector('select[name="periodicidad"]');
+    const fechaInicioGeneracionInput = document.querySelector('input[name="fecha_inicio_generacion"]');
+
+    // Función para habilitar o deshabilitar el campo según la periodicidad
+    function toggleFechaInicioGeneracion() {
+        if (periodicidadSelect.value === 'NO') {
+            fechaInicioGeneracionInput.disabled = true;
+            fechaInicioGeneracionInput.value = ''; // Limpia el campo
+        } else {
+            fechaInicioGeneracionInput.disabled = false;
+            fechaInicioGeneracionInput.value = new Date().toISOString().split('T')[0]; // Pone la fecha actual
+        }
+    }
+
+    // Ejecutar la función inicialmente
+    toggleFechaInicioGeneracion();
+
+    // Añadir el evento para manejar cambios en la periodicidad
+    periodicidadSelect.addEventListener('change', toggleFechaInicioGeneracion);
+
+
 
 
     // Función para manejar el envío del formulario
     function submitTaskForm(additionalClientData = {}) {
+        const periodicidad = document.querySelector('select[name="periodicidad"]').value; // Valor del select Periodicidad
+        const fechaInicioGeneracion = document.querySelector('input[name="fecha_inicio_generacion"]').value; // Valor del input Fecha de Inicio de Generación
+        const hoy = new Date().toISOString().split('T')[0]; // Fecha actual en formato ISO (YYYY-MM-DD)
+
+        // Validación: si la periodicidad no es "NO", la fecha de inicio de generación no puede estar vacía
+        if (periodicidad !== "NO" && !fechaInicioGeneracion) {
+            alert("Por favor, selecciona una Fecha de Inicio de Generación.");
+            return; // Detener el envío del formulario
+        }
+
+        // Validación: la fecha de inicio de generación debe ser posterior a la fecha actual
+        if (fechaInicioGeneracion && fechaInicioGeneracion < hoy) {
+            alert("La Fecha de Inicio de Generación debe ser posterior a la fecha actual.");
+            return; // Detener el envío del formulario
+        }
+
         // Obtener los usuarios seleccionados
         const selectedUsers = getSelectedUsers();
 
@@ -105,7 +142,10 @@ document.addEventListener('DOMContentLoaded', function () {
             fecha_imputacion: document.querySelector('input[name="fecha_imputacion"]').value,
             tiempo_previsto: document.querySelector('input[name="tiempo_previsto"]').value,
             tiempo_real: document.querySelector('input[name="tiempo_real"]').value,
-            planificacion: document.querySelector('input[name="planificacion"]').value
+            planificacion: document.querySelector('input[name="planificacion"]').value,
+            periodicidad: document.querySelector('select[name="periodicidad"]').value, // Valor del select Periodicidad
+            fecha_inicio_generacion: document.querySelector('input[name="fecha_inicio_generacion"]').value, // Valor del input Fecha de Inicio de Generación
+
         };
 
         console.log('Datos del formulario:', formData);

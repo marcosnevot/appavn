@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -16,6 +17,9 @@ class Kernel extends ConsoleKernel
         // Ejecuta el comando diariamente a la medianoche
         // $schedule->command('notifications:delete-old')
         //    ->monthly();
+        $schedule->command('tareas:generar')->dailyAt('10:00');
+        Log::info('Comando tareas:generar ejecutado.');
+
     }
 
     /**

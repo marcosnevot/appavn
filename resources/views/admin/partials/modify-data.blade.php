@@ -1,11 +1,11 @@
+<div class="periodic-container">
     <!-- Título de la Sección -->
-    <div class="section-header">
+    <div class="users-header">
         <p class="section-description">Gestiona y visualiza los asuntos y tipos de tareas y las clasificaciones, situaciones, tributaciones y tipos de clientes registrados en la base de datos.</p>
     </div>
 
     <!-- Contenido Principal -->
     <div class="lists-container">
-
         <!-- Lista de Asuntos -->
         <div class="data-list" role="region" aria-labelledby="asuntos-title">
             <div class="list-header">
@@ -106,3 +106,4 @@
             </ul>
         </div>
     </div>
+</div>

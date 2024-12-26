@@ -53,10 +53,14 @@
 
 /* Notificación */
 .toastify {
-    border-radius: 8px; /* Bordes redondeados */
-    font-family: "Inter", sans-serif; /* Fuente profesional */
-    font-size: 14px; /* Tamaño de texto */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    border-radius: 8px;
+    /* Bordes redondeados */
+    font-family: "Inter", sans-serif;
+    /* Fuente profesional */
+    font-size: 14px;
+    /* Tamaño de texto */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* Sombra sutil */
 }
 
 
@@ -65,6 +69,7 @@
         opacity: 0;
         transform: translateY(-10px);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -76,6 +81,7 @@
         opacity: 1;
         transform: translateY(0);
     }
+
     100% {
         opacity: 0;
         transform: translateY(-10px);
@@ -176,9 +182,12 @@
 /* SECCIÓN 1 - MODIFICAR ASUNTOS Y TIPOS */
 /* Contenedor Principal de Modify Data */
 .modify-data-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    padding: 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
 }
 
@@ -445,10 +454,11 @@
 /* Contenedor principal */
 .users-container {
     padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #f9fafb;
     margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Cabecera de la sección */
@@ -498,7 +508,7 @@
     /* Borde más oscuro */
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     /* Sombra más pronunciada */
-    
+
 }
 
 .btn-admin-action.primary:active {
@@ -711,3 +721,99 @@
         transform: translateY(0);
     }
 }
+
+
+
+
+/* SECCIÓN 4 - TAREAS PERIÓDICAS */
+/* Contenedor general */
+.periodic-container {
+    padding: 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Cabecera */
+.periodic-header .section-description {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 15px;
+}
+
+/* Contenedor principal */
+.tasks-container {
+    display: grid;
+    grid-template-rows: auto auto;
+    /* Una fila para los filtros, otra para la tabla */
+}
+
+
+/* Filtros */
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.filters-grid input,
+.filters-grid select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* Tabla */
+.tasks-list {
+    max-height: 400px;
+    min-height: 400px;
+    /* Máximo alto con scroll */
+    overflow-y: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+.tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* Establece un ancho fijo */
+}
+
+.tasks-table th,
+.tasks-table td {
+    padding: 10px;
+    text-align: center;
+    /* Centrado horizontal */
+    /* Centrado vertical */
+    border-bottom: 1px solid #e5e7eb;
+    box-sizing: border-box;
+    /* Asegura que padding y borders no afecten el tamaño */
+}
+
+.tasks-table th {
+    position: sticky;
+    /* Encabezados fijos */
+    top: 0;
+    /* Fijar en la parte superior */
+    background-color: #1E1E1E;
+    color: #ffffff;
+    /* Cambiar color a blanco para contraste */
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Encabezados alineados con filtros */
+.tasks-table th {
+    text-align: center;
+    font-weight: 600;
+}
+
+

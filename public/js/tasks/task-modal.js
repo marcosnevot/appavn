@@ -143,6 +143,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         const fechaPlanificacionInput = document.querySelector('input[name="fecha_planificacionEdit"]');
                         const fechaVencimientoInput = document.querySelector('input[name="fecha_vencimientoEdit"]');
 
+                        const periodicidadSelect = document.querySelector('select[name="periodicidadEdit"]');
+                        const fechaInicioGeneracionInput = document.querySelector('input[name="fecha_inicio_generacionEdit"]');
+
+
                         const tiempoPrevistoInput = document.querySelector('input[name="tiempo_previstoEdit"]');
                         const tiempoRealInput = document.querySelector('input[name="tiempo_realEdit"]');
 
@@ -160,9 +164,27 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (facturableCheckbox) facturableCheckbox.checked = !!task.facturable;
                         if (facturadoInput) facturadoInput.value = task.facturado || '';
 
-                        if (fechaPlanificacionInput) fechaPlanificacionInput.value = task.fecha_planificacion || '';
-                        if (fechaInicioInput) fechaInicioInput.value = task.fecha_inicio || '';
-                        if (fechaVencimientoInput) fechaVencimientoInput.value = task.fecha_vencimiento || '';
+                        function formatFechaParaInput(fecha) {
+                            return fecha ? fecha.split('T')[0] : ''; // Extrae solo la parte de la fecha
+                        }
+
+                        if (fechaPlanificacionInput) {
+                            fechaPlanificacionInput.value = formatFechaParaInput(task.fecha_planificacion);
+                        }
+                        if (fechaInicioInput) {
+                            fechaInicioInput.value = formatFechaParaInput(task.fecha_inicio);
+                        }
+                        if (fechaVencimientoInput) {
+                            fechaVencimientoInput.value = formatFechaParaInput(task.fecha_vencimiento);
+                        }
+
+                        if (periodicidadSelect) periodicidadSelect.value = task.periodicidad || 'NO';
+                        if (fechaInicioGeneracionInput) {
+                            fechaInicioGeneracionInput.value = task.fecha_inicio_generacion
+                                ? task.fecha_inicio_generacion.split('T')[0] // Extrae solo la fecha
+                                : '';
+                        }
+
 
                         if (tiempoPrevistoInput) tiempoPrevistoInput.value = task.tiempo_previsto || '';
                         if (tiempoRealInput) tiempoRealInput.value = task.tiempo_real || '';
@@ -402,9 +424,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
+    const periodicidadSelect = document.querySelector('select[name="periodicidadEdit"]');
+    const fechaInicioGeneracionInput = document.querySelector('input[name="fecha_inicio_generacionEdit"]');
+
+    // Variable para almacenar el estado inicial de la periodicidad
+    let initialPeriodicidad = periodicidadSelect.value;
+
+    // Función para habilitar o deshabilitar el campo según la periodicidad
+    function toggleFechaInicioGeneracion() {
+        if (periodicidadSelect.value === 'NO') {
+            fechaInicioGeneracionInput.disabled = true;
+            fechaInicioGeneracionInput.value = ''; // Limpia el campo si es 'NO'
+        } else {
+            fechaInicioGeneracionInput.disabled = false;
+
+            // Solo asignar la fecha actual si la periodicidad inicial era 'NO'
+            if (initialPeriodicidad === 'NO' && !fechaInicioGeneracionInput.value) {
+                fechaInicioGeneracionInput.value = new Date().toISOString().split('T')[0];
+            }
+        }
+    }
+
+    // Ejecutar la función inicialmente
+    toggleFechaInicioGeneracion();
+
+    // Añadir el evento para manejar cambios en la periodicidad
+    periodicidadSelect.addEventListener('change', () => {
+        toggleFechaInicioGeneracion();
+        // Actualizar la variable de estado inicial si es necesario
+        initialPeriodicidad = periodicidadSelect.value;
+    });
+
 
     function submitEditForm(taskId, duplicarCheckbox, nuevoCliente, nuevoAsunto, nuevoTipo, additionalClientData = {}) {
         console.log("Entrando en submitEditForm", { taskId, nuevoCliente, nuevoAsunto, nuevoTipo });
+
+        const periodicidad = document.querySelector('select[name="periodicidadEdit"]').value; // Valor del select Periodicidad
+        const fechaInicioGeneracion = document.querySelector('input[name="fecha_inicio_generacionEdit"]').value; // Valor del input Fecha de Inicio de Generación
+        const hoy = new Date().toISOString().split('T')[0]; // Fecha actual en formato ISO (YYYY-MM-DD)
+
+        // Validación: si la periodicidad no es "NO", la fecha de inicio de generación no puede estar vacía
+        if (periodicidad !== "NO" && !fechaInicioGeneracion) {
+            alert("Por favor, selecciona una Fecha de Inicio de Generación.");
+            return; // Detener el envío del formulario
+        }
 
         // Asegúrate de declarar todas las referencias necesarias dentro de esta función
         const clienteInput = document.getElementById('cliente-inputEdit');

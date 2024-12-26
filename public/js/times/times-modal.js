@@ -160,9 +160,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (facturableCheckbox) facturableCheckbox.checked = !!task.facturable;
                         if (facturadoInput) facturadoInput.value = task.facturado || '';
 
-                        if (fechaPlanificacionInput) fechaPlanificacionInput.value = task.fecha_planificacion || '';
-                        if (fechaInicioInput) fechaInicioInput.value = task.fecha_inicio || '';
-                        if (fechaVencimientoInput) fechaVencimientoInput.value = task.fecha_vencimiento || '';
+                        function formatFechaParaInput(fecha) {
+                            return fecha ? fecha.split('T')[0] : ''; // Extrae solo la parte de la fecha
+                        }
+
+                        if (fechaPlanificacionInput) {
+                            fechaPlanificacionInput.value = formatFechaParaInput(task.fecha_planificacion);
+                        }
+                        if (fechaInicioInput) {
+                            fechaInicioInput.value = formatFechaParaInput(task.fecha_inicio);
+                        }
+                        if (fechaVencimientoInput) {
+                            fechaVencimientoInput.value = formatFechaParaInput(task.fecha_vencimiento);
+                        }
+
 
                         if (tiempoPrevistoInput) tiempoPrevistoInput.value = task.tiempo_previsto || '';
                         if (tiempoRealInput) tiempoRealInput.value = task.tiempo_real || '';

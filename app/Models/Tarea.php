@@ -31,8 +31,16 @@ class Tarea extends Model
         'fecha_imputacion',
         'fecha_planificacion',
         'tiempo_previsto',
-        'tiempo_real'
+        'tiempo_real',
+        'periodicidad',
+        'fecha_inicio_generacion'
     ];
+
+    protected $casts = [
+        'fecha_inicio' => 'datetime',
+        'fecha_vencimiento' => 'datetime',
+    ];
+    
 
 
     // Relación con el cliente

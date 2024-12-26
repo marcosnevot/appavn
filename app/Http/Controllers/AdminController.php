@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Asunto;
 use App\Models\Clasificacion;
 use App\Models\Situacion;
+use App\Models\Tarea;
 use App\Models\Tipo;
 use App\Models\TipoCliente;
 use App\Models\Tributacion;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
@@ -191,5 +195,128 @@ class AdminController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'Usuario eliminado correctamente.'], 204);
+    }
+
+
+
+
+
+
+    /**
+     * Muestra la lista de tareas periódicas con soporte para filtros.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexPeriodic(Request $request)
+    {
+        $query = Tarea::query();
+
+        // Filtrar solo las tareas con periodicidad definida (distinta de "NO")
+        $query->where('periodicidad', '<>', 'NO');
+
+        // Aplicar relaciones para cliente, asunto y asignaciones
+        $query->with(['cliente', 'asunto', 'users']);
+
+        // Aplicar filtros adicionales si existen
+        if ($request->filled('id')) {
+            $query->where('id', $request->id);
+        }
+
+        if ($request->filled('cliente')) {
+            $query->whereHas('cliente', function ($q) use ($request) {
+                $q->where('nombre_fiscal', 'like', '%' . $request->cliente . '%');
+            });
+        }
+
+        if ($request->filled('asunto')) {
+            $query->whereHas('asunto', function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->asunto . '%');
+            });
+        }
+
+        // Filtro por usuario (asignacion)
+        if ($request->has('asignacion') && !empty($request->asignacion)) {
+            $query->whereHas('users', function (Builder $q) use ($request) {
+                $q->where('users.id', $request->asignacion);
+            });
+        }
+
+
+        if ($request->filled('descripcion')) {
+            $query->where('descripcion', 'like', '%' . $request->descripcion . '%');
+        }
+
+        // Filtrar por periodicidad si está presente
+        if ($request->has('periodicidad') && !empty($request->periodicidad)) {
+            $query->where('periodicidad', $request->periodicidad);
+        }
+
+        if ($request->filled('fecha_inicio_generacion')) {
+            $query->where('fecha_inicio_generacion', $request->fecha_inicio_generacion);
+        }
+
+        $query->orderBy('periodicidad', 'asc');
+
+        $tareas = $query->get();
+
+        // Transformar los datos para incluir nombres de relaciones
+        $tareasTransformadas = $tareas->map(function ($tarea) {
+            return [
+                'id' => $tarea->id,
+                'cliente_nombre' => $tarea->cliente->nombre_fiscal ?? null,
+                'asunto_nombre' => $tarea->asunto->nombre ?? null,
+                'descripcion' => $tarea->descripcion,
+                'asignacion_nombre' => $tarea->users->pluck('name')->join(', ') ?? null,
+                'periodicidad' => $tarea->periodicidad,
+                'fecha_inicio_generacion' => $tarea->fecha_inicio_generacion,
+            ];
+        });
+
+        return response()->json($tareasTransformadas);
+    }
+
+    /**
+     * Muestra los detalles de una tarea periódica específica.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showPeriodic($id)
+    {
+        $tarea = Tarea::findOrFail($id);
+
+        return response()->json($tarea);
+    }
+
+    /**
+     * Actualiza una tarea periódica específica.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updatePeriodic(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'periodicidad' => 'required|in:NO,SEMANAL,MENSUAL,TRIMESTRAL,ANUAL',
+            'fecha_inicio_generacion' => 'nullable|date',
+        ]);
+
+        $tarea = Tarea::findOrFail($id);
+
+        // Si la periodicidad es "NO", eliminamos la fecha de inicio generación
+        if ($validated['periodicidad'] === 'NO') {
+            $validated['fecha_inicio_generacion'] = null;
+        }
+
+        $tarea->update($validated);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tarea actualizada correctamente.',
+            'tarea' => $tarea,
+        ]);
     }
 }

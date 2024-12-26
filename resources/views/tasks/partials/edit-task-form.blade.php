@@ -54,7 +54,7 @@
                 <input type="checkbox" name="facturableEdit" id="facturable" value="1">
             </div>
 
-            <div class="form-group grow">
+            <div class="form-group time">
                 <label for="facturado">Facturado:</label>
                 <select name="facturadoEdit" id="facturado">
                     <option value="NO">NO</option>
@@ -63,7 +63,7 @@
                 </select>
             </div>
 
-            <div class="form-group grow">
+            <div class="form-group narrow">
                 <label for="subtipo">Subtipo:</label>
                 <select name="subtipoEdit" id="subtipo">
                     <option value="ORDINARIA">Ordinaria</option>
@@ -105,6 +105,25 @@
                     </div>
                 </div>
                 <input type="hidden" name="usersEdit" id="user-ids-edit">
+            </div>
+
+            <!-- Campo Periodicidad -->
+            <div class="form-group narrow">
+                <label for="periodicidadEdit">Periodicidad</label>
+                <select name="periodicidadEdit" id="periodicidad" class="form-control">
+                    <option value="NO" selected>NO</option>
+                    <option value="SEMANAL">SEMANAL</option>
+                    <option value="MENSUAL">MENSUAL</option>
+                    <option value="TRIMESTRAL">TRIMESTRAL</option>
+                    <option value="ANUAL">ANUAL</option>
+                </select>
+            </div>
+
+            <!-- Campo Fecha Inicio Generación -->
+            <div class="form-group">
+                <label for="fecha_inicio_generacionEdit">Fecha de Inicio de Generación</label>
+                <input type="date" name="fecha_inicio_generacionEdit" id="fecha_inicio_generacion"
+                    class="form-control" value="{{ now()->toDateString() }}">
             </div>
 
 
@@ -172,10 +191,12 @@
                 <input type="date" name="fecha_vencimientoEdit" id="fecha_vencimiento">
             </div>
 
-            <div class="form-group grow">
+            <div class="form-group grow" style="display: none;">
                 <label for="fecha_imputacionEdit">Fecha de Imputación:</label>
                 <input type="date" name="fecha_imputacionEdit" id="fecha_imputacion">
             </div>
+
+
 
             <div class="form-group time">
                 <label for="tiempo_previsto">Horas previstas:</label>

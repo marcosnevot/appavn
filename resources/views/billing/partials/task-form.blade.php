@@ -179,6 +179,8 @@
                 <input type="hidden" name="users" id="user-ids"> <!-- Campo oculto para los IDs de usuarios seleccionados -->
             </div>
 
+            
+
         </div>
 
         <!-- Botones del formulario -->

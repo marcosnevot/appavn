@@ -167,6 +167,7 @@
                 <input type="date" name="fecha_imputacion" id="fecha_imputacion">
             </div>
 
+
             <div class="form-group time">
                 <label for="tiempo_previsto">Horas previstas:</label>
                 <input type="number" step="0.25" name="tiempo_previsto" id="tiempo_previsto">
@@ -176,6 +177,26 @@
                 <label for="tiempo_real">Horas reales:</label>
                 <input type="number" step="0.25" name="tiempo_real" id="tiempo_real">
             </div>
+
+            <!-- Campo Periodicidad -->
+            <div class="form-group">
+                <label for="periodicidad">Periodicidad</label>
+                <select name="periodicidad" id="periodicidad" class="form-control">
+                    <option value="NO" selected>NO</option>
+                    <option value="SEMANAL">SEMANAL</option>
+                    <option value="MENSUAL">MENSUAL</option>
+                    <option value="TRIMESTRAL">TRIMESTRAL</option>
+                    <option value="ANUAL">ANUAL</option>
+                </select>
+            </div>
+
+            <!-- Campo Fecha Inicio Generación -->
+            <div class="form-group">
+                <label for="fecha_inicio_generacion">Fecha de Inicio de Generación</label>
+                <input type="date" name="fecha_inicio_generacion" id="fecha_inicio_generacion"
+                    class="form-control" value="{{ now()->toDateString() }}">
+            </div>
+
         </div>
 
         <!-- Botones del formulario -->

@@ -64,4 +64,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/users', [AdminController::class, 'storeUser']); // Método específico para crear usuarios
     Route::put('/users/{id}', [AdminController::class, 'updateUser']); // Método específico para actualizar usuarios
     Route::delete('/users/{id}', [AdminController::class, 'destroyUser']); // Método específico para eliminar usuarios
+
+    // Estadísticas
+    Route::prefix('stats')->group(function () {
+        Route::get('/kpis', [AdminController::class, 'getKPIs']); // KPIs generales
+        Route::get('/charts', [AdminController::class, 'getCharts']); // Datos de gráficos
+        Route::post('/filtered-data', [AdminController::class, 'getFilteredData']); // Datos con filtros aplicados
+    });
+
+    // Tareas Periódicas
+    Route::get('/periodic-tasks', [AdminController::class, 'indexPeriodic']);
+    Route::get('/periodic-tasks/{id}', [AdminController::class, 'showPeriodic']);
+    Route::put('/periodic-tasks/{id}', [AdminController::class, 'updatePeriodic']);
 });

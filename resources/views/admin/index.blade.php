@@ -43,6 +43,24 @@
     </div>
 
 
+    <!-- Tarjeta: Gestión de Tareas Periódicas -->
+    <div class="admin-card periodic-tasks">
+        <div class="toggle-section" data-toggle-section>
+            <div class="section-header" data-toggle-header>
+                <h3>Tareas Periódicas Activas</h3>
+                <button class="toggle-button" aria-expanded="false" data-toggle-button>
+                    <span class="icon-toggle">▼</span>
+                </button>
+            </div>
+            <div class="section-content" data-toggle-content class="periodic-tasks-container">
+                @include('admin.partials.periodic')
+            </div>
+        </div>
+    </div>
+
+
+
+
     <!-- Placeholder para futuras secciones -->
     <div class="admin-card">
         <div class="toggle-section" data-toggle-section>
@@ -64,5 +82,6 @@
 @section('scripts')
 <script src="{{ asset('js/admin/modify-data.js') }}"></script>
 <script src="{{ asset('js/admin/manage-users.js') }}"></script>
+<script src="{{ asset('js/admin/periodic.js') }}"></script>
 
 @endsection

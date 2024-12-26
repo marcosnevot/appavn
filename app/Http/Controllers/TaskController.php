@@ -1108,7 +1108,9 @@ class TaskController extends Controller
                 'tiempo_real' => 'nullable|numeric',
                 'planificacion' => 'nullable|date',
                 'users' => 'nullable|array',
-                'users.*' => 'exists:users,id'
+                'users.*' => 'exists:users,id',
+                'periodicidad' => 'required|in:NO,SEMANAL,MENSUAL,TRIMESTRAL,ANUAL',
+                'fecha_inicio_generacion' => 'nullable|date|after_or_equal:today',
             ]);
 
             Log::debug('Datos validados:', $validated);
@@ -1192,6 +1194,10 @@ class TaskController extends Controller
                     : null,
                 'tiempo_previsto' => $validated['tiempo_previsto'] ?? null,
                 'tiempo_real' => $validated['tiempo_real'] ?? null,
+                'periodicidad' => $validated['periodicidad'],
+                'fecha_inicio_generacion' => $validated['periodicidad'] !== 'NO'
+                    ? $validated['fecha_inicio_generacion']
+                    : null,
             ]);
 
 
@@ -1763,6 +1769,8 @@ class TaskController extends Controller
                     'usersEdit' => 'nullable|array',
                     'usersEdit.*' => 'exists:users,id',
                     'duplicar' => 'nullable|boolean',
+                    'periodicidadEdit' => 'required|in:NO,SEMANAL,MENSUAL,TRIMESTRAL,ANUAL',
+                    'fecha_inicio_generacionEdit' => 'nullable|date',
                 ] as $field => $rule
             ) {
                 if ($request->has($field)) { // Validar solo campos presentes
@@ -1800,6 +1808,8 @@ class TaskController extends Controller
                     'fecha_imputacion' => 'fecha_imputacionEdit',
                     'tiempo_previsto' => 'tiempo_previstoEdit',
                     'tiempo_real' => 'tiempo_realEdit',
+                    'periodicidad' => 'periodicidadEdit',
+                    'fecha_inicio_generacion' => 'fecha_inicio_generacionEdit'
                 ] as $field => $requestKey
             ) {
                 if ($request->has($requestKey)) { // Incluir solo campos presentes
