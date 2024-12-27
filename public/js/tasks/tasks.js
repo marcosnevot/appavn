@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Si el estado es "none", reestablecer al orden original
             const sortKeyToSend = currentSortDirection === 'none' ? '' : currentSortKey;
             const sortDirectionToSend = currentSortDirection === 'none' ? '' : currentSortDirection;
+            console.log(sortKeyToSend, '  ', sortDirectionToSend)
 
             // Recargar tareas con la nueva ordenación y filtros activos
             loadTasks(1, sortKeyToSend, sortDirectionToSend);

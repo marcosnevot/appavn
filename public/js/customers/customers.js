@@ -11,10 +11,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const sessionUserId = document.getElementById('user-session-id').value;
 
     // Cargar clientes inicialmente
-    loadCustomers();
+    loadCustomers(1, 'created_at', 'desc');
 
     // Función para cargar las tareas mediante AJAX con paginación
-    function loadCustomers(page = 1, sortKey = 'created_at', sortDirection = 'desc') {
+    function loadCustomers(page = 1, sortKey, sortDirection) {
         const tableBody = document.querySelector('table tbody');
         tableBody.innerHTML = '<tr><td colspan="21" class="text-center">Cargando clientes...</td></tr>'; // Mensaje de carga
 
@@ -81,12 +81,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Si el estado es "none", reestablecer al orden original
-            const sortKeyToSend = currentSortDirection === 'none' ? 'created_at' : currentSortKey;
-            const sortDirectionToSend = currentSortDirection === 'none' ? 'desc' : currentSortDirection;
+            const sortKeyToSend = currentSortDirection === 'none' ? '' : currentSortKey;
+            const sortDirectionToSend = currentSortDirection === 'none' ? '' : currentSortDirection;
+            console.log(sortKeyToSend, '  ', sortDirectionToSend)
 
-            // Recargar tareas con la nueva ordenación y filtros activos
             loadCustomers(1, sortKeyToSend, sortDirectionToSend);
         });
+
+
 
 
 

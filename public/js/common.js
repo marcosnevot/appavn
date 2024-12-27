@@ -144,9 +144,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (diaSemana === 0 || diaSemana === 6) continue;
 
             const nombreDia = i === 0 ? "Hoy" : i === 1 ? "Mañana" : diasSemana[diaSemana - 1];
+
+            // Ajustar la fecha para eliminar posibles desajustes de zona horaria
+            const fechaAjustada = new Date(nuevoDia);
+            fechaAjustada.setMinutes(fechaAjustada.getMinutes() - fechaAjustada.getTimezoneOffset());  // Ajustar a la zona horaria local
+            const fechaFormateada = fechaAjustada.toISOString().split('T')[0];  // Formato YYYY-MM-DD
+
+
             diasRestantes.push({
                 nombre: nombreDia,
-                fecha: nuevoDia.toISOString().split('T')[0]
+                fecha: fechaFormateada
             });
         }
 

@@ -450,6 +450,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Crear un nuevo objeto con las propiedades relevantes
                 const newItem = {
                     id: item.id || null,
+                    nombre: item.nombre || null,
                     nombre_fiscal: item.nombre_fiscal || '',
                     nif: item.nif || '' // Asegurarse de capturar el NIF correctamente
                 };
@@ -497,7 +498,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         id: null, // ID nulo para elementos personalizados
                         nombre_fiscal: inputId.includes('nombre-fiscal') ? query : '',
                         nif: inputId.includes('nif') ? query : '',
-                        nombre: query // Nombre genérico para otros campos
+                        nombre: inputId.includes('nombre') ? query : '', // Nombre genérico para otros campos
                     };
 
                     // Validar duplicados
