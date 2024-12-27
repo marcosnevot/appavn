@@ -27,6 +27,11 @@ class AdminController extends Controller
         return view('admin.index');
     }
 
+    public function periodicIndex()
+    {
+        return view('periodic.index');
+    }
+
 
     /**
      * Actualiza un dato (Asunto o Tipo).

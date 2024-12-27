@@ -754,7 +754,7 @@
 /* Filtros */
 .filters-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     gap: 10px;
     margin-bottom: 10px;
 }
@@ -767,6 +767,13 @@
     border-radius: 4px;
     font-size: 14px;
     box-sizing: border-box;
+}
+
+.filter-placeholder {
+    visibility: hidden;
+    width: 100%;
+    /* Establece el mismo ancho que los inputs anteriores */
+    height: 100%;
 }
 
 /* Tabla */
@@ -815,5 +822,4 @@
     text-align: center;
     font-weight: 600;
 }
-
 

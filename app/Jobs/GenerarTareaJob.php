@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\Tarea;
+use App\Notifications\TaskAssignedNotification;
+use App\Notifications\TaskPeriodicReminderNotification;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -67,9 +69,17 @@ class GenerarTareaJob implements ShouldQueue
 
                 // **Sincronizar los usuarios** con la tarea duplicada
                 if ($tarea->users) {
+                    // Sincronizar los usuarios con la tarea duplicada
                     $nuevaTarea->users()->sync($tarea->users->pluck('id')->toArray());
+                    Log::info('Usuarios asignados a la tarea duplicada: ' . $tarea->users->pluck('name')->toArray());
                 }
 
+                // Notificar a los usuarios asignados sobre la creación de la tarea periódica
+                $assignedUsers = $tarea->users;
+                foreach ($assignedUsers as $user) {
+                    $nuevaTarea->load(['cliente', 'asunto', 'tipo', 'users']);
+                    $user->notify(new TaskPeriodicReminderNotification($nuevaTarea, auth()->user()));
+                }
                 // Actualizar la fecha de próxima generación de la tarea original
                 $tarea->update(['fecha_inicio_generacion' => $nuevaFechaGeneracion]);
 

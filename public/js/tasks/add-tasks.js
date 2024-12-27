@@ -189,6 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('add-task-form').reset(); // Resetear el formulario
                     generarBotonesPlanificacion();
                     preselectSessionUser();
+                    toggleFechaInicioGeneracion();
                 } else {
                     console.error('Errores de validación:', data.errors);
                 }

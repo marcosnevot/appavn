@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
     });
 
+    Route::get('/periodic', [AdminController::class, 'periodicIndex'])->name('periodic.index');
 
     Route::get('/tareas', [TaskController::class, 'index'])->name('tasks.index');
     Route::post('/tareas', [TaskController::class, 'store'])->name('tasks.store');

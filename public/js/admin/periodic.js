@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const descripcion = task.descripcion ? task.descripcion.slice(0, 50) : "Sin Descripción";
         const descripcionMostrar = descripcion.length < (task.descripcion ? task.descripcion.length : 0) ? descripcion + "..." : descripcion;
 
+        const proximaGeneracion = calcularProximaGeneracion(task.fecha_inicio_generacion, task.periodicidad);
 
         row.innerHTML = `
             <td>${task.id}</td>
@@ -70,6 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${task.asignacion_nombre || "Sin Asignación"}</td>
             <td>${task.periodicidad}</td>
             <td>${task.fecha_inicio_generacion}</td>
+            <td>${proximaGeneracion || "N/A"}</td> <!-- Columna "Próxima Generación" -->
+
         `;
 
         // Evento para abrir el modal al hacer doble clic
@@ -168,3 +171,26 @@ document.addEventListener("DOMContentLoaded", () => {
     loadUsers();
     loadTasks();
 });
+
+
+// Función para calcular la próxima fecha de generación
+function calcularProximaGeneracion(fecha, periodicidad) {
+    const fechaGeneracion = new Date(fecha);
+    switch (periodicidad) {
+        case 'SEMANAL':
+            fechaGeneracion.setDate(fechaGeneracion.getDate() + 7);
+            break;
+        case 'MENSUAL':
+            fechaGeneracion.setMonth(fechaGeneracion.getMonth() + 1);
+            break;
+        case 'TRIMESTRAL':
+            fechaGeneracion.setMonth(fechaGeneracion.getMonth() + 3);
+            break;
+        case 'ANUAL':
+            fechaGeneracion.setFullYear(fechaGeneracion.getFullYear() + 1);
+            break;
+        default:
+            return null;
+    }
+    return fechaGeneracion.toISOString().split('T')[0]; // Devuelve la fecha en formato YYYY-MM-DD
+}

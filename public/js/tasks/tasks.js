@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentPage = 1;
     let globalTasksArray = []; // Definir una variable global para las tareas
 
-
     let currentSortKey = ''; // Almacena la clave de ordenación actual
     let currentSortDirection = ''; // Dirección de orden actual
     const sessionUserId = document.getElementById('user-session-id').value;
@@ -28,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Cargar tareas inicialmente
     loadTasks(1, 'fecha_planificacion', 'asc');
-
 
 
 

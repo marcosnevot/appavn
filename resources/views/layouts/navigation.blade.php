@@ -191,10 +191,10 @@
             <span>Admin</span>
         </a>
         @else
-        <div class="option-item date-display" title="Fecha de hoy">
+        <a href="{{ route('periodic.index') }}" class="option-item admin-button" title="Tareas Periódicas Activas">
 
-            <span>{{ \Carbon\Carbon::now()->format('d/m/Y') }}</span>
-        </div>
+            <span>Periódicas</span>
+        </a>
         @endif
 
 
@@ -294,9 +294,14 @@
                 const notificationItem = document.createElement('li');
                 notificationItem.className = 'notification-item';
                 notificationItem.dataset.id = notification.id; // Usar un identificador único
+                // Verificar si la notificación contiene el atributo 'reminder'
+                const notificationMessage = notification.reminder ?
+                    `${notification.reminder}` // Mostrar el recordatorio
+                    :
+                    `<strong>${notification.assigned_by}</strong> te asignó la tarea:`;
                 notificationItem.innerHTML = `
                 <p class="notification-content">
-                    <strong>${notification.assigned_by}</strong> te asignó la tarea: 
+                            ${notificationMessage} 
                             <a href="/tareas?task_id=${notification.task_id}" 
                                 data-task-id="${notification.task_id}" 
                                 class="notification-link" 
@@ -395,9 +400,14 @@
                     const notificationItem = document.createElement('li');
                     notificationItem.className = 'notification-item';
                     notificationItem.dataset.id = notification.id;
+                    // Verificar si la notificación contiene el atributo 'reminder'
+                    const notificationMessage = notification.data.reminder ?
+                        `${notification.data.reminder}` // Mostrar el recordatorio
+                        :
+                        `<strong>${notification.data.assigned_by}</strong> te asignó la tarea:`;
                     notificationItem.innerHTML = `
                     <p class="notification-content">
-                        <strong>${notification.data.assigned_by}</strong> te asignó la tarea: 
+                         ${notificationMessage} 
                         <a href="/tareas?task_id=${notification.data.task_id}" 
                         data-task-id="${notification.data.task_id}" 
                         class="notification-link" 
