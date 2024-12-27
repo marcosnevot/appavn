@@ -14,18 +14,18 @@ class TaskPeriodicReminderNotification extends Notification implements ShouldQue
     use Queueable;
 
     private $task;
-    private $createdBy; // El usuario que ha creado la tarea periódica
+    private $periodicidad;
 
     /**
      * Constructor de la notificación.
      *
      * @param $task La tarea periódica creada.
-     * @param $createdBy El usuario que creó la tarea periódica.
+     * @param $periodicidad La periodicidad de la tarea original.
      */
-    public function __construct($task, $createdBy)
+    public function __construct($task, $periodicidad)
     {
         $this->task = $task;
-        $this->createdBy = $createdBy;
+        $this->periodicidad = $periodicidad;
     }
 
     /**
@@ -50,13 +50,12 @@ class TaskPeriodicReminderNotification extends Notification implements ShouldQue
         return [
             'task_id' => $this->task->id,
             'task_title' => $this->task->asunto->nombre ?? 'Sin asunto',
-            'created_by' => $this->createdBy->name, // Nombre del usuario que creó la tarea
             'client' => $this->task->cliente->nombre_fiscal ?? 'Sin cliente', // Relación con cliente
             'description' => Str::limit($this->task->descripcion ?? '', 15), // Descripción de la tarea
             'url' => route('tasks.index'), // URL para ver la tarea
             'created_at' => $this->task->created_at ? $this->task->created_at->toISOString() : now()->toISOString(),
             'notification_type' => 'task_periodic_reminder', // Nuevo campo para diferenciar el tipo de notificación
-            'reminder' => 'Tarea Periódica ', $this->task->periodicidad,
+            'reminder' => 'Tarea Periódica ' . $this->periodicidad,
         ];
     }
 
@@ -71,13 +70,12 @@ class TaskPeriodicReminderNotification extends Notification implements ShouldQue
         return new BroadcastMessage([
             'task_id' => $this->task->id,
             'task_title' => $this->task->asunto->nombre ?? 'Sin asunto',
-            'created_by' => $this->createdBy->name, // Nombre del usuario que creó la tarea
             'client' => $this->task->cliente->nombre_fiscal ?? 'Sin cliente',
             'description' => Str::limit($this->task->descripcion ?? '', 15),
             'url' => route('tasks.index'),
             'created_at' => $this->task->created_at ? $this->task->created_at->toISOString() : now()->toISOString(),
             'notification_type' => 'task_periodic_reminder', // Nuevo campo para diferenciar el tipo de notificación
-            'reminder' => 'Tarea Periódica ', $this->task->periodicidad,
+            'reminder' => 'Tarea Periódica ' . $this->periodicidad,
         ]);
     }
 }

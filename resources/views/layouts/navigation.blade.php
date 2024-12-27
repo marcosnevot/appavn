@@ -225,6 +225,7 @@
             @csrf
         </form>
     </div>
+    <div id="notification-stack" class="notification-stack"></div>
 </nav>
 
 <script>
@@ -252,6 +253,60 @@
 
         const sessionUserId = document.getElementById('user-session-id').value;
 
+        // Obtener el contenedor de la pila de notificaciones
+        const notificationStack = document.getElementById('notification-stack');
+        // Función para verificar si el contenido sobrepasa el max-height
+        function updateGradient() {
+            if (notificationStack.scrollHeight > notificationStack.clientHeight) {
+                notificationStack.classList.add('with-gradient'); // Activa el degradado
+            } else {
+                notificationStack.classList.remove('with-gradient'); // Desactiva el degradado
+            }
+        }
+
+        // Verificar inicialmente y cada vez que se agrega contenido
+        updateGradient();
+        notificationStack.addEventListener('DOMNodeInserted', updateGradient);
+        // Función para mostrar notificaciones flotantes
+        function showFloatingNotification(notification) {
+            // Crear el elemento de la notificación flotante
+            const floatingNotification = document.createElement('div');
+            floatingNotification.classList.add('floating-notification');
+
+            // Verificar si tiene el campo `reminder`
+            if (notification.reminder) {
+                floatingNotification.textContent = `${notification.reminder}: ${notification.task_title || 'Sin asunto'}`;
+                floatingNotification.classList.add('reminder');
+            } else {
+                floatingNotification.innerHTML = `<strong>${notification.assigned_by}</strong> te asignó la tarea: ${notification.task_title || 'Sin asunto'}`;
+                floatingNotification.classList.add('assigned');
+            }
+
+            // Agregar la notificación al contenedor
+            notificationStack.appendChild(floatingNotification);
+            updateGradient();
+            // Forzar reflujo para que la animación funcione
+            void floatingNotification.offsetWidth;
+
+            // Usar timeout para forzar la animación
+            setTimeout(() => {
+                floatingNotification.classList.add('show'); // Clase que activa la animación de entrada
+            }, 50); // Pequeño retraso para permitir que el DOM procese el nuevo elemento
+
+            // Ocultar la notificación después de 5 segundos
+            setTimeout(() => {
+                floatingNotification.classList.add('fade-out'); // Agregar clase de salida
+                setTimeout(() => {
+                    floatingNotification.remove(); // Eliminar del DOM
+                }, 500); // Esperar a que termine la animación
+            }, 5000); // Tiempo visible
+
+            // Desplazar automáticamente hacia la última notificación
+            notificationStack.scrollTo({
+                top: notificationStack.scrollHeight,
+                behavior: 'smooth',
+            });
+        }
 
 
         window.Echo.private(`App.Models.User.${sessionUserId}`)
@@ -275,17 +330,8 @@
                 }
 
                 // Mostrar la notificación flotante
-                floatingNotification.textContent = `${notification.assigned_by} te asignó la tarea: ${notification.task_title || 'Sin asunto'}`;
-                floatingNotification.classList.remove('hidden'); // Asegúrate de mostrarla
-                floatingNotification.classList.add('show'); // Activa la animación
+                showFloatingNotification(notification);
 
-                // Ocultar después de 3 segundos
-                setTimeout(() => {
-                    floatingNotification.classList.remove('show');
-                    setTimeout(() => {
-                        floatingNotification.classList.add('hidden'); // Ocultar completamente
-                    }, 500); // Tiempo suficiente para que termine la animación
-                }, 3000);
 
 
                 const clientName = notification.client || 'Sin cliente';
@@ -294,6 +340,11 @@
                 const notificationItem = document.createElement('li');
                 notificationItem.className = 'notification-item';
                 notificationItem.dataset.id = notification.id; // Usar un identificador único
+                // Verificar si la notificación contiene el atributo 'reminder'
+                if (notification.reminder) {
+                    // Mostrar el reminder si está presente
+                    notificationItem.classList.add('reminderPanel');
+                }
                 // Verificar si la notificación contiene el atributo 'reminder'
                 const notificationMessage = notification.reminder ?
                     `${notification.reminder}` // Mostrar el recordatorio
@@ -401,11 +452,15 @@
                     notificationItem.className = 'notification-item';
                     notificationItem.dataset.id = notification.id;
                     // Verificar si la notificación contiene el atributo 'reminder'
+                    if (notification.data.reminder) {
+                        // Mostrar el reminder si está presente
+                        notificationItem.classList.add('reminderPanel');
+                    }
                     const notificationMessage = notification.data.reminder ?
                         `${notification.data.reminder}` // Mostrar el recordatorio
                         :
                         `<strong>${notification.data.assigned_by}</strong> te asignó la tarea:`;
-                    notificationItem.innerHTML = `
+                    notificationItem.innerHTML = ` 
                     <p class="notification-content">
                          ${notificationMessage} 
                         <a href="/tareas?task_id=${notification.data.task_id}" 
@@ -937,43 +992,92 @@
 
 
 
-    /* Notificación flotante */
+    .notification-stack {
+        position: fixed;
+        bottom: 22vh;
+        left: 20px;
+        overflow-y: hidden;
+        /* Oculta la barra de desplazamiento visible */
+        height: 30vh;
+        max-height: 30vh;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        /* Espaciado entre notificaciones */
+        z-index: 9999;
+        flex-direction: column-reverse;
+        /* Invertir el orden */
+    }
+
+    .notification-stack.with-gradient {
+        /* Efecto de difuminado en el borde superior */
+        mask-image: linear-gradient(to bottom, transparent, black 10%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%);
+        mask-composite: exclude;
+        -webkit-mask-composite: destination-in;
+    }
+
+    /* Estilo adicional para forzar scroll funcional pero invisible */
+    .notification-stack::-webkit-scrollbar {
+        display: none;
+        /* Oculta el scroll en navegadores basados en Webkit */
+    }
+
+    .notification-stack {
+        scrollbar-width: none;
+        /* Oculta el scroll en Firefox */
+    }
+
     .floating-notification {
-        position: absolute;
-        top: -120px;
-        /* Ajusta para que esté encima del botón */
-        left: -100%;
-        /* Comienza fuera de la pantalla a la izquierda */
         background-color: #333333;
-        /* Azul oscuro profesional */
         color: #FFFFFF;
-        /* Texto blanco */
         padding: 12px 18px;
-        /* Más espacio para contenido */
         border-radius: 10px;
-        /* Bordes más redondeados */
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
-        /* Sombra más marcada */
         font-size: 14px;
         font-weight: 500;
-        /* Peso moderado para un texto profesional */
         line-height: 1.5;
-        /* Mejor separación del texto */
         max-width: 280px;
-        /* Limitar ancho */
         z-index: 1000;
-        /* Asegura que esté encima de otros elementos */
-        opacity: 0;
-        /* Invisible inicialmente */
-        pointer-events: none;
-        /* No interactuable */
+        opacity: 1;
+        transform: translateX(-100%);
+        /* Fuera de la pantalla a la izquierda */
+        /* Fuera de pantalla hacia la izquierda */
         transition: transform 0.5s ease-out, opacity 0.5s ease-out;
-        /* Suavidad en la animación */
-        border: 2px solid #2563eb;
-        /* Borde azul para resaltar */
         width: 200px;
-
     }
+
+    .floating-notification.reminder {
+        border: 2px solid yellow;
+    }
+
+    .floating-notification.assigned {
+        border: 2px solid #2563eb;
+    }
+
+    /* Notificación visible (aparece progresivamente desde la izquierda) */
+    .floating-notification.show {
+        opacity: 1;
+        /* Totalmente visible */
+        transform: translateX(0);
+        /* Posición final */
+    }
+
+    /* Animación de salida */
+    .floating-notification.fade-out {
+        opacity: 0;
+        transform: translateX(-100%);
+        /* Se mueve hacia la izquierda para desaparecer */
+        /* Se desliza hacia abajo */
+    }
+
+
+
+    .reminderPanel {
+        border: 0.1px solid yellow !important;
+    }
+
+
 
 
     .floating-notification a {
@@ -992,11 +1096,7 @@
         /* Subrayado para accesibilidad */
     }
 
-    /* Cuando se muestra la notificación flotante */
-    .floating-notification.show {
-        animation: slideInFromLeft 1s ease-out forwards, fadeOut 3s 2.5s ease-in forwards;
-        /* Deslizarse y luego desvanecer */
-    }
+
 
 
     .options {

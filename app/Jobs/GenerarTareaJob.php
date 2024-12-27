@@ -26,11 +26,12 @@ class GenerarTareaJob implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('Generando tareas periódicas.');
+        // Log::info('Generando tareas periódicas.');
 
         // Obtener todas las tareas periódicas que deben generarse
         $tareas = Tarea::where('periodicidad', '!=', 'NO')
             ->whereDate('fecha_inicio_generacion', '<=', now()) // Obtener tareas cuya fecha de generación ha pasado
+            ->with('users')
             ->get();
 
         foreach ($tareas as $tarea) {
@@ -67,30 +68,34 @@ class GenerarTareaJob implements ShouldQueue
                     'fecha_inicio_generacion' => null, // La fecha de inicio de generación de la nueva tarea es nula
                 ]);
 
-                // **Sincronizar los usuarios** con la tarea duplicada
-                if ($tarea->users) {
-                    // Sincronizar los usuarios con la tarea duplicada
+                // Verifica y sincroniza usuarios
+                // Log::info('Usuarios asociados a la tarea original (ID ' . $tarea->id . '): ' . json_encode($tarea->users));
+
+                if ($tarea->users->isNotEmpty()) { // Verifica que haya usuarios
                     $nuevaTarea->users()->sync($tarea->users->pluck('id')->toArray());
-                    Log::info('Usuarios asignados a la tarea duplicada: ' . $tarea->users->pluck('name')->toArray());
+
+                    foreach ($tarea->users as $user) {
+                        try {
+                            $user->notify(new TaskPeriodicReminderNotification($nuevaTarea, $tarea->periodicidad));
+                            // Log::info('Notificación enviada al usuario ID: ' . $user->id);
+                        } catch (\Exception $e) {
+                            Log::error('Error al enviar notificación al usuario ID: ' . $user->id . '. Error: ' . $e->getMessage());
+                        }
+                    }
+                } else {
+                    Log::warning('La tarea (ID ' . $tarea->id . ') no tiene usuarios asignados.');
                 }
 
-                // Notificar a los usuarios asignados sobre la creación de la tarea periódica
-                $assignedUsers = $tarea->users;
-                foreach ($assignedUsers as $user) {
-                    $nuevaTarea->load(['cliente', 'asunto', 'tipo', 'users']);
-                    $user->notify(new TaskPeriodicReminderNotification($nuevaTarea, auth()->user()));
-                }
-                // Actualizar la fecha de próxima generación de la tarea original
                 $tarea->update(['fecha_inicio_generacion' => $nuevaFechaGeneracion]);
+                // Log::info('Tarea generada con ID: ' . $tarea->id);
 
-                Log::info('Tarea generada con ID: ' . $tarea->id);
             } else {
                 // Si la tarea no se genera porque la fecha aún no ha llegado
                 Log::info('La tarea con ID ' . $tarea->id . ' aún no está lista para ser generada. Próxima fecha de generación: ' . $nuevaFechaGeneracion);
             }
         }
 
-        Log::info('Tareas periódicas generadas correctamente.');
+        // Log::info('Tareas periódicas generadas correctamente.');
     }
 
 
