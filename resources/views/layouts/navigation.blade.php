@@ -123,25 +123,7 @@
                 {{ __('Clientes') }}
             </a>
 
-            @php
-            $user = auth()->user();
-            @endphp
-
-            @if ($user->hasRole('admin') || ($user->hasRole('employee') && $user->id === 2))
-            <hr class="border-gray-700">
-            @inject('users', 'App\Models\User')
-            <div class="user-tasks-container">
-
-                <div class="user-tasks-grid">
-                    @foreach ($users::where('id', '!=', auth()->id())->get() as $user)
-                    <a href="{{ route('tasks.index', ['usuario' => $user->id]) }}"
-                        class="user-task-link {{ request()->query('usuario') == $user->id ? 'active' : '' }}">
-                        {{ $user->name }}
-                    </a>
-                    @endforeach
-                </div>
-            </div>
-            @endif
+           
 
         </div>
     </div>
@@ -266,7 +248,6 @@
 
         // Verificar inicialmente y cada vez que se agrega contenido
         updateGradient();
-        notificationStack.addEventListener('DOMNodeInserted', updateGradient);
         // Función para mostrar notificaciones flotantes
         function showFloatingNotification(notification) {
             // Crear el elemento de la notificación flotante
@@ -1192,57 +1173,7 @@
         color: #FFFFFF;
     }
 
-    /* tareas por Usuario */
-
-    .user-tasks-container {
-        border-radius: 4px;
-        margin-top: 10px;
-        overflow: hidden;
-        display: flex;
-        /* Añadido para centrar el grid */
-        justify-content: center;
-        /* Centra horizontalmente el grid */
-    }
-
-
-    .user-tasks-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 80px);
-        gap: 10px;
-        max-height: 160px;
-        max-width: 500px;
-        overflow-y: auto;
-        justify-content: center;
-        /* Centra las columnas horizontalmente */
-        align-content: center;
-        /* Centra las filas verticalmente dentro del contenedor */
-    }
-
-    .user-task-link {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 4px 5px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        text-decoration: none;
-        color: #CCCCCC;
-        font-size: 14px;
-        text-align: center;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .user-task-link:hover {
-        background-color: #333333;
-        color: #FFFFFF;
-    }
-
-    .user-task-link.active {
-        background-color: #4A4A4A;
-        color: #fff;
-        font-weight: bold;
-    }
-
+   
 
 
 

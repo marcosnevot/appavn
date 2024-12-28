@@ -41,6 +41,8 @@
     </ul>
 </div>
 
+
+
 <!-- Modal para los detalles del cliente -->
 <div id="customer-detail-modal" class="customer-detail-modal" style="display: none;">
     <div class="customer-detail-modal-content" id="customer-detail-modal-content">
