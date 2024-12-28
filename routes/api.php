@@ -79,6 +79,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/periodic-tasks/{id}', [AdminController::class, 'updatePeriodic']);
 
     Route::get('/calendar/tasks', [CalendarController::class, 'getTasks']);
+    Route::get('/calendar/events', [CalendarController::class, 'getEventsByDate']);
 
 
 });

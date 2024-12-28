@@ -1,23 +1,37 @@
 /* Estilo para limitar la altura de las celdas del calendario */
-.fc-daygrid-day-frame {
-    position: relative;
-
+#calendar {
 }
 
+/* Limitar la altura de las celdas del calendario */
+.fc-daygrid-day-frame {
+    position: relative;
+    max-height: 10vh !important;
+    /* Limita la altura de la celda */
+}
+
+/* Permitir el desplazamiento dentro de la celda si hay muchos eventos */
 .fc-daygrid-day-frame>.fc-daygrid-day-events {
     max-height: 70px !important;
     overflow-y: auto !important;
+    /* Desplazamiento vertical */
     padding-right: 5px;
-    /* Espacio para el scrollbar */
+    /* Espacio para la barra de desplazamiento */
 }
 
-/* Estilo para evitar que las tareas se desborden */
+/* Ajustar los eventos para que se mantengan dentro de la celda */
 .fc-event {
-    white-space: normal; /* Permitir saltos de línea */
-    text-overflow: unset; /* Quitar truncamiento */
-    overflow: hidden; /* Mantener el contenido dentro del contenedor */
-    word-wrap: break-word; /* Permitir dividir palabras largas */
-    overflow-wrap: break-word; /* Compatibilidad con navegadores */
+    white-space: normal;
+    /* Permitir saltos de línea */
+    text-overflow: ellipsis;
+    /* Truncar texto si es demasiado largo */
+    overflow: hidden;
+    /* Evitar que el contenido se desborde */
+    word-wrap: break-word;
+    /* Dividir palabras largas */
+    overflow-wrap: break-word;
+    /* Soporte adicional para dividir palabras */
+    max-width: 100%;
+    /* Asegurarse de que el evento no exceda el ancho de la celda */
 }
 
 
@@ -46,7 +60,9 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    overflow: hidden; /* Prevenir desbordamiento */
+    overflow: hidden;
+    /* Prevenir desbordamiento */
+    width: 100%;
 }
 
 /* Estilo del asunto */
@@ -76,20 +92,125 @@
     /* Compatibilidad con navegadores */
 }
 
-/* Estilo para planificaciones */
-.fc-event-content.evento-planificacion {
-    border-left: 4px solid #90CAF9; /* Azul claro */
+/* Evento planificado */
+.evento-planificacion {
+    background-color: #90CAF9 !important;
+    color: #ffffff;
+    border: 1px solid #007bb5;
 }
 
-/* Estilo para vencimientos */
-.fc-event-content.evento-vencimiento {
-    border-left: 4px solid #FFCDD2; /* Rojo claro */
-    background-color: #FFCDD2;
+/* Evento vencimiento */
+.evento-vencimiento {
+    background-color: #FFCDD2 !important;
+    color: #ffffff;
+    border: 1px solid #d32f2f;
 }
 
-/* Estilo para periodicidad */
-.fc-event-content.evento-periodicidad {
-    border-left: 4px solid #FFF59D; /* Amarillo claro */
-    background-color: #FFF59D;
+/* Evento periodicidad */
+.evento-periodicidad {
+    background-color: #FFF59D !important;
+    color: #333333;
+    border: 1px solid #fdd835;
+}
 
+/* Overlay (fondo negro transparente) */
+.calendar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Negro con transparencia */
+    z-index: 999; /* Debajo del modal */
+    display: none; /* Ocultar por defecto */
+}
+
+/* Modal */
+.calendar-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 50%;
+    max-width: 600px;
+    z-index: 1000; /* Encima del overlay */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón de cierre */
+.calendar-modal-close {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    align-self: flex-end;
+    transition: background-color 0.3s;
+}
+
+.calendar-modal-close:hover {
+    background-color: #d32f2f;
+}
+
+
+/* Título del modal */
+.calendar-modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+/* Contenedor de eventos */
+.calendar-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+/* Estilo para eventos individuales */
+.calendar-modal-event {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    color: #333333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding-right: 5px;
+    cursor: pointer;
+
+}
+
+/* Sin eventos */
+.calendar-modal-no-events {
+    font-size: 1rem;
+    color: #777777;
+    text-align: center;
+}
+
+
+
+/* Scrollbar personalizado */
+.calendar-modal-content::-webkit-scrollbar {
+    width: 8px;
+    /* Ancho del scroll */
+}
+
+.calendar-modal-content::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    /* Color del scroll */
+    border-radius: 4px;
+    /* Esquinas redondeadas */
+}
+
+.calendar-modal-content::-webkit-scrollbar-thumb:hover {
+    background-color: #aaa;
+    /* Color al pasar el cursor */
 }

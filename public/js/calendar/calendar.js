@@ -6,12 +6,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            locale: 'es', // Idioma en español
-
+            locale: 'es', // Idioma español
+            firstDay: 1,
+            eventOrder: "classNames,start", // Ordenar por tipo de evento (classNames) y luego por fecha de inicio
             headerToolbar: {
                 left: 'prev,next today', // Botones de navegación
                 center: 'title', // Título del mes
                 right: 'customLegend', // Añadimos un botón personalizado
+            },
+            buttonText: {
+                today: 'Hoy', // Cambia el texto del botón "Today" a "Hoy"
             },
             customButtons: {
                 customLegend: {
@@ -47,6 +51,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Redirigir al detalle de la tarea al hacer clic en un evento
                 window.location.href = `/tareas?task_id=${info.event.id}`;
             },
+            dateClick: function (info) {
+                // Abrir modal al hacer doble clic en un día
+                showModal(info.dateStr);
+            },
             eventContent: function (arg) {
                 // Crear contenido personalizado para el evento
                 let asunto = document.createElement('div');
@@ -78,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Verifica si el rango solicitado es diferente del último
 
             },
+
 
             loading: function (isLoading) {
                 if (isLoading) {
@@ -112,4 +121,98 @@ document.addEventListener('DOMContentLoaded', function () {
             customLegendButton.style.cursor = 'default'; // Evitar el puntero de clic
         }
     }
-}); 
+});
+function showModal(date) {
+    // Crear overlay dinámicamente si no existe
+    let overlay = document.getElementById('calendar-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'calendar-overlay';
+        overlay.classList.add('calendar-overlay'); // Clase para el overlay
+        document.body.appendChild(overlay);
+    }
+
+    // Crear modal dinámicamente si no existe
+    let modal = document.getElementById('calendar-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'calendar-modal';
+        modal.classList.add('calendar-modal'); // Aplicar estilos del CSS
+        document.body.appendChild(modal);
+    }
+
+    // Limpiar contenido previo
+    modal.innerHTML = '';
+
+    // Título del modal
+    const modalTitle = document.createElement('h3');
+    modalTitle.textContent = `Tareas del ${date}`;
+    modalTitle.classList.add('calendar-modal-title'); // Aplicar estilos del CSS
+    modal.appendChild(modalTitle);
+
+    // Contenedor dinámico de eventos
+    const eventsContainer = document.createElement('div');
+    eventsContainer.classList.add('calendar-modal-content'); // Aplicar estilos del CSS
+    modal.appendChild(eventsContainer);
+
+    // Cargar eventos desde la API
+    fetch(`/api/calendar/events?date=${encodeURIComponent(date)}`)
+        .then(response => response.json())
+        .then(events => {
+            if (events.length === 0) {
+                eventsContainer.innerHTML = '<p class="calendar-modal-no-events">No hay tareas para este día.</p>';
+                return;
+            }
+
+            events.forEach(event => {
+                const eventContainer = document.createElement('div');
+                eventContainer.classList.add('calendar-modal-event');
+
+                if (event.classNames && Array.isArray(event.classNames)) {
+                    event.classNames.forEach(className => eventContainer.classList.add(className));
+                }
+
+                if (event.color) {
+                    eventContainer.style.backgroundColor = event.color;
+                }
+
+                const title = document.createElement('div');
+                title.textContent = event.title;
+                title.classList.add('fc-event-asunto');
+
+                const client = document.createElement('div');
+                client.textContent = event.extendedProps?.cliente || 'Sin Cliente';
+                client.classList.add('fc-event-cliente');
+
+                eventContainer.appendChild(title);
+                eventContainer.appendChild(client);
+
+                // Listener para redirigir al detalle de la tarea
+                eventContainer.addEventListener('click', () => {
+                    // Redirigir usando el id del evento
+                    window.location.href = `/tareas?task_id=${event.id}`;
+                });
+
+                eventsContainer.appendChild(eventContainer);
+            });
+        })
+        .catch(error => {
+            console.error("Error al cargar eventos del día:", error);
+            eventsContainer.innerHTML = '<p class="calendar-modal-error">Error al cargar los eventos.</p>';
+        });
+
+    // Botón de cierre
+    const closeButton = document.createElement('button');
+    closeButton.textContent = 'Cerrar';
+    closeButton.classList.add('calendar-modal-close');
+    closeButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+        overlay.style.display = 'none';
+    });
+    modal.appendChild(closeButton);
+
+    // Mostrar el modal y el overlay
+    modal.style.display = 'block';
+    overlay.style.display = 'block';
+}
+

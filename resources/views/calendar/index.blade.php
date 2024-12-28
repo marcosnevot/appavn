@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="header-tareas">
-    <h2 style="width: auto; min-width:220px; max-width:600px;" class="title">
+    <h2 style="width: auto; min-width:220px; max-width:600px; margin-bottom:10px;" class="title">
         Calendario
     </h2>
     <input type="hidden" id="user-session-id" value="{{ Auth::user()->id }}">

@@ -47,15 +47,13 @@ class CalendarController extends Controller
                 ->where(function ($query) use ($start, $end) {
                     $query->whereBetween('fecha_planificacion', [$start, $end])
                         ->orWhereBetween('fecha_vencimiento', [$start, $end])
-                        ->orWhere(function ($subquery) use ($start, $end) {
-                            $subquery->whereNotNull('periodicidad')
-                                ->whereBetween('fecha_inicio_generacion', [$start, $end]);
-                        });
+                        ->orWhereNotNull('fecha_inicio_generacion'); // Incluir tareas periódicas
                 })
                 ->where('estado', '!=', 'COMPLETADA') // Excluir tareas completadas
                 ->whereHas('users', function ($query) {
                     $query->where('user_id', auth()->id()); // Filtrar asignadas al usuario autenticado
                 })
+                ->orderByRaw('fecha_vencimiento IS NULL, fecha_vencimiento DESC')
                 ->get();
 
             // Log para depuración
@@ -70,82 +68,56 @@ class CalendarController extends Controller
 
                 // Validar que $task es un objeto y tiene las propiedades necesarias
                 if (is_object($task)) {
-                    // Log::info('Procesando tarea:', ['task' => $task->toArray()]);
-
-                    // Evento para la fecha de planificación
-                    if (!empty($task->fecha_planificacion)) {
-                        $events[] = [
-                            'id' => $task->id . '-planificacion',
-                            'title' => $task->asunto->nombre ?? 'Sin Asunto',
-                            'start' => $task->fecha_planificacion,
-                            'color' => $this->getTaskColor('planificacion'),
-                            'classNames' => ['evento-planificacion'], // Clase específica
-                            'extendedProps' => [
-                                'cliente' => $task->cliente->nombre_fiscal ?? 'Sin Cliente',
-                            ],
-                        ];
-                    }
-
-                    // Evento para la fecha de vencimiento
                     if (!empty($task->fecha_vencimiento)) {
                         $events[] = [
                             'id' => $task->id . '-vencimiento',
                             'title' => $task->asunto->nombre ?? 'Sin Asunto',
                             'start' => $task->fecha_vencimiento,
                             'color' => $this->getTaskColor('vencimiento'),
-                            'classNames' => ['evento-vencimiento'], // Clase específica
+                            'classNames' => ['evento-vencimiento'],
                             'extendedProps' => [
                                 'cliente' => $task->cliente->nombre_fiscal ?? 'Sin Cliente',
                             ],
                         ];
                     }
 
-                    if (!empty($task->fecha_inicio_generacion)) {
-                        $proximaFecha = $this->calcularProximaFecha(
-                            $task->fecha_inicio_generacion,
-                            $task->periodicidad
-                        );
+                    if (!empty($task->fecha_planificacion)) {
+                        $events[] = [
+                            'id' => $task->id . '-planificacion',
+                            'title' => $task->asunto->nombre ?? 'Sin Asunto',
+                            'start' => $task->fecha_planificacion,
+                            'color' => $this->getTaskColor('planificacion'),
+                            'classNames' => ['evento-planificacion'],
+                            'extendedProps' => [
+                                'cliente' => $task->cliente->nombre_fiscal ?? 'Sin Cliente',
+                            ],
+                        ];
+                    }
 
-                        Log::info('Cálculo de próxima fecha realizado', [
-                            'tarea_id' => $task->id,
-                            'proxima_fecha' => $proximaFecha ? $proximaFecha->toDateTimeString() : 'N/A',
-                            'start' => $start->toDateTimeString(),
-                            'end' => $end->toDateTimeString(),
-                            'en_rango' => $proximaFecha && $proximaFecha->between($start, $end, true),
-                        ]);
+                    // Manejar tareas periódicas
+                    if (!empty($task->fecha_inicio_generacion) && $task->periodicidad !== 'NO') {
+                        $nextDate = $this->calculateNextPeriodicDate($task->fecha_inicio_generacion, $task->periodicidad);
 
-                        if ($proximaFecha && $proximaFecha->between($start, $end, true)) {
-                            Log::info('Procesando tarea periódica', [
-                                'tarea_id' => $task->id,
-                                'proxima_fecha' => $proximaFecha->toDateTimeString(),
-                            ]);
-
-                            $events[] = [
-                                'id' => $task->id . '-periodicidad-' . $proximaFecha->format('Ymd'),
-                                'title' => ($task->asunto->nombre ?? 'Sin Asunto') . ' (' . ucfirst(strtolower($task->periodicidad)) . ')',
-                                'start' => $proximaFecha->toDateTimeString(),
+                        if ($nextDate && $nextDate->between($start, $end)) {
+                            $event = [
+                                'id' => $task->id . '-periodicidad',
+                                'title' => ($task->asunto->nombre ?? 'Sin Asunto') . ' - ' . $task->periodicidad,
+                                'start' => $nextDate,
                                 'color' => $this->getTaskColor('periodicidad'),
                                 'classNames' => ['evento-periodicidad'],
                                 'extendedProps' => [
                                     'cliente' => $task->cliente->nombre_fiscal ?? 'Sin Cliente',
                                 ],
                             ];
-                        } else {
-                            Log::warning('Tarea fuera del rango visible', [
-                                'tarea_id' => $task->id,
-                                'proxima_fecha' => $proximaFecha ? $proximaFecha->toDateTimeString() : 'N/A',
-                                'start' => $start->toDateTimeString(),
-                                'end' => $end->toDateTimeString(),
-                            ]);
+                            // Log::info('Evento creado para tarea periódica', ['event' => $event]);
+                            $events[] = $event;
                         }
                     }
-                } else {
-                    Log::error('Elemento inesperado en tareas:', ['task' => $task]);
                 }
-                Log::info('Eventos enviados al frontend', ['events' => $events]);
-
+                Log::info('Eventos ordenados en el backend', ['events' => $events]);
                 return $events;
             });
+
 
             return response()->json($events);
         } catch (\Exception $e) {
@@ -158,43 +130,23 @@ class CalendarController extends Controller
         }
     }
 
-    private function calcularProximaFecha($fechaInicioGeneracion, $periodicidad)
+    private function calculateNextPeriodicDate($startDate, $periodicity)
     {
-        $fecha = Carbon::parse($fechaInicioGeneracion);
+        $startDate = Carbon::parse($startDate);
 
-        //Log::info('Iniciando cálculo de próxima fecha', [
-        //  'fecha_inicio_generacion' => $fechaInicioGeneracion,
-        //'periodicidad' => $periodicidad,
-        // ]);
-
-        // Calcular la próxima fecha directamente según la periodicidad
-        switch (strtoupper($periodicidad)) {
+        switch ($periodicity) {
             case 'SEMANAL':
-                $fecha->addWeek();
-                break;
+                return $startDate->addWeek();
             case 'MENSUAL':
-                $fecha->addMonth();
-                break;
+                return $startDate->addMonth();
             case 'TRIMESTRAL':
-                $fecha->addMonths(3);
-                break;
+                return $startDate->addMonths(3);
             case 'ANUAL':
-                $fecha->addYear();
-                break;
+                return $startDate->addYear();
             default:
-                Log::error('Periodicidad no válida', ['periodicidad' => $periodicidad]);
-                return null;
+                return $startDate; // Si la periodicidad no es válida, devolver la fecha inicial
         }
-
-        // Log::info('Próxima fecha generada', ['proxima_fecha' => $fecha->toDateString()]);
-        return $fecha;
     }
-
-
-
-
-
-
 
 
     private function getTaskColor($type)
@@ -209,6 +161,72 @@ class CalendarController extends Controller
             default:
                 Log::error('Tipo desconocido en getTaskColor:', ['type' => $type]);
                 return '#E0E0E0'; // Gris claro por defecto
+        }
+    }
+
+    public function getEventsByDate(Request $request)
+    {
+        try {
+            $date = $request->query('date');
+
+            if (!$date) {
+                return response()->json(['error' => 'Fecha no proporcionada'], 400);
+            }
+
+            $tasks = Tarea::with(['cliente', 'asunto', 'tipo', 'users'])
+                ->where(function ($query) use ($date) {
+                    $query->whereDate('fecha_planificacion', $date)
+                        ->orWhereDate('fecha_vencimiento', $date)
+                        ->orWhereNotNull('fecha_inicio_generacion'); // Incluir tareas periódicas
+                })
+                ->where('estado', '!=', 'COMPLETADA') // Excluir tareas completadas
+                ->whereHas('users', function ($query) {
+                    $query->where('user_id', auth()->id()); // Filtrar asignadas al usuario autenticado
+                })
+                ->orderByRaw('fecha_vencimiento IS NULL, fecha_vencimiento DESC')
+                ->get();
+
+
+            $events = $tasks->flatMap(function ($task) use ($date) {
+                $events = [];
+
+                if (is_object($task)) {
+                    if (!empty($task->fecha_vencimiento) && Carbon::parse($task->fecha_vencimiento)->isSameDay(Carbon::parse($date))) {
+                        $events[] = [
+                            'id' => $task->id . '-vencimiento',
+                            'title' => $task->asunto->nombre ?? 'Sin Asunto',
+                            'color' => $this->getTaskColor('vencimiento'),
+                            'classNames' => ['evento-vencimiento'],
+                            'extendedProps' => [
+                                'cliente' => $task->cliente->nombre_fiscal ?? 'Sin Cliente',
+                            ],
+                        ];
+                    }
+
+                    if (!empty($task->fecha_planificacion) && $task->fecha_planificacion == $date) {
+                        $events[] = [
+                            'id' => $task->id . '-planificacion',
+                            'title' => $task->asunto->nombre ?? 'Sin Asunto',
+                            'color' => $this->getTaskColor('planificacion'),
+                            'classNames' => ['evento-planificacion'],
+                            'extendedProps' => [
+                                'cliente' => $task->cliente->nombre_fiscal ?? 'Sin Cliente',
+                            ],
+                        ];
+                    }
+                }
+
+                return $events;
+            });
+
+
+            return response()->json($events->toArray()); // Asegurar que sea un array
+        } catch (\Exception $e) {
+            Log::error('Error obteniendo eventos por fecha', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }
