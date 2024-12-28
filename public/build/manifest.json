@@ -50,6 +50,11 @@
     "file": "assets/admin.css",
     "src": "resources/css/admin.css",
     "isEntry": true
+  },
+  "resources/css/calendar.css": {
+    "file": "assets/calendar.css",
+    "src": "resources/css/calendar.css",
+    "isEntry": true
   }
 
 }

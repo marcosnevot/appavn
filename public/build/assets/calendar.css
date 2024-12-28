@@ -1,0 +1,95 @@
+/* Estilo para limitar la altura de las celdas del calendario */
+.fc-daygrid-day-frame {
+    position: relative;
+
+}
+
+.fc-daygrid-day-frame>.fc-daygrid-day-events {
+    max-height: 70px !important;
+    overflow-y: auto !important;
+    padding-right: 5px;
+    /* Espacio para el scrollbar */
+}
+
+/* Estilo para evitar que las tareas se desborden */
+.fc-event {
+    white-space: normal; /* Permitir saltos de línea */
+    text-overflow: unset; /* Quitar truncamiento */
+    overflow: hidden; /* Mantener el contenido dentro del contenedor */
+    word-wrap: break-word; /* Permitir dividir palabras largas */
+    overflow-wrap: break-word; /* Compatibilidad con navegadores */
+}
+
+
+/* Estilo del scrollbar */
+.fc-daygrid-day-frame>.fc-daygrid-day-events::-webkit-scrollbar {
+    width: 8px;
+    /* Ancho del scrollbar */
+}
+
+.fc-daygrid-day-frame>.fc-daygrid-day-events::-webkit-scrollbar-thumb {
+    background: #cccccc;
+    /* Color del scrollbar */
+    border-radius: 4px;
+}
+
+.fc-daygrid-day-frame>.fc-daygrid-day-events::-webkit-scrollbar-thumb:hover {
+    background: #aaaaaa;
+    /* Color al pasar el cursor */
+}
+
+/* Estilo general para los eventos */
+.fc-event-content {
+    padding: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow: hidden; /* Prevenir desbordamiento */
+}
+
+/* Estilo del asunto */
+.fc-event-asunto {
+    font-weight: bold;
+    font-size: 1em;
+    color: #333;
+    /* Texto oscuro para contraste */
+    margin-bottom: 2px;
+    overflow: hidden;
+    word-wrap: break-word;
+    /* Permitir saltos de línea si es necesario */
+    overflow-wrap: break-word;
+    /* Compatibilidad con navegadores */
+}
+
+/* Estilo del cliente */
+.fc-event-cliente {
+    font-size: 0.8em;
+    color: #666;
+    /* Texto más claro */
+
+    overflow: hidden;
+    word-wrap: break-word;
+    /* Permitir saltos de línea si es necesario */
+    overflow-wrap: break-word;
+    /* Compatibilidad con navegadores */
+}
+
+/* Estilo para planificaciones */
+.fc-event-content.evento-planificacion {
+    border-left: 4px solid #90CAF9; /* Azul claro */
+}
+
+/* Estilo para vencimientos */
+.fc-event-content.evento-vencimiento {
+    border-left: 4px solid #FFCDD2; /* Rojo claro */
+    background-color: #FFCDD2;
+}
+
+/* Estilo para periodicidad */
+.fc-event-content.evento-periodicidad {
+    border-left: 4px solid #FFF59D; /* Amarillo claro */
+    background-color: #FFF59D;
+
+}

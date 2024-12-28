@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ClientController;
@@ -92,6 +93,7 @@ Route::middleware('auth')->group(function () {
         return response()->json(['status' => 'success']);
     });
 
+    Route::get('/calendario', [CalendarController::class, 'index'])->name('calendar.index');
 
 
     Route::get('/clientes', [ClientController::class, 'index'])->name('client.index');
