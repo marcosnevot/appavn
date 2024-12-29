@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Tarea;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CalendarController extends Controller
 {
@@ -53,7 +54,7 @@ class CalendarController extends Controller
                 ->whereHas('users', function ($query) {
                     $query->where('user_id', auth()->id()); // Filtrar asignadas al usuario autenticado
                 })
-                ->orderByRaw('fecha_vencimiento IS NULL, fecha_vencimiento DESC')
+                ->orderByRaw('fecha_vencimiento IS NULL, fecha_vencimiento ASC')
                 ->get();
 
             // Log para depuración
@@ -183,7 +184,7 @@ class CalendarController extends Controller
                 ->whereHas('users', function ($query) {
                     $query->where('user_id', auth()->id()); // Filtrar asignadas al usuario autenticado
                 })
-                ->orderByRaw('fecha_vencimiento IS NULL, fecha_vencimiento DESC')
+                ->orderByRaw('fecha_vencimiento IS NULL, fecha_vencimiento ASC')
                 ->get();
 
 
@@ -200,6 +201,8 @@ class CalendarController extends Controller
                             'extendedProps' => [
                                 'cliente' => $task->cliente->nombre_fiscal ?? 'Sin Cliente',
                             ],
+                            'description' => Str::limit($task->descripcion ?? '', 100),
+
                         ];
                     }
 
@@ -212,6 +215,7 @@ class CalendarController extends Controller
                             'extendedProps' => [
                                 'cliente' => $task->cliente->nombre_fiscal ?? 'Sin Cliente',
                             ],
+                            'description' => Str::limit($task->descripcion ?? '', 100),
                         ];
                     }
                 }

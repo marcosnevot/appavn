@@ -35,11 +35,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (deleteButton) {
             deleteButton.addEventListener('click', () => {
                 const customerId = deleteButton.getAttribute('data-customer-id');
-                const confirmDelete = confirm('¿Estás seguro de que quieres borrar este cliente?');
+                deleteCustomer(customerId);
 
-                if (confirmDelete) {
-                    deleteCustomer(customerId);
-                }
             });
         }
 
@@ -388,10 +385,85 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-// Función para borrar la customer
+// Función para borrar un cliente
 function deleteCustomer(customerId) {
-    console.log("Intentando borrar la customer con ID:", customerId);
+    console.log("Verificando tareas relacionadas para el cliente con ID:", customerId);
 
+    // Verificar tareas relacionadas antes de borrar
+    fetch(`/clientes/${customerId}/confirm-delete`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const tareas = data.tareas;
+
+                if (tareas.length > 0) {
+                    // Mostrar el modal con las tareas relacionadas
+                    showConfirmationModal(customerId, data.cliente, tareas);
+                } else {
+                    // Confirmar eliminación si no hay tareas relacionadas
+                    if (confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
+                        proceedWithDeletion(customerId);
+                    }
+                }
+            } else {
+                alert('Error al verificar las tareas relacionadas: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error al verificar las tareas relacionadas:', error);
+            alert('Error al verificar las tareas relacionadas.');
+        });
+}
+
+// Mostrar el modal de confirmación
+function showConfirmationModal(customerId, clienteNombre, tareas) {
+    const modal = document.createElement('div');
+    modal.classList.add('confirmation-modal');
+
+    modal.innerHTML = `
+        <div class="modal-header">
+            <h3>Confirmación de eliminación</h3>
+        </div>
+        <div class="modal-content">
+            <p>El cliente <strong>${clienteNombre}</strong> tiene tareas relacionadas. Estas tareas quedarán sin cliente asignado:</p>
+            <div class="task-list">
+                <ul>
+                    ${tareas.map(tarea => `
+                        <li>
+                            <div class="task-details">
+                                <strong>ID: ${tarea.id} - ${tarea.asunto}</strong>
+                                <span>Estado: ${tarea.estado}</span>
+                                <span>Descripción: ${tarea.descripcion || 'Sin descripción'}</span>
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="cancel-button">Cancelar</button>
+            <button class="confirm-delete-button">Sí, borrar</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Botón para confirmar la eliminación
+    modal.querySelector('.confirm-delete-button').addEventListener('click', () => {
+        modal.remove();
+        if (confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
+            proceedWithDeletion(customerId);
+        }
+    });
+
+    // Listener para cerrar el modal
+    modal.querySelector('.cancel-button').addEventListener('click', () => {
+        modal.remove();
+    });
+}
+
+// Proceder con la eliminación
+function proceedWithDeletion(customerId) {
     fetch(`/clientes/${customerId}`, {
         method: 'DELETE',
         headers: {
@@ -411,7 +483,7 @@ function deleteCustomer(customerId) {
                     rowToDelete.remove();
                 }
             } else {
-                console.error('Error al eliminar la customer:', data.message);
+                console.error('Error al eliminar el cliente:', data.message);
                 alert('Error al eliminar el cliente: ' + data.message);
             }
         })
@@ -420,6 +492,7 @@ function deleteCustomer(customerId) {
             alert('Error al borrar el cliente.');
         });
 }
+
 
 // Función para cerrar el formulario de edición
 function closeEditCustomerForm(editCustomerFormContainer) {

@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Ocultar el formulario cuando se hace clic fuera de él
-    document.addEventListener('click', function (event) {
+    /* document.addEventListener('click', function (event) {
         const isInsideForm = taskForm.contains(event.target);
         const isInsideModal = document.getElementById('confirm-modal').contains(event.target);
         const isNewTaskButton = document.getElementById('new-task-button').contains(event.target);
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 closeTaskForm();
             }
         }
-    });
+    }); */
 
     // Función para cerrar el formulario
     function closeTaskForm() {

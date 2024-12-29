@@ -103,19 +103,20 @@ document.addEventListener('DOMContentLoaded', function () {
             return; // Salir si el usuario cancela el prompt
         }
 
+
         const filterData = {
-            nombre_fiscal: document.getElementById('filter-nombrefiscal-input').value || '',
-            nif: document.getElementById('filter-nif-input').value || '',
+            nombre_fiscal: document.getElementById('filter-nombrefiscal-ids').value || '',
+            nif: document.getElementById('filter-nif-ids').value || '',
             movil: document.getElementById('filter-movil-input').value || '',
             fijo: document.getElementById('filter-fijo-input').value || '',
             email: document.getElementById('filter-email-input').value || '',
             direccion: document.getElementById('filter-direccion-input').value || '',
             codigo_postal: document.getElementById('filter-codigo-postal-input').value || '',
             poblacion: document.getElementById('filter-poblacion-input').value || '',
-            tipo_cliente: document.getElementById('filter-tipocliente-input').value || '',
-            clasificacion: document.getElementById('filter-clasificacion-input').value || '',
-            tributacion: document.getElementById('filter-tributacion-input').value || '',
-            situacion: document.getElementById('filter-situacion-input').value || '',
+            tipo_cliente: document.getElementById('filter-tipocliente-ids').value || '',
+            clasificacion: document.getElementById('filter-clasificacion-ids').value || '',
+            tributacion: document.getElementById('filter-tributacion-ids').value || '',
+            situacion: document.getElementById('filter-situacion-ids').value || '',
             datos_bancarios: document.getElementById('filter-datos-bancarios-input').value || '',
             subclase: document.getElementById('filter-subclase-input').value || '',
             puntaje: document.getElementById('filter-puntaje-input').value || '',
@@ -123,11 +124,11 @@ document.addEventListener('DOMContentLoaded', function () {
             usuario: document.getElementById('filter-user-ids').value || '', // Para el responsable asignado
             persona_contacto: document.getElementById('filter-persona_contacto-input').value || '', // Persona de contacto
             segundo_telefono: document.getElementById('filter-segundo_telefono-input').value || '', // Segundo teléfono
-
+   
 
             fileName: fileName + '.xlsx'
         };
-
+        console.log(filterData);
         try {
             const response = await fetch('/clientes/export', {
                 method: 'POST',

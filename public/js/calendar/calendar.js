@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
          </span> |
          <span style="display: flex; align-items: center; gap: 5px;">
              <span style="width: 15px; height: 15px; background-color: #FFF59D; display: inline-block;"></span>
-              Tarea Periódica
+              Tarea Periódica (Próxima Generación)
          </span>
      </div>
  `;
@@ -146,7 +146,7 @@ function showModal(date) {
 
     // Título del modal
     const modalTitle = document.createElement('h3');
-    modalTitle.textContent = `Tareas del ${date}`;
+    modalTitle.textContent = `Tareas del ${formatDate(date)}`;
     modalTitle.classList.add('calendar-modal-title'); // Aplicar estilos del CSS
     modal.appendChild(modalTitle);
 
@@ -184,8 +184,13 @@ function showModal(date) {
                 client.textContent = event.extendedProps?.cliente || 'Sin Cliente';
                 client.classList.add('fc-event-cliente');
 
+                const description = document.createElement('div');
+                description.textContent = event.description || '';
+                description.classList.add('fc-event-description');
+
                 eventContainer.appendChild(title);
                 eventContainer.appendChild(client);
+                eventContainer.appendChild(description);
 
                 // Listener para redirigir al detalle de la tarea
                 eventContainer.addEventListener('click', () => {
@@ -201,7 +206,10 @@ function showModal(date) {
             eventsContainer.innerHTML = '<p class="calendar-modal-error">Error al cargar los eventos.</p>';
         });
 
-    // Botón de cierre
+    // Botón de cierre en un contenedor
+    const closeButtonContainer = document.createElement('div');
+    closeButtonContainer.classList.add('calendar-modal-close-container'); // Nueva clase para el contenedor
+
     const closeButton = document.createElement('button');
     closeButton.textContent = 'Cerrar';
     closeButton.classList.add('calendar-modal-close');
@@ -209,10 +217,37 @@ function showModal(date) {
         modal.style.display = 'none';
         overlay.style.display = 'none';
     });
-    modal.appendChild(closeButton);
+
+    // Añadir el botón al contenedor y luego al modal
+    closeButtonContainer.appendChild(closeButton);
+    modal.appendChild(closeButtonContainer);
 
     // Mostrar el modal y el overlay
     modal.style.display = 'block';
     overlay.style.display = 'block';
 }
 
+
+function formatDate(dateString) {
+    console.log("Procesando fecha:", dateString);
+
+    if (!dateString) return "N/A";
+
+    // Normalizar la fecha si tiene el formato "DD/MM/YYYY"
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+        const [day, month, year] = dateString.split("/");
+        dateString = `${year}-${month}-${day}`; // Convertir a "YYYY-MM-DD"
+    }
+
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        console.warn(`Formato de fecha inválido: ${dateString}`);
+        return "Fecha inválida";
+    }
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}

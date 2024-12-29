@@ -29,7 +29,7 @@ return new class extends Migration
             $table->enum('estado', ['PENDIENTE', 'ENPROGRESO', 'COMPLETADA'])->nullable();
 
             // Relación con cliente
-            $table->foreignId('cliente_id')->nullable()->constrained('clientes')->onDelete('cascade'); 
+            $table->foreignId('cliente_id')->nullable()->constrained('clientes')->onDelete('set null');
 
             // Asignación a uno o varios usuarios
             $table->foreignId('asignacion_id')->nullable()->constrained('users')->onDelete('set null');

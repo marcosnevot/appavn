@@ -77,77 +77,74 @@ function updateFilterInfoPanel(filters) {
 
     filterInfoContent.innerHTML = ''; // Limpiar contenido anterior
 
-    // Filtrar las entradas con valores no vacíos
     const filterEntries = Object.entries(filters).filter(([key, value]) => value !== '');
 
     if (filterEntries.length === 0) {
-        // Ocultar el panel cuando no hay filtros aplicados
         filterInfoPanel.classList.add('hide');
     } else {
         filterEntries.forEach(([key, value]) => {
             const p = document.createElement('p');
 
             if (key === 'usuario') {
-                // Manejo para usuarios
-                const usuario = usersData.find(usuario => usuario.id === parseInt(value));
+                const usuario = usersData.find(usuario => usuario.id == value); // Comparación flexible (==)
                 p.textContent = `Usuario Asignado: ${usuario ? usuario.name : 'Desconocido'}`;
-            }
-            else if (key === 'clasificacion') {
-                // Manejo para clasificaciones
-                const clasificacionIds = value.split(',').map(id => parseInt(id));
-                const clasificacionNames = clasificacionIds
-                    .map(id => {
-                        const clasificacion = clasificacionesData.find(c => c.id === id);
+            } else if (key === 'clasificacion') {
+                // Buscar directamente por nombre
+                const clasificacionNames = value.split(',')
+                    .map(nombre => {
+                        const clasificacion = clasificacionesData.find(c => c.nombre.toLowerCase() === nombre.toLowerCase());
                         return clasificacion ? clasificacion.nombre : 'Desconocido';
                     })
                     .join(', ');
                 p.textContent = `Clasificación: ${clasificacionNames}`;
-            }
-            else if (key === 'situacion') {
-                // Manejo para situaciones
-                const situacionIds = value.split(',').map(id => parseInt(id));
-                const situacionNames = situacionIds
-                    .map(id => {
-                        const situacion = situacionesData.find(s => s.id === id);
+            } else if (key === 'situacion') {
+                // Buscar directamente por nombre
+                const situacionNames = value.split(',')
+                    .map(nombre => {
+                        const situacion = situacionesData.find(s => s.nombre.toLowerCase() === nombre.toLowerCase());
                         return situacion ? situacion.nombre : 'Desconocido';
                     })
                     .join(', ');
                 p.textContent = `Situación: ${situacionNames}`;
-            }
-            else if (key === 'tributacion') {
-                // Manejo para tributaciones
-                const tributacionIds = value.split(',').map(id => parseInt(id));
-                const tributacionNames = tributacionIds
-                    .map(id => {
-                        const tributacion = tributacionesData.find(t => t.id === id);
+            } else if (key === 'tributacion') {
+                // Buscar directamente por nombre
+                const tributacionNames = value.split(',')
+                    .map(nombre => {
+                        const tributacion = tributacionesData.find(t => t.nombre.toLowerCase() === nombre.toLowerCase());
                         return tributacion ? tributacion.nombre : 'Desconocido';
                     })
                     .join(', ');
                 p.textContent = `Tributación: ${tributacionNames}`;
-            }
-            else if (key === 'tipo_cliente') {
-                // Manejo para tipo de cliente
-                const tipoClienteIds = value.split(',').map(id => parseInt(id));
-                const tipoClienteNames = tipoClienteIds
-                    .map(id => {
-                        const tipoCliente = tiposData.find(t => t.id === id);
+            } else if (key === 'tipo_cliente') {
+                // Buscar directamente por nombre
+                const tipoClienteNames = value.split(',')
+                    .map(nombre => {
+                        const tipoCliente = tiposData.find(t => t.nombre.toLowerCase() === nombre.toLowerCase());
                         return tipoCliente ? tipoCliente.nombre : 'Desconocido';
                     })
                     .join(', ');
                 p.textContent = `Tipo Cliente: ${tipoClienteNames}`;
-            }
-            else {
-                // Default para otros campos
+            } else if (key === 'nombre_fiscal') {
+                const nombres = value.split(',');
+                const nombresFiscales = nombres
+                    .map(nombre => {
+                        const cliente = clientesData.find(c => c.id == nombre || c.nombre_fiscal == nombre);
+                        return cliente ? cliente.nombre_fiscal : 'Desconocido';
+                    })
+                    .join(', ');
+                p.textContent = `Nombre Fiscal: ${nombresFiscales}`;
+            } else {
                 p.textContent = `${capitalizeFirstLetter(key)}: ${value}`;
             }
 
             filterInfoContent.appendChild(p);
         });
 
-        // Mostrar el panel si hay filtros
         filterInfoPanel.classList.remove('hide');
     }
 }
+
+
 
 // Función para capitalizar la primera letra
 function capitalizeFirstLetter(string) {
@@ -359,7 +356,6 @@ document.addEventListener('DOMContentLoaded', function () {
             renderList(filtered);
         }
 
-
         function renderList(filtered) {
             list.innerHTML = '';
             if (filtered.length === 0) {
@@ -367,19 +363,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // Filtrar elementos que tienen valores válidos según displayFormatter
-            const validItems = filtered.filter(item => {
-                const displayValue = displayFormatter(item);
-                return displayValue && displayValue.trim() !== ''; // Excluir valores nulos o vacíos
-            });
-
-            if (validItems.length === 0) {
-                list.style.display = 'none';
-                return;
-            }
-
             list.style.display = 'block';
-            validItems.forEach((item, index) => {
+            filtered.forEach((item, index) => {
                 const li = document.createElement('li');
                 li.textContent = displayFormatter(item);
                 li.setAttribute('data-id', item.id);
@@ -392,17 +377,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-
         function renderSelectedItems() {
-            // Mantener el ancho del contenedor igual al del input
             selectedContainer.style.width = `${input.offsetWidth}px`;
-            selectedContainer.style.overflowX = 'auto'; // Habilitar scroll horizontal
-            selectedContainer.innerHTML = ''; // Limpiar el contenedor
+            selectedContainer.style.overflowX = 'auto';
+            selectedContainer.innerHTML = '';
 
             selectedItems.forEach(item => {
                 const span = document.createElement('span');
                 span.classList.add('selected-item');
-                // Orden de prioridad para mostrar el texto
+
+                // Mostrar NIF si está presente, caso contrario nombre o nombre fiscal
                 const displayText = item.nif || item.nombre_fiscal || item.nombre || 'Valor desconocido';
                 span.textContent = displayText;
 
@@ -414,54 +398,62 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectedContainer.appendChild(span);
             });
 
-            updateHiddenInput(); // Actualizar el campo oculto
+            updateHiddenInput();
         }
+
 
         function updateHiddenInput() {
             let value = '';
 
-            // Determinar el tipo de filtro según el inputId
-            if (input.id.includes('nif')) {
-                // Enviar solo los NIFs
-                value = selectedItems.map(item => item.nif).filter(v => v).join(',');
-            } else if (input.id.includes('nombrefiscal')) {
-                // Enviar solo los nombres fiscales
-                value = selectedItems.map(item => item.nombre_fiscal).filter(v => v).join(',');
+            if (input.id === 'filter-nombrefiscal-input') {
+                // Enviar IDs si existen, pero incluir nombres fiscales para entradas personalizadas
+                value = selectedItems
+                    .map(item => item.id || item.nombre_fiscal) // Usar ID si está presente, caso contrario el nombre fiscal
+                    .filter(v => v) // Eliminar valores nulos o vacíos
+                    .join(',');
+            } else if (input.id === 'filter-nif-input') {
+                // Enviar NIFs o el valor escrito manualmente
+                value = selectedItems
+                    .map(item => item.nif || item.nombre || 'Valor desconocido') // Priorizar NIF o nombre
+                    .filter(v => v)
+                    .join(',');
             } else {
-                // Para otros casos (clasificación, tributación, etc.), enviar nombre
-                value = selectedItems.map(item => item.nombre).filter(v => v).join(',');
+                // Otros casos
+                value = selectedItems
+                    .map(item => item.nombre || item.nombre_fiscal || item.nif)
+                    .filter(v => v)
+                    .join(',');
             }
 
             hiddenInput.value = value;
-
-            console.log(`Valores actualizados para el filtro: ${hiddenInput.value}`);
+            console.log(`Valores actualizados para el filtro (${inputId}): ${hiddenInput.value}`);
         }
 
 
 
         function selectItem(item) {
-            // Determinar si el valor ya está seleccionado
             const exists = selectedItems.some(selected =>
-                (selected.id && selected.id === item.id) ||
-                (selected.nombre && selected.nombre === item.nombre)
+                (selected.id && selected.id === item.id) || // Comparar por ID
+                (!selected.id && selected.nif === item.nif) // Comparar por NIF para valores personalizados
             );
 
             if (!exists) {
-                // Crear un nuevo objeto con las propiedades relevantes
                 const newItem = {
                     id: item.id || null,
                     nombre: item.nombre || null,
                     nombre_fiscal: item.nombre_fiscal || '',
-                    nif: item.nif || '' // Asegurarse de capturar el NIF correctamente
+                    nif: item.nif || item.nombre || '' // Asegurar que NIF personalizado se asigna correctamente
                 };
                 selectedItems.push(newItem);
                 renderSelectedItems();
             }
 
-            input.value = '';
+            input.value = item.nif || item.nombre || ''; // Mostrar el NIF o nombre en el input
             list.style.display = 'none';
             selectedIndex = -1;
         }
+
+
 
 
         function removeItem(item) {
@@ -486,22 +478,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.preventDefault();
 
                 if (selectedIndex >= 0 && selectedIndex < items.length) {
-                    // Selección desde la lista desplegable
+                    // Selección desde la lista
                     const selectedItem = dataList.find(item =>
                         displayFormatter(item) === items[selectedIndex].textContent
                     );
                     selectItem(selectedItem);
                 } else if (input.value.trim()) {
-                    // Texto libre si no está en la lista
+                    // Manejo de entrada manual
                     const query = input.value.trim();
                     const newItem = {
-                        id: null, // ID nulo para elementos personalizados
-                        nombre_fiscal: inputId.includes('nombre-fiscal') ? query : '',
+                        id: null, // ID nulo para valores personalizados
+                        nombre_fiscal: inputId.includes('nombrefiscal') ? query : '',
                         nif: inputId.includes('nif') ? query : '',
-                        nombre: inputId.includes('nombre') ? query : '', // Nombre genérico para otros campos
+                        nombre: (!inputId.includes('nif') && !inputId.includes('nombrefiscal')) ? query : ''
                     };
 
-                    // Validar duplicados
                     const exists = selectedItems.some(item =>
                         item.nombre === newItem.nombre ||
                         item.nombre_fiscal === newItem.nombre_fiscal ||
@@ -509,12 +500,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
 
                     if (!exists) {
-                        selectItem(newItem);
+                        selectedItems.push(newItem);
+                        renderSelectedItems();
                     }
 
                     input.value = ''; // Limpiar el input
-                    list.style.display = 'none'; // Ocultar la lista
-                    selectedIndex = -1; // Reiniciar el índice
+                    list.style.display = 'none';
+                    selectedIndex = -1;
                 }
             } else if (e.key === 'ArrowDown') {
                 e.preventDefault();
@@ -529,15 +521,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-
         function updateActiveItem(items, index) {
             items.forEach(item => item.classList.remove('active'));
             if (items[index]) {
                 items[index].classList.add('active');
-                items[index].scrollIntoView({ block: "nearest" });
+                items[index].scrollIntoView({ block: 'nearest' });
             }
         }
     }
+
 
 
     function closeAutocompleteListIfClickedOutside(inputId, listId, event) {

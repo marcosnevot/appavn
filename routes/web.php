@@ -103,6 +103,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/clientes/{id}', [ClientController::class, 'show'])->name('clients.show');
     Route::delete('/clientes/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');
+    Route::get('/clientes/{id}/confirm-delete', [ClientController::class, 'confirmDelete']);
     Route::get('/clientes/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
     Route::put('/clientes/{id}', [ClientController::class, 'update'])->name('clients.update');
     Route::post('/clientes/export', [ClientController::class, 'exportFilteredCustomers'])->name('clientes.export');

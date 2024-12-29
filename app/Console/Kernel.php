@@ -18,8 +18,8 @@ class Kernel extends ConsoleKernel
         // Ejecuta el comando diariamente a la medianoche
         // $schedule->command('notifications:delete-old')
         //    ->monthly();
-        // $schedule->job(new GenerarTareaJob)->dailyAt('21:54');
-        $schedule->job(new GenerarTareaJob)->everyMinute();
+        $schedule->job(new GenerarTareaJob)->dailyAt('9:00');
+        // $schedule->job(new GenerarTareaJob)->everyMinute();
         Log::info('Comando tareas:    generar ejecutado.');
        
     }

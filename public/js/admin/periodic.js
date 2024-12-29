@@ -61,7 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const descripcion = task.descripcion ? task.descripcion.slice(0, 50) : "Sin Descripción";
         const descripcionMostrar = descripcion.length < (task.descripcion ? task.descripcion.length : 0) ? descripcion + "..." : descripcion;
 
-        const proximaGeneracion = calcularProximaGeneracion(task.fecha_inicio_generacion, task.periodicidad);
+        // Formatear las fechas
+        const fechaInicioGeneracion = formatDate(task.fecha_inicio_generacion);
+        const proximaGeneracion = formatDate(calcularProximaGeneracion(task.fecha_inicio_generacion, task.periodicidad));
 
         row.innerHTML = `
             <td>${task.id}</td>
@@ -70,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${descripcionMostrar}</td>
             <td>${task.asignacion_nombre || "Sin Asignación"}</td>
             <td>${task.periodicidad}</td>
-            <td>${task.fecha_inicio_generacion}</td>
+            <td>${fechaInicioGeneracion}</td>
             <td>${proximaGeneracion || "N/A"}</td> <!-- Columna "Próxima Generación" -->
 
         `;
@@ -175,6 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Función para calcular la próxima fecha de generación
 function calcularProximaGeneracion(fecha, periodicidad) {
+    if (!fecha) return null; // Manejar fechas nulas
     const fechaGeneracion = new Date(fecha);
     switch (periodicidad) {
         case 'SEMANAL':
@@ -192,5 +195,30 @@ function calcularProximaGeneracion(fecha, periodicidad) {
         default:
             return null;
     }
-    return fechaGeneracion.toISOString().split('T')[0]; // Devuelve la fecha en formato YYYY-MM-DD
+    return formatDate(fechaGeneracion.toISOString());
 }
+
+function formatDate(dateString) {
+    console.log("Procesando fecha:", dateString);
+
+    if (!dateString) return "N/A";
+
+    // Normalizar la fecha si tiene el formato "DD/MM/YYYY"
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+        const [day, month, year] = dateString.split("/");
+        dateString = `${year}-${month}-${day}`; // Convertir a "YYYY-MM-DD"
+    }
+
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        console.warn(`Formato de fecha inválido: ${dateString}`);
+        return "Fecha inválida";
+    }
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+

@@ -136,3 +136,148 @@
     max-width: 19.5%;
     box-sizing: border-box;
 }
+
+
+.confirmation-modal {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 25px;
+    width: 50%;
+    max-width: 700px;
+    z-index: 1000;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    font-family: 'Inter', sans-serif; /* Fuente profesional */
+}
+
+.confirmation-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+}
+
+.confirmation-modal .modal-header h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333333;
+}
+
+.confirmation-modal .modal-header .close-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #888888;
+    transition: color 0.3s ease;
+}
+
+.confirmation-modal .modal-header .close-button:hover {
+    color: #f44336;
+}
+
+.confirmation-modal .modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.confirmation-modal .modal-content p {
+    font-size: 1rem;
+    color: #555555;
+    line-height: 1.6;
+}
+
+.confirmation-modal .modal-content .task-list {
+    max-height: 300px; /* Altura máxima para evitar que crezca demasiado */
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.confirmation-modal .modal-content .task-list ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.confirmation-modal .modal-content .task-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.95rem;
+    color: #333333;
+}
+
+.confirmation-modal .modal-content .task-list li:last-child {
+    border-bottom: none; /* Quitar línea para el último elemento */
+}
+
+.confirmation-modal .modal-content .task-list li .task-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.confirmation-modal .modal-content .task-list li .task-details strong {
+    font-weight: 600;
+    color: #222222;
+}
+
+.confirmation-modal .modal-content .task-list li .task-actions {
+    margin-left: 15px;
+    display: flex;
+    gap: 5px;
+}
+
+.confirmation-modal .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.confirmation-modal .modal-footer button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.confirmation-modal .modal-footer .confirm-delete-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.confirmation-modal .modal-footer .confirm-delete-button:hover {
+    background-color: #d32f2f;
+}
+
+.confirmation-modal .modal-footer .cancel-button {
+    background-color: #e5e7eb;
+    color: #333333;
+}
+
+.confirmation-modal .modal-footer .cancel-button:hover {
+    background-color: #cccccc;
+}
