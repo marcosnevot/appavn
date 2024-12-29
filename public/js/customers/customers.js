@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             fileName: fileName + '.xlsx'
         };
-        console.log(filterData);
+
         try {
             const response = await fetch('/clientes/export', {
                 method: 'POST',

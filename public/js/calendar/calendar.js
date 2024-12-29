@@ -1,3 +1,34 @@
+// Tiempo límite de inactividad en milisegundos (por ejemplo, 15 minutos)
+const INACTIVITY_LIMIT = 60 * 60 * 1000; 
+
+let inactivityTimer;
+
+// Función para recargar la página
+function reloadPage() {
+    if (confirm('Has estado inactivo durante un tiempo. La página se recargará para evitar problemas.')) {
+        window.location.reload(); // Recargar la página
+    }
+}
+
+// Reinicia el temporizador de inactividad
+function resetInactivityTimer(event) {
+    // Verificar si el evento existe y proviene de un enlace (<a>)
+    if (!event || event.target?.tagName === 'A' || event.target?.closest('a')) {
+        console.log('Inactividad reseteada');
+        clearTimeout(inactivityTimer); // Limpia el temporizador anterior
+        inactivityTimer = setTimeout(reloadPage, INACTIVITY_LIMIT); // Establece un nuevo temporizador
+    }
+}
+
+// Seleccionar el contenedor principal (body-container)
+const bodyContainer = document.getElementById('body-container');
+
+// Escucha eventos de clic únicamente en el body-container
+bodyContainer.addEventListener('click', resetInactivityTimer);
+
+// Inicia el temporizador al cargar la página
+resetInactivityTimer();
+
 document.addEventListener('DOMContentLoaded', function () {
     var calendarEl = document.getElementById('calendar');
     let lastRange = { start: null, end: null }; // Variable para almacenar el último rango solicitado

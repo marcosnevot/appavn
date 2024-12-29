@@ -1,6 +1,5 @@
-
 // Tiempo límite de inactividad en milisegundos (por ejemplo, 15 minutos)
-const INACTIVITY_LIMIT = 30 * 60 * 1000; 
+const INACTIVITY_LIMIT = 60 * 60 * 1000; 
 
 let inactivityTimer;
 
@@ -12,10 +11,13 @@ function reloadPage() {
 }
 
 // Reinicia el temporizador de inactividad
-function resetInactivityTimer() {
-    console.log('reseteadoInactivity');
-    clearTimeout(inactivityTimer); // Limpia el temporizador anterior
-    inactivityTimer = setTimeout(reloadPage, INACTIVITY_LIMIT); // Establece un nuevo temporizador
+function resetInactivityTimer(event) {
+    // Verificar si el evento existe y proviene de un enlace (<a>)
+    if (!event || event.target?.tagName === 'A' || event.target?.closest('a')) {
+        console.log('Inactividad reseteada');
+        clearTimeout(inactivityTimer); // Limpia el temporizador anterior
+        inactivityTimer = setTimeout(reloadPage, INACTIVITY_LIMIT); // Establece un nuevo temporizador
+    }
 }
 
 // Seleccionar el contenedor principal (body-container)

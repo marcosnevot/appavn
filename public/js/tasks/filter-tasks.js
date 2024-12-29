@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // Ocultar el formulario cuando se hace clic fuera de él
-    document.addEventListener('click', function (event) {
+    /* document.addEventListener('click', function (event) {
         const isInsideForm = filterTaskForm.contains(event.target); // Verifica si el clic fue dentro del formulario
         const isfilterTaskButton = document.getElementById('filter-task-button').contains(event.target);
         const isDateRangePicker = event.target.closest('.daterangepicker'); // Verifica si el clic fue dentro del Date Range Picker
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 closeFilterTaskForm();
             }
         }
-    });
+    }); */
 
 
 

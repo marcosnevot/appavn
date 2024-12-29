@@ -528,7 +528,6 @@ class ClientController extends Controller
     {
         // Obtén los filtros aplicados desde la solicitud
         $filters = $request->all();
-        Log::info('Filtros enviados:', $filters);
 
         // Aplica los filtros a la consulta de tareas
         $query = Cliente::select([
@@ -566,7 +565,6 @@ class ClientController extends Controller
 
 
         $filteredCustomers = $query->get();
-        Log::info('Clientes filtrados:', $filteredCustomers->toArray());
 
         $fileName = $filters['fileName'] ?? 'clientes_filtrados.xlsx';
 

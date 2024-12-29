@@ -199,7 +199,6 @@ function calcularProximaGeneracion(fecha, periodicidad) {
 }
 
 function formatDate(dateString) {
-    console.log("Procesando fecha:", dateString);
 
     if (!dateString) return "N/A";
 

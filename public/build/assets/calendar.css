@@ -1,54 +1,71 @@
 /* Estilo para limitar la altura de las celdas del calendario */
 #calendar {}
 
+
 /* Limitar la altura de las celdas del calendario */
 .fc-daygrid-day-frame {
     position: relative;
-    max-height: 10vh !important;
-    /* Limita la altura de la celda */
+    max-height: calc(10vh);
+    /* Altura máxima proporcional al tamaño de la pantalla */
+    overflow: hidden;
+    /* Evitar que toda la celda tenga scroll */
 }
 
-/* Permitir el desplazamiento dentro de la celda si hay muchos eventos */
+/* Permitir el desplazamiento dentro del contenedor de eventos */
 .fc-daygrid-day-frame>.fc-daygrid-day-events {
-    max-height: 70px !important;
-    overflow-y: auto !important;
-    /* Desplazamiento vertical */
+    max-height: calc(10vh - 20px);
+    /* Ajustar al tamaño disponible dentro de la celda */
+    overflow-y: auto;
+    /* Scroll vertical si hay más eventos de los que caben */
     padding-right: 5px;
     /* Espacio para la barra de desplazamiento */
+    margin-top: 2px;
+    /* Espacio entre eventos y el número del día */
 }
 
-/* Ajustar los eventos para que se mantengan dentro de la celda */
+/* Asegurar que los eventos se mantengan dentro de las celdas */
 .fc-event {
     white-space: normal;
     /* Permitir saltos de línea */
     text-overflow: ellipsis;
     /* Truncar texto si es demasiado largo */
     overflow: hidden;
-    /* Evitar que el contenido se desborde */
+    /* Evitar desbordamiento */
     word-wrap: break-word;
     /* Dividir palabras largas */
     overflow-wrap: break-word;
-    /* Soporte adicional para dividir palabras */
+    /* Compatibilidad adicional */
     max-width: 100%;
     /* Asegurarse de que el evento no exceda el ancho de la celda */
 }
 
+/* Ajustar altura dinámica del calendario */
+.fc-daygrid {
+    height: 100%;
+    /* Usar toda la altura disponible */
+}
 
-/* Estilo del scrollbar */
+/* Mejorar la visibilidad del número del día */
+.fc-daygrid-day-number {
+    font-size: 0.9rem;
+    padding: 2px;
+    text-align: right;
+}
+
+
+
+/* Scrollbar estilizado */
 .fc-daygrid-day-frame>.fc-daygrid-day-events::-webkit-scrollbar {
     width: 8px;
-    /* Ancho del scrollbar */
 }
 
 .fc-daygrid-day-frame>.fc-daygrid-day-events::-webkit-scrollbar-thumb {
-    background: #cccccc;
-    /* Color del scrollbar */
+    background-color: #c4c4c4;
     border-radius: 4px;
 }
 
-.fc-daygrid-day-frame>.fc-daygrid-day-events::-webkit-scrollbar-thumb:hover {
-    background: #aaaaaa;
-    /* Color al pasar el cursor */
+.fc-daygrid-day-frame>.fc-daygrid-day-events::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
 }
 
 /* Estilo general para los eventos */
