@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\GenericExport;
 use App\Models\Asunto;
 use App\Models\Clasificacion;
 use App\Models\Situacion;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdminController extends Controller
 {
@@ -91,6 +93,36 @@ class AdminController extends Controller
             'tiposcliente' => TipoCliente::class,
             default => throw new \Exception('Entidad no soportada.'),
         };
+    }
+
+    public function exportAsuntos()
+    {
+        return Excel::download(new GenericExport('asunto'), 'asuntos.xlsx');
+    }
+
+    public function exportTipos()
+    {
+        return Excel::download(new GenericExport('tipo'), 'tipos.xlsx');
+    }
+
+    public function exportClasificaciones()
+    {
+        return Excel::download(new GenericExport('clasificacion'), 'asuntos.xlsx');
+    }
+
+    public function exportSituaciones()
+    {
+        return Excel::download(new GenericExport('situacion'), 'tipos.xlsx');
+    }
+
+    public function exportTributaciones()
+    {
+        return Excel::download(new GenericExport('tributacion'), 'asuntos.xlsx');
+    }
+
+    public function exportTiposCliente()
+    {
+        return Excel::download(new GenericExport('tipocliente'), 'tipos.xlsx');
     }
 
 

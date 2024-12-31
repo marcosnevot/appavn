@@ -60,6 +60,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/{entity}/{id}', [AdminController::class, 'destroy'])
         ->whereIn('entity', ['asuntos', 'tipos', 'clasificaciones', 'situaciones', 'tributaciones', 'tiposcliente']);
 
+    // Exportación de datos a excel
+    Route::get('/export/asuntos', [AdminController::class, 'exportAsuntos']);
+    Route::get('/export/tipos', [AdminController::class, 'exportTipos']);
+    Route::get('/export/clasificaciones', [AdminController::class, 'exportClasificaciones']);
+    Route::get('/export/situaciones', [AdminController::class, 'exportSituaciones']);
+    Route::get('/export/tributaciones', [AdminController::class, 'exportTributaciones']);
+    Route::get('/export/tiposcliente', [AdminController::class, 'exportTiposCliente']);
+
     // Gestión de Usuarios
     Route::get('/users', [AdminController::class, 'indexUsers']); // Cambiamos el método al correcto
     Route::post('/users', [AdminController::class, 'storeUser']); // Método específico para crear usuarios
@@ -80,6 +88,4 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/calendar/tasks', [CalendarController::class, 'getTasks']);
     Route::get('/calendar/events', [CalendarController::class, 'getEventsByDate']);
-
-
 });

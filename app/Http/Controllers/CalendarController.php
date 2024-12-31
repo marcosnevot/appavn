@@ -115,7 +115,7 @@ class CalendarController extends Controller
                         }
                     }
                 }
-                Log::info('Eventos ordenados en el backend', ['events' => $events]);
+               // Log::info('Eventos ordenados en el backend', ['events' => $events]);
                 return $events;
             });
 
