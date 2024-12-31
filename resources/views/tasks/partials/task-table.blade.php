@@ -37,26 +37,6 @@
 </div>
 
 
-<!-- Links a las tareas de cada user -->
-@php
-$user = auth()->user();
-@endphp
-
-@if ($user->hasRole('admin') || ($user->hasRole('employee') && $user->id === 2))
-<hr class="border-gray-700">
-@inject('users', 'App\Models\User')
-<div class="user-tasks-container">
-
-    <div class="user-tasks-grid">
-        @foreach ($users::where('id', '!=', auth()->id())->get() as $user)
-        <a href="{{ route('tasks.index', ['usuario' => $user->id]) }}"
-            class="user-task-link {{ request()->query('usuario') == $user->id ? 'active' : '' }}">
-            {{ $user->name }}
-        </a>
-        @endforeach
-    </div>
-</div>
-@endif
 
 <!-- Panel de horas -->
 <div class="hours-summary-main professional-hours-panel">

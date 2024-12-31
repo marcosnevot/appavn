@@ -122,7 +122,7 @@
                 </span>
                 {{ __('Clientes') }}
             </a>
-            
+
             <hr class="border-gray-700">
 
             <a href="{{ route('calendar.index') }}" class="menu-link {{ request()->routeIs('calendar.index') ? 'active' : '' }}">
@@ -141,6 +141,27 @@
                 {{ __('Calendario') }}
             </a>
 
+            <!-- Links a las tareas de cada user -->
+            @php
+            $user = auth()->user();
+            @endphp
+
+            @if ($user->hasRole('admin') || ($user->hasRole('employee') && $user->id === 2))
+            <hr class="border-gray-700">
+            @inject('users', 'App\Models\User')
+           
+            <div class="user-tasks-container">
+                <div class="user-tasks-grid">
+                    @foreach ($users::where('id', '!=', auth()->id())->get() as $user)
+                    <a href="{{ route('tasks.index', ['usuario' => $user->id]) }}"
+                        class="user-task-link {{ request()->query('usuario') == $user->id ? 'active' : '' }}">
+                        {{ $user->name }}
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            
+            @endif
 
 
         </div>
@@ -1191,6 +1212,69 @@
         color: #FFFFFF;
     }
 
+
+    /* tareas por Usuario */
+
+    .user-tasks-container {
+        border-radius: 4px;
+        position: fixed;
+        overflow: auto;
+        display: flex;
+        /* Añadido para centrar el grid */
+        justify-content: center;
+        /* Centra horizontalmente el grid */
+        bottom: 23%;
+        left: 1%;
+        max-width: 500px;
+    }
+
+
+    .user-tasks-grid {
+        display: grid;
+        /* Usa grid para la disposición */
+        grid-template-columns: repeat(3, 1fr);
+        /* Define dos columnas iguales */
+        grid-gap: 5px;
+        /* Espaciado entre los elementos */
+        max-height: 180px;
+        /* Altura máxima del contenedor */
+        max-width: 220px;
+        /* Ancho máximo del contenedor */
+        overflow-y: auto;
+        /* Permite desplazamiento vertical si el contenido excede la altura */
+        justify-content: center;
+        /* Centra las columnas horizontalmente */
+        align-content: start;
+        /* Alinea los elementos al inicio vertical */
+        padding: 5px;
+       
+    }
+
+    .user-task-link {
+        display: flex;
+        background-color: #4A4A4A;
+        justify-content: center;
+        align-items: center;
+        padding: 3px 4px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #fff;
+        font-size: 14px;
+        text-align: center;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .user-task-link:hover {
+        background-color: #333333;
+        color: #FFFFFF;
+    }
+
+    .user-task-link.active {
+        background-color: #333333;
+        color: #fff;
+        font-weight: bold;
+    }
 
 
 

@@ -1391,60 +1391,6 @@ input[type="date"].planificacion-date-picker:focus {
 }
 
 
- /* tareas por Usuario */
-
- .user-tasks-container {
-    border-radius: 4px;
-    position: fixed;
-    overflow: auto;
-    display: flex;
-    /* Añadido para centrar el grid */
-    justify-content: center;
-    /* Centra horizontalmente el grid */
-    bottom: 10px;
-    left:320px;
-    max-width: 500px;
-}
-
-
-.user-tasks-grid {
-    display: grid; /* Cambia a grid */
-    grid-template-rows: repeat(2, 1fr); /* Define dos filas iguales */
-    grid-auto-flow: column; /* Organiza los elementos en filas */
-    grid-gap: 5px; /* Espaciado entre botones */
-    max-height: 160px;
-    max-width: 200px;
-    overflow-y: auto;
-    justify-content: center;
-    align-content: center;
-}
-
-.user-task-link {
-    display: flex;
-    background-color: #4A4A4A;
-    justify-content: center;
-    align-items: center;
-    padding: 4px 5px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    text-decoration: none;
-    color: #fff;
-    font-size: 15px;
-    text-align: center;
-    transition: all 0.2s ease-in-out;
-}
-
-.user-task-link:hover {
-    background-color: #333333;
-    color: #FFFFFF;
-}
-
-.user-task-link.active {
-    background-color: #333333;
-    color: #fff;
-    font-weight: bold;
-}
-
 
 
 @keyframes highlight {

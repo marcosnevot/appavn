@@ -1894,8 +1894,7 @@ class TaskController extends Controller
                 }
             }
 
-            // Actualizar la tarea con los datos procesados
-            $task->update($updateData);
+
 
             // Asociar los usuarios a la tarea (si se han seleccionado)
             if (!empty($validated['usersEdit'])) {
@@ -1912,10 +1911,33 @@ class TaskController extends Controller
                 }
             }
 
-            
+            // Actualizar la tarea con los datos procesados
+            $task->update($updateData);
 
             // Emitir el evento para notificar a otros usuarios
             broadcast(new TaskUpdated($task));
+
+            // Si el campo "duplicar" está marcado, crear una nueva tarea duplicada
+            if ($request->input('duplicar') === '1') {
+                $duplicatedTaskData = $updateData;
+
+                // Modificar los valores específicos para la tarea duplicada
+                $duplicatedTaskData['estado'] = 'PENDIENTE';
+                $duplicatedTaskData['fecha_planificacion'] = now()->toDateString();
+                $duplicatedTaskData['fecha_inicio'] = now()->toDateString();
+
+                // Crear la nueva tarea duplicada
+                $duplicatedTask = Tarea::create($duplicatedTaskData);
+
+                // Asociar usuarios seleccionados a la tarea duplicada
+                if (!empty($validated['usersEdit'])) {
+                    $duplicatedTask->users()->sync($validated['usersEdit']);
+                }
+
+                // Emitir el evento para la tarea duplicada
+                broadcast(new TaskCreated($duplicatedTask));
+            }
+
 
             // Confirmar la transacción
             DB::commit();

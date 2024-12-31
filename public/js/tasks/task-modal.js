@@ -493,6 +493,8 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('cliente_telefonoEdit', nuevoCliente ? additionalClientData.clienteTelefono : '');
         formData.append('asunto_nombreEdit', nuevoAsunto || '');
         formData.append('tipo_nombreEdit', nuevoTipo || '');
+        
+        formData.append('duplicar', duplicarCheckbox.checked ? '1' : '0');
 
         // Agregar manualmente el campo _method para simular una solicitud PUT
         formData.append('_method', 'PUT');
@@ -509,7 +511,6 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('usersEdit[]', userId);
         });
 
-        formData.append('duplicar', duplicarCheckbox.checked ? '1' : '0');
 
         fetch(`/tareas/${taskId}`, {
             method: 'POST',
