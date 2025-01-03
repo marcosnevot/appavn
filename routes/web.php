@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ChatGPTController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ClientController;
@@ -109,6 +110,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/clientes/export', [ClientController::class, 'exportFilteredCustomers'])->name('clientes.export');
     // Rutas relacionadas con los correos
     Route::post('/clientes/emails', [ClientController::class, 'fetchEmails'])->name('clientes.fetchEmails');
+
+
+    Route::post('/chat', [ChatGPTController::class, 'handleChat'])->name('chat.handle');
+
 });
 
 require __DIR__ . '/auth.php';

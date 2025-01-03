@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\DatabaseManagerController;
 use App\Http\Controllers\TaskController;
 use App\Models\Asunto;
 use App\Models\Clasificacion;
@@ -87,5 +88,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/periodic-tasks/{id}', [AdminController::class, 'updatePeriodic']);
 
     Route::get('/calendar/tasks', [CalendarController::class, 'getTasks']);
-    Route::get('/calendar/events', [CalendarController::class, 'getEventsByDate']);
+    Route::get('/calendar/events', [CalendarController::class, 'getEventsByDate']);   
 });
