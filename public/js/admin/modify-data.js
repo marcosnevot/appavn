@@ -361,6 +361,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function setupExportButton(buttonId, endpoint) {
+        const button = document.getElementById(buttonId);
+
+        button.addEventListener('click', async () => {
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error exportando datos: ${response.statusText}`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `datos-${buttonId.split('-')[1]}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error al exportar:', error);
+            }
+        });
+    }
+
     document.getElementById('refresh-asuntos').addEventListener('click', () => {
         loadData(API_ENDPOINTS.asuntos, 'asuntos-list', 'nombre', 'asuntos', asuntosData);
     });
@@ -391,20 +423,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Pasamos 'asuntos' y 'tipos' como el tipo de entidad
         loadData(API_ENDPOINTS.asuntos, 'asuntos-list', 'nombre', 'asuntos', asuntosData);
         loadData(API_ENDPOINTS.tipos, 'tipos-list', 'nombre', 'tipos', tiposData);
-
-        setupSearch('search-asuntos', asuntosData, 'asuntos-list', 'nombre', 'asuntos');
-        setupSearch('search-tipos', tiposData, 'tipos-list', 'nombre', 'tipos');
-
         // Pasamos 'clasificaciones', 'situaciones', 'tributaciones' y 'tiposcliente' como el tipo de entidad
         loadData(API_ENDPOINTS.clasificaciones, 'clasificaciones-list', 'nombre', 'clasificaciones', clasificacionesData);
         loadData(API_ENDPOINTS.situaciones, 'situaciones-list', 'nombre', 'situaciones', situacionesData);
         loadData(API_ENDPOINTS.tributaciones, 'tributaciones-list', 'nombre', 'tributaciones', tributacionesData);
         loadData(API_ENDPOINTS.tiposcliente, 'tiposcliente-list', 'nombre', 'tiposcliente', tiposclienteData);
 
+        setupSearch('search-asuntos', asuntosData, 'asuntos-list', 'nombre', 'asuntos');
+        setupSearch('search-tipos', tiposData, 'tipos-list', 'nombre', 'tipos');
         setupSearch('search-clasificaciones', clasificacionesData, 'clasificaciones-list', 'nombre', 'clasificaciones');
         setupSearch('search-situaciones', situacionesData, 'situaciones-list', 'nombre', 'situaciones');
         setupSearch('search-tributaciones', tributacionesData, 'tributaciones-list', 'nombre', 'tributaciones');
         setupSearch('search-tiposcliente', tiposclienteData, 'tiposcliente-list', 'nombre', 'tiposcliente');
+
+        setupExportButton('export-asuntos', '/api/export/asuntos');
+        setupExportButton('export-tipos', '/api/export/tipos');
+        setupExportButton('export-clasificaciones', '/api/export/clasificaciones');
+        setupExportButton('export-situaciones', '/api/export/situaciones');
+        setupExportButton('export-tributaciones', '/api/export/tributaciones');
+        setupExportButton('export-tiposcliente', '/api/export/tiposcliente');
 
     })();
 

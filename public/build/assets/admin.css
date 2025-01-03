@@ -277,6 +277,20 @@
     /* Suaviza el efecto al enfocar */
 }
 
+/* Botón Excel */
+.btn-export {
+    background-color: #2563eb;
+    color: #fff;
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-export:hover {
+    background-color: #1d4ed8;
+}
 
 
 /* Botón Refrescar */
