@@ -59,6 +59,11 @@
                 <input type="password" id="user-password" name="password" placeholder="Contraseña" minlength="5">
             </div>
 
+            <div class="form-group">
+                <label for="outlook-password">App Password de Outlook</label>
+                <input type="password" id="outlook-password" name="outlook_password" placeholder="App Password de Outlook">
+            </div>
+
             <div class="modal-actions">
                 <button type="submit" class="btn-admin-action primary">Guardar</button>
                 <button type="button" class="btn-admin-action secondary cancel-button">Cancelar</button>

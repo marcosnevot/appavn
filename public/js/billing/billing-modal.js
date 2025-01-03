@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         const descripcionTextarea = document.querySelector('textarea[name="descripcionEdit"]');
                         const observacionesTextarea = document.querySelector('textarea[name="observacionesEdit"]');
-                        const facturableCheckbox = document.querySelector('input[name="facturableEdit"]');
+                        const facturableSelect = document.querySelector('input[name="facturableEdit"]');
                         const facturadoInput = document.querySelector('select[name="facturadoEdit"]');
 
                         const fechaInicioInput = document.querySelector('input[name="fecha_inicioEdit"]');
@@ -160,7 +160,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         if (descripcionTextarea) descripcionTextarea.value = task.descripcion || '';
                         if (observacionesTextarea) observacionesTextarea.value = task.observaciones || '';
-                        if (facturableCheckbox) facturableCheckbox.checked = !!task.facturable;
+                        if (facturableSelect) {
+                            facturableSelect.value = task.facturable || '';
+                        }
                         if (facturadoInput) facturadoInput.value = task.facturado || '';
 
                         function formatFechaParaInput(fecha) {
@@ -903,6 +905,14 @@ clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute(
 asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribute('data-asuntos'));
 tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
 
+ // Verifica si los datos son un array y ordena alfabéticamente
+ if (Array.isArray(asuntosData)) {
+    asuntosData.sort((a, b) => {
+        if (a.nombre < b.nombre) return -1;
+        if (a.nombre > b.nombre) return 1;
+        return 0;
+    });
+}
 
 function setupAutocomplete({ inputId, hiddenId, listId, data, nameKey, formatItem }) {
     const input = document.getElementById(inputId);

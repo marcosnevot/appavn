@@ -51,8 +51,12 @@
         <div class="form-row ">
             <div class="form-group narrow">
                 <label for="facturable">Facturable:</label>
-                <input type="checkbox" name="facturableEdit" id="facturable" value="1">
+                <select name="facturableEdit" id="facturable" class="form-control">
+                    <option value="0">NO</option>
+                    <option value="1">SÍ</option>
+                </select>
             </div>
+
 
             <div class="form-group time">
                 <label for="facturado">Facturado:</label>

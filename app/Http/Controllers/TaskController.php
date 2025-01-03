@@ -19,6 +19,7 @@ use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TaskController extends Controller
@@ -1906,7 +1907,7 @@ class TaskController extends Controller
                     // Excluir al usuario autenticado
                     if ($user->id !== auth()->id()) {
                         $task->load(['cliente', 'asunto', 'tipo', 'users']);
-                        $user->notify(new TaskAssignedNotification($task, auth()->user()));
+                        $user->notify(new TaskAssignedNotification($task, auth()->user()));                        
                     }
                 }
             }

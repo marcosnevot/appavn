@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const btnEditCustomerForm = document.getElementById('btn-edit-customer-form');
 
+   
+
 
     // Asignar Usuarios a un customer (formulario de edición)
     const userSelectEdit = document.getElementById('user-select-edit');

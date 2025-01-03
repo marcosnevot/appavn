@@ -4,6 +4,12 @@
         <span class="customer-name">{{ $customer->nombre_fiscal ?? 'Sin Nombre Fiscal' }}</span>
         <span class="customer-nif">{{ $customer->nif ?? 'Sin NIF' }}</span>
     </h2>
+
+    <!-- Teléfono y Email del Cliente -->
+    <div class="task-client-contact">
+        <div class="task-client-contact-item task-client-email">✉️ <a href="mailto:{{ $customer->email ?? '#' }}">{{ $customer->email ?? 'Sin email' }}</a></div>
+        <div class="task-client-contact-item task-client-phone">📞 {{ $customer->movil ?? 'Sin móvil' }}</div>
+    </div>
   
 </div>
 
@@ -14,7 +20,7 @@
 </div>
 
 <!-- Sección reservada para la futura gestión de subclientes o detalles adicionales -->
-<div class="customer-subdetails-section">
+<div id="customer-subdetails-section" class="customer-subdetails-section">
     <h3>Detalles Adicionales</h3>
     <p>Aquí se gestionarán detalles adicionales de este cliente. (Próximamente)</p>
 </div>

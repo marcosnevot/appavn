@@ -1,5 +1,5 @@
 // Tiempo límite de inactividad en milisegundos (por ejemplo, 15 minutos)
-const INACTIVITY_LIMIT = 60 * 60 * 1000; 
+const INACTIVITY_LIMIT = 60 * 60 * 1000;
 
 let inactivityTimer;
 
@@ -29,9 +29,6 @@ bodyContainer.addEventListener('click', resetInactivityTimer);
 // Inicia el temporizador al cargar la página
 resetInactivityTimer();
 
-
-
-//Filtros Planificación
 function sincronizarBotonesConFecha() {
     const dateRangePicker = document.getElementById('filter-fecha-planificacion');
     const dateRangeValue = dateRangePicker.value || '';
@@ -60,6 +57,13 @@ function sincronizarBotonesConFecha() {
             // Activar fechas específicas
             button.classList.add('active');
             botonSeleccionado = true;
+        } else if (botonFecha.includes(',')) {
+            // Manejo de rangos (e.g., "Semana")
+            const [rangoInicio, rangoFin] = botonFecha.split(',');
+            if (rangoInicio === fechaInicio && rangoFin === fechaFin) {
+                button.classList.add('active');
+                botonSeleccionado = true;
+            }
         }
     });
 
@@ -67,6 +71,7 @@ function sincronizarBotonesConFecha() {
         console.log('No hay botón correspondiente para el rango de fechas seleccionado.');
     }
 }
+
 
 // Función para restablecer el filtro rápido de planificación
 function resetFiltroRapidoPlanificacion() {
@@ -88,7 +93,8 @@ function resetFiltroRapidoPlanificacion() {
 
 // Actualizar visualización de ítems seleccionados
 function updateSelectedDisplay(container, items, isBoolean) {
-    container.innerHTML = '';
+    container.innerHTML = ''; // Limpiar contenido previo
+
     if (items.length === 0) {
         const placeholder = document.createElement('span');
         placeholder.textContent = 'Seleccionar...';
@@ -98,7 +104,15 @@ function updateSelectedDisplay(container, items, isBoolean) {
     } else {
         items.forEach(item => {
             const span = document.createElement('span');
-            span.textContent = isBoolean ? (item === true ? 'Sí' : 'No') : item;
+
+            if (isBoolean) {
+                // Convertir valores booleanos a texto
+                span.textContent = item === "1" ? 'SÍ' : 'NO';
+            } else {
+                span.textContent = item;
+            }
+
+            // Aplicar estilos a cada selección
             span.style.backgroundColor = '#f0f0f0';
             span.style.color = '#333';
             span.style.padding = '3px 8px';
@@ -106,10 +120,12 @@ function updateSelectedDisplay(container, items, isBoolean) {
             span.style.fontSize = '12px';
             span.style.lineHeight = '1.5';
             span.style.border = '1px solid #ddd';
+
             container.appendChild(span);
         });
     }
 }
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -195,6 +211,28 @@ document.addEventListener('DOMContentLoaded', function () {
         return diasRestantes;
     }
 
+    // Función para obtener el rango de la semana actual (lunes a domingo)
+    function obtenerRangoSemanaActual() {
+        const hoy = new Date();
+        const diaSemana = hoy.getDay();
+        const lunes = new Date(hoy);
+        lunes.setDate(hoy.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1)); // Ajustar para lunes
+        const domingo = new Date(lunes);
+        domingo.setDate(lunes.getDate() + 6); // Ajustar para domingo
+
+        return {
+            inicio: formatearFechaLocal(lunes),
+            fin: formatearFechaLocal(domingo)
+        };
+    }
+
+    // Función para formatear la fecha a YYYY-MM-DD
+    function formatearFechaLocal(fecha) {
+        const fechaAjustada = new Date(fecha);
+        fechaAjustada.setMinutes(fechaAjustada.getMinutes() - fechaAjustada.getTimezoneOffset());
+        return fechaAjustada.toISOString().split('T')[0];
+    }
+
     // Función para generar los botones de filtro de planificación
     function generarBotonesFiltroPlanificacion() {
         planificacionFilterContainer.innerHTML = ""; // Limpiar botones previos
@@ -210,6 +248,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             planificacionFilterContainer.appendChild(button);
         });
+
+        // Crear el botón de "Semana"
+        const botonSemana = document.createElement('button');
+        botonSemana.type = 'button';
+        botonSemana.classList.add('btn-filter-planificacion');
+        botonSemana.textContent = 'Semana';
+        const { inicio, fin } = obtenerRangoSemanaActual();
+        botonSemana.setAttribute('data-fecha', `${inicio},${fin}`);
+        botonSemana.onclick = () => filtrarTareasPorPlanificacion(`${inicio},${fin}`);
+        planificacionFilterContainer.appendChild(botonSemana);
 
         // Crear el botón de "Pasadas"
         const botonPasadas = document.createElement('button');
@@ -234,12 +282,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-
-
-
     // Función para gestionar el filtrado de tareas
     function filtrarTareasPorPlanificacion(fecha, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
-        console.log('filtrarTareasPorPlanificacion llamada desde:', new Error().stack);
 
         // Actualizar la interfaz de botones
         document.querySelectorAll('.btn-filter-planificacion').forEach(btn => {
@@ -256,8 +300,12 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (fecha === '') {
             // Vaciar el daterangepicker para "Todas"
             dateRangePicker.value = '';
+        } else if (fecha.includes(',')) {
+            // Si el parámetro fecha es un rango (ej. "YYYY-MM-DD,YYYY-MM-DD")
+            const [fechaInicio, fechaFin] = fecha.split(',');
+            dateRangePicker.value = `${fechaInicio} - ${fechaFin}`;
         } else {
-            // Establecer el rango de fechas seleccionado
+            // Establecer el rango de fechas seleccionado para un único día
             dateRangePicker.value = `${fecha} - ${fecha}`;
         }
 

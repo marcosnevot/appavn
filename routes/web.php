@@ -77,7 +77,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/times', [TaskController::class, 'timesIndex'])->name('times.index');
     Route::get('/times/getTimes', [TaskController::class, 'getTimes'])->name('times.get');
 
-
+    
     Route::get('/notifications', function () {
         $notifications = auth()->user()->unreadNotifications()->orderBy('created_at', 'asc')->take(30)->get();
         return response()->json($notifications);

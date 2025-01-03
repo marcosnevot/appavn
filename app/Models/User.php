@@ -27,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'outlook_password', // Asegúrate de incluir este campo
     ];
 
     /**

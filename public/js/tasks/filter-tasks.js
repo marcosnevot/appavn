@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const asuntoDesdeUrl = urlParams.get('asunto') ? urlParams.get('asunto').split(',') : []; // Dividir en array si existen varios asuntos
     const estadoDesdeUrl = urlParams.get('estado');
-    const userIdFromUrl = urlParams.get('usuario'); // Leer el ID del usuario desde la URL
+    const userIdsFromUrl = urlParams.get('usuario'); // Obtener los IDs de usuario (puede ser una lista separada por comas)
 
     // Mostrar el formulario de filtrar tareas
     filterTaskButton.addEventListener('click', function () {
@@ -539,28 +539,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Obtener el ID del usuario en sesión y agregarlo como seleccionado
     const sessionUserId = document.getElementById('user-session-id').value;
-    const selectedUserId = userIdFromUrl || sessionUserId; // Priorizar el usuario de la URL
+    // Convertir la lista de IDs en un array
+    const selectedUserIds = userIdsFromUrl ? userIdsFromUrl.split(',') : [sessionUserId];
 
     // Seleccionar el checkbox correspondiente al usuario seleccionado
-    const selectedUserCheckbox = document.getElementById(`filter-user-${selectedUserId}`);
 
-    // Marcar el checkbox del usuario seleccionado
-    if (selectedUserCheckbox) {
-        selectedUserCheckbox.checked = true; // Marcar el checkbox como seleccionado
-        const selectedUserName = selectedUserCheckbox.nextElementSibling.textContent;
 
-        // Añadir el usuario seleccionado a la lista de seleccionados
-        filterSelectedUsers = [{ id: selectedUserId, name: selectedUserName }];
-        updateFilterSelectedUsersDisplay();
-        updateFilterUserIdsInput();
+    // Iterar sobre los checkboxes y marcar los correspondientes
+    selectedUserIds.forEach(userId => {
+        const checkbox = document.getElementById(`filter-user-${userId}`);
+        if (checkbox) {
+            checkbox.checked = true;
 
-        // Actualizar el panel de información del filtro
-        updateFilterInfoPanel({
-            usuario: selectedUserId // Define el usuario seleccionado como filtro activo
-        });
-    } else {
-        console.warn(`No se encontró el checkbox para el usuario ID: ${selectedUserId}`);
-    }
+            // Actualizar el panel de información y otros datos relevantes
+            const selectedUserName = checkbox.nextElementSibling.textContent;
+            filterSelectedUsers.push({ id: userId, name: selectedUserName });
+        } else {
+            console.warn(`No se encontró el checkbox para el usuario ID: ${userId}`);
+        }
+    });
+    // Llama a las funciones para actualizar los displays y los inputs
+    updateFilterSelectedUsersDisplay();
+    updateFilterUserIdsInput();
+    updateFilterInfoPanel({ usuario: selectedUserIds });
 
 
     // Llama a la función inicialmente para cargar el título al abrir la página

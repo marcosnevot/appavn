@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('user-name').value = user.name;
             document.getElementById('user-email').value = user.email;
             document.getElementById('user-role').value = user.role;
+            document.getElementById('outlook-password').value = ''; // No prellenar por seguridad
             editingUserId = user.id;
 
             // Si el usuario tiene id 1, aplica readonly
@@ -171,6 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Si el campo de contraseña está vacío al editar, no lo envía
         if (editingUserId && !userData.password) {
             delete userData.password; // No envía contraseña vacía al backend
+        }
+
+        // Si el campo de App Password está vacío, no lo envía
+        if (editingUserId && !userData.outlook_password) {
+            delete userData.outlook_password; // No envía app password vacío al backend
         }
 
         try {

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
 
 class AdminController extends Controller
 {
@@ -161,6 +162,7 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|string|min:5', // Contraseña opcional
             'role' => 'required|exists:roles,name', // Rol obligatorio
+            'outlook_password' => 'nullable|string', // App Password opcional
         ]);
 
         // Construcción de los datos para actualizar
@@ -172,6 +174,11 @@ class AdminController extends Controller
         // Solo agrega la contraseña si está presente
         if (isset($validated['password'])) {
             $dataToUpdate['password'] = bcrypt($validated['password']);
+        }
+
+        // Solo agrega el App Password si está presente
+        if (!empty($validated['outlook_password'])) {
+            $dataToUpdate['outlook_password'] = Crypt::encryptString($validated['outlook_password']);
         }
 
         // Actualiza el usuario

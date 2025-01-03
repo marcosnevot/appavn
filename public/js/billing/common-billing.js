@@ -70,6 +70,15 @@ let asuntosData = JSON.parse(document.getElementById('asuntos-data').getAttribut
 let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
 let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
+ // Verifica si los datos son un array y ordena alfabéticamente
+ if (Array.isArray(asuntosData)) {
+    asuntosData.sort((a, b) => {
+        if (a.nombre < b.nombre) return -1;
+        if (a.nombre > b.nombre) return 1;
+        return 0;
+    });
+}
+
 function updateFilterInfoPanel(filters) {
     const filterInfoContent = document.getElementById('filter-info-content');
     const filterInfoPanel = document.getElementById('filter-info-panel');
@@ -126,8 +135,7 @@ function updateFilterInfoPanel(filters) {
 
                 p.textContent = `Tipo(s): ${tipoNames || 'Desconocido'}`;
             } else if (key === 'usuario') {
-                // Manejo para usuarios
-                const userValues = value.split(',');
+                const userValues = String(value).split(',');
                 const userNames = userValues
                     .map(value => {
                         const usuario = usersData.find(usuario =>
@@ -138,7 +146,12 @@ function updateFilterInfoPanel(filters) {
                     .join(', ');
 
                 p.textContent = `Mostrando Tareas De: ${userNames}`;
+            } else if (key === 'facturable') {
+                // Manejo para facturable
+                const facturableText = value === '1' ? 'SÍ' : 'NO';
+                p.textContent = `Facturable: ${facturableText}`;
             } else {
+                // Manejo general para otros filtros
                 p.textContent = `${capitalizeFirstLetter(key)}: ${value}`;
             }
 

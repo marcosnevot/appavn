@@ -9,6 +9,16 @@ const cancelFilterButton = document.getElementById('cancel-filter-button');
 const clearFilterButton = document.getElementById('clear-filter-button');
 
 
+// Filtro rápido asignación
+const quickFilterUserSelect = document.getElementById('quick-filter-user-select');
+const quickFilterUserList = document.getElementById('quick-filter-user-list');
+const quickFilterSelectedUsersContainer = document.getElementById('quick-filter-selected-users');
+const quickFilterUserIdsInput = document.getElementById('quick-filter-user-ids');
+const selectedUserNamesContainer = document.getElementById('selected-user-names');
+let quickFilterSelectedUsers = [];
+const sessionUserCheckboxQuick = document.getElementById(`quick-filter-user-${sessionUserId}`);
+
+
 let isLoading = false; // Bandera para evitar solicitudes concurrentes
 
 function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirection = 'asc') {
@@ -43,6 +53,12 @@ function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirect
     console.log('Datos de filtro:', filterData);
     window.currentFilters = filterData; // Actualiza los filtros activos en la variable global
 
+    // Obtener los IDs de usuario seleccionados como array
+    const selectedUserIds = filterData.usuario ? filterData.usuario.split(',').map(id => parseInt(id)) : [];
+
+    // Sincronizar el filtro rápido de usuario con los seleccionados en el formulario
+    syncQuickFilterWithFormFilter(selectedUserIds);
+
     // Actualizar el panel con los filtros actuales
     updateFilterInfoPanel(filterData);
 
@@ -66,7 +82,7 @@ function loadFilteredTasks(page = 1, sortKey = 'fecha_planificacion', sortDirect
                 updateTaskTable(data.filteredTasks);
                 updatePagination(data.pagination, loadFilteredTasks);  // Pasa loadFilteredTasks como argumento
                 resetFiltroRapidoPlanificacion();
-                updateSelectedUserNamesFromFilterForm();
+                // updateSelectedUserNamesFromFilterForm();
                 closeFilterTaskForm();
             } else {
                 console.error('Error al filtrar tareas:', data.message);
@@ -95,27 +111,6 @@ function closeFilterTaskForm() {
 
 
 
-// Función para actualizar el nombre de los usuarios en el título desde el formulario
-function updateSelectedUserNamesFromFilterForm() {
-    const selectedUserNamesElement = document.getElementById('selected-user-names'); // Seleccionar el span en el título
-    const selectedCheckboxes = document.querySelectorAll('#filter-user-list input.user-checkbox:checked'); // Checkboxes seleccionados
-
-    if (selectedCheckboxes.length === 0) {
-        // Si no hay usuarios seleccionados, mostrar "todos"
-        selectedUserNamesElement.textContent = 'todos';
-    } else {
-        // Obtén los nombres de los usuarios seleccionados
-        const selectedNames = Array.from(selectedCheckboxes).map(checkbox => {
-            const label = document.querySelector(`label[for="${checkbox.id}"]`);
-            return label ? label.textContent : ''; // Extrae el texto del label asociado
-        }).join(', ');
-
-        // Actualiza el contenido del span con los nombres seleccionados
-        selectedUserNamesElement.textContent = selectedNames;
-    }
-}
-
-
 
 
 
@@ -128,7 +123,6 @@ function updateSelectedUserNamesFromFilterForm() {
 
 document.addEventListener('DOMContentLoaded', function () {
     console.log('El script de filtro ha sido cargado correctamente.');
-
 
 
 
@@ -456,7 +450,7 @@ document.addEventListener('DOMContentLoaded', function () {
         usuario: sessionUserId  // Define el usuario en sesión como filtro activo
     });
     // Llama a la función inicialmente para cargar el título al abrir la página
-    updateSelectedUserNamesFromFilterForm();
+    //  updateSelectedUserNamesFromFilterForm();
 
     // Mostrar el panel de información de filtros
     document.getElementById('filter-info-panel').classList.remove('hide');
@@ -553,6 +547,8 @@ document.addEventListener('DOMContentLoaded', function () {
         checkboxes[filterCurrentFocus].focus();
     }
 
+
+
     // Checklists de los campos Estado, Subtipo, facturable y Facturado
 
     // Checklists de los campos Estado, Facturable y Facturado
@@ -568,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const checkboxes = Array.from(listElement.querySelectorAll('input[type="checkbox"]'));
         checkboxes.forEach((checkbox, index) => {
             checkbox.dataset.index = index; // Asignar índice único al checkbox
-            const value = isBoolean ? checkbox.value === "1" : checkbox.value;
+            const value = checkbox.value; // Mantener el valor como cadena ("1" o "0")
 
             // Marcar los valores predeterminados
             if (defaultValues.includes(value)) {
@@ -583,6 +579,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     selectedItems = selectedItems.filter(item => item !== value);
                 }
 
+                // Actualizar el input oculto y la visualización
                 hiddenInput.value = selectedItems.join(',');
                 updateSelectedDisplay(selectedContainer, selectedItems, isBoolean);
             });
@@ -627,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        
+
 
         // Función para manejar el enfoque de los checkboxes
         function focusNextCheckbox(direction) {
@@ -657,10 +654,166 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Inicializar los filtros con valores predeterminados
-    initializeChecklistFilter('facturable', true, [true]); // Predeterminado a "Sí"
+    initializeChecklistFilter('facturable', true, ['1']); // Predeterminado a "Sí"
     initializeChecklistFilter('facturado', false, ['NO']); // Predeterminado a "NO"
     initializeChecklistFilter('estado', false, ['COMPLETADA']); // Sin valores predeterminados para "estado"
 
 
+
+
+
+
+
+    // Mostrar/ocultar la lista de usuarios al hacer clic
+    quickFilterUserSelect.addEventListener('click', toggleQuickFilterUserList);
+
+    function toggleQuickFilterUserList() {
+        quickFilterUserList.style.display = quickFilterUserList.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Manejar la selección de usuarios en el filtro rápido
+    quickFilterUserList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            const userId = this.value;
+            const userName = this.nextElementSibling.textContent;
+
+            if (this.checked) {
+                quickFilterSelectedUsers.push({ id: userId, name: userName });
+            } else {
+                quickFilterSelectedUsers = quickFilterSelectedUsers.filter(user => user.id !== userId);
+            }
+            updateQuickFilterSelectedUsersDisplay();
+            updateQuickFilterUserIdsInput();
+            updateSelectedUserNames();
+            applyQuickFilters();
+        });
+    });
+
+
+    // Cerrar el selector al hacer clic fuera
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.custom-select') && e.target !== quickFilterUserSelect) {
+            quickFilterUserList.style.display = 'none';
+        }
+    });
+
+    // Seleccionar automáticamente el usuario en sesión
+    if (sessionUserCheckboxQuick) {
+        sessionUserCheckboxQuick.checked = true;
+        const sessionUserName = sessionUserCheckboxQuick.nextElementSibling.textContent;
+        quickFilterSelectedUsers.push({ id: sessionUserId, name: sessionUserName });
+        updateQuickFilterSelectedUsersDisplay();
+        updateQuickFilterUserIdsInput();
+        updateSelectedUserNames();
+        // applyQuickFilters();
+    }
+
 });
 
+// Función para actualizar el filtro rápido basado en el filtro del formulario
+function syncQuickFilterWithFormFilter(selectedUserIds) {
+    // Limpiar las selecciones actuales en el filtro rápido
+    quickFilterSelectedUsers = [];
+
+    // Desmarcar todos los checkboxes en el filtro rápido
+    quickFilterUserList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+
+    // Marcar checkboxes según los IDs seleccionados en el formulario de filtro
+    selectedUserIds.forEach(userId => {
+        const checkbox = document.getElementById(`quick-filter-user-${userId}`);
+        if (checkbox) {
+            checkbox.checked = true;
+            const userName = checkbox.nextElementSibling.textContent;
+            quickFilterSelectedUsers.push({ id: userId, name: userName });
+        }
+    });
+
+    // Actualizar la visualización y el input oculto en el filtro rápido
+    updateQuickFilterSelectedUsersDisplay();
+    updateQuickFilterUserIdsInput();
+    updateSelectedUserNames();
+    applyQuickFilters(); // Aplicar el filtro en tiempo real
+}
+
+// Actualizar la visualización de los usuarios seleccionados en el filtro rápido
+function updateQuickFilterSelectedUsersDisplay() {
+    quickFilterSelectedUsersContainer.innerHTML = '';
+    quickFilterSelectedUsers.forEach(user => {
+        const span = document.createElement('span');
+        span.textContent = user.name;
+        quickFilterSelectedUsersContainer.appendChild(span);
+    });
+}
+
+// Actualizar el campo oculto con los IDs de usuarios seleccionados en el filtro rápido
+function updateQuickFilterUserIdsInput() {
+    quickFilterUserIdsInput.value = quickFilterSelectedUsers.map(user => user.id).join(',');
+}
+
+// Actualizar el nombre de los usuarios en el título
+function updateSelectedUserNames() {
+    const title = document.querySelector('.title');
+    if (quickFilterSelectedUsers.length === 0) {
+        title.textContent = 'Facturación de todos';
+    } else {
+        const names = quickFilterSelectedUsers.map(user => user.name).join(', ');
+        title.textContent = `Facturación de ${names}`;
+    }
+}
+
+
+// Aplicar el filtro de usuarios seleccionados en la tabla de tareas
+function applyQuickFilters() {
+    if (isLoading) return; // Salir si hay una solicitud en curso
+
+    const fechaPlanificacionInput = document.getElementById('filter-fecha-planificacion').value || '';
+    const [fechaPlanificacionInicio, fechaPlanificacionFin] = fechaPlanificacionInput === 'past'
+        ? ['past', 'past'] // Manejar "past" como caso especial
+        : fechaPlanificacionInput.split(' - ');
+
+    const filterData = {
+        cliente: document.getElementById('filter-cliente-ids').value || '', // Usar los IDs de clientes seleccionados
+        asunto: document.getElementById('filter-asunto-ids').value || '',  // Usar los IDs/nombres de asuntos seleccionados
+        tipo: document.getElementById('filter-tipo-ids').value || '',
+        subtipo: document.getElementById('filter-subtipo').value || '',
+        estado: document.getElementById('filter-estado-ids').value || 'COMPLETADA', // Predeterminar a "PENDIENTE, ENESPERA"
+        usuario: document.getElementById('filter-user-ids').value || '',
+        fecha_inicio: document.getElementById('filter-fecha-inicio').value || '',
+        fecha_vencimiento: document.getElementById('filter-fecha-vencimiento').value || '',
+        fecha_planificacion_inicio: fechaPlanificacionInicio || '',
+        fecha_planificacion_fin: fechaPlanificacionFin || '',
+        tiempo_previsto: document.getElementById('filter-tiempo-previsto').value || '',
+        tiempo_real: document.getElementById('filter-tiempo-real').value || '',
+        descripcion: document.getElementById('filter-descripcion-input').value || '', // Nuevo campo para descripción
+        observaciones: document.getElementById('filter-observaciones-input').value || '', // Nuevo campo para observaciones
+        // Filtros personalizados para Facturación
+        facturable: document.getElementById('filter-facturable-ids').value || '', // Usar el campo oculto con los valores seleccionados
+        facturado: document.getElementById('filter-facturado-ids').value || '', // Usar el campo oculto con los valores seleccionados
+        usuario: quickFilterUserIdsInput.value // Usar el ID(s) de los usuarios seleccionados en el filtro rápido
+    };
+    window.currentFilters = filterData; // Actualiza los filtros activos en la variable global
+
+    // Actualizar el panel con los filtros actuales
+    updateFilterInfoPanel(filterData);
+
+    fetch(`/tareas/filtrar`, {
+        method: 'POST',
+        body: JSON.stringify(filterData),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateTaskTable(data.filteredTasks); // Actualizar la tabla con las tareas filtradas
+            } else {
+                console.error('Error al filtrar tareas:', data.message);
+            }
+        })
+        .catch(error => console.error('Error en la solicitud:', error.message))
+        .finally(() => isLoading = false);
+}

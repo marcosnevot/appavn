@@ -13,6 +13,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
 
+     // Verifica si los datos son un array y ordena alfabéticamente
+     if (Array.isArray(asuntosData)) {
+        asuntosData.sort((a, b) => {
+            if (a.nombre < b.nombre) return -1;
+            if (a.nombre > b.nombre) return 1;
+            return 0;
+        });
+    }
+    
     // Obtener el ID del usuario en sesión
     const sessionUserId = document.querySelector('meta[name="user-id"]').getAttribute('content');
 

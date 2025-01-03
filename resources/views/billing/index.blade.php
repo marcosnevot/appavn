@@ -8,11 +8,33 @@
     <div class="actions">
 
         <!-- Contenedor de Filtro Rápido de Planificación -->
-        <div class="quick-filter-planificacion">
+        <div class="quick-filter-planificacion" style="display: none;">
             <div id="planificacion-filter-buttons" class="planificacion-buttons-container">
                 <!-- Aquí aparecerán los botones de planificación dinámica -->
             </div>
         </div>
+
+          <!-- Contenedor de Filtro Rápido de Asignación de Usuarios -->
+          <div class="form-group grow" style="margin-bottom: 0px;">
+                <div class="quick-filter-asignacion" style="width:150px;">
+                    <div class="custom-select" name="quick-filter-user-select" tabindex="0" id="quick-filter-user-select">
+                        <div id="quick-filter-selected-users" class="selected-users">
+                            <!-- Aquí se añadirán los usuarios seleccionados para el filtro rápido -->
+                        </div>
+                        <div id="quick-filter-user-list" class="dropdown-list" style="display: none;">
+                            <ul>
+                                @foreach($usuarios as $user)
+                                <li>
+                                    <input class="user-checkbox" type="checkbox" id="quick-filter-user-{{ $user->id }}" value="{{ $user->id }}">
+                                    <label for="quick-filter-user-{{ $user->id }}">{{ $user->name }}</label>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                    <input type="hidden" name="quick_filter_users" id="quick-filter-user-ids"> <!-- Campo oculto para IDs seleccionados -->
+                </div>
+            </div>
 
 
         <span class="actions-space"></span>
