@@ -5,7 +5,8 @@ window.currentFilters = {}; // Variable global para los filtros activos
  let situacionesData = JSON.parse(document.getElementById('situaciones-data').getAttribute('data-situaciones'));
  let tiposData = JSON.parse(document.getElementById('tipos-data').getAttribute('data-tipos'));
  let clientesData = JSON.parse(document.getElementById('clientes-data').getAttribute('data-clientes'));
- 
+ let usersData = JSON.parse(document.getElementById('usuarios-data').getAttribute('data-usuarios'));
+
 // Función para actualizar la paginación
 function updatePagination(pagination, loadFunction, isFiltered = false) {
     const paginationContainer = document.getElementById('pagination-controls');

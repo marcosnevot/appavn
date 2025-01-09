@@ -15,7 +15,7 @@
                 <th data-sort-key="direccion" data-field="filter_direccion" style="cursor: pointer;">Dirección</th>
                 <th data-sort-key="codigo_postal" data-field="filter_codigo_postal" style="cursor: pointer;">Código Postal</th>
                 <th data-sort-key="poblacion" data-field="filter_poblacion" style="cursor: pointer;">Población</th>
-                <th data-sort-key="users.name" data-field="filter-responsable" style="cursor: pointer;">Responsable</th>
+                <th data-sort-key="users.name" data-field="filter-user" style="cursor: pointer;">Responsable</th>
                 <th data-sort-key="tipoCliente.nombre" data-field="tipocliente" style="cursor: pointer;">Tipo de Cliente</th>
                 <th data-sort-key="tributacion.nombre" data-field="tributacion" style="cursor: pointer;">Tributación</th>
                 <th data-sort-key="clasificacion.nombre" data-field="clasificacion" style="cursor: pointer;">Clasificación</th>
