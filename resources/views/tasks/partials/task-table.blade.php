@@ -1,33 +1,15 @@
-<!-- Contenedor de la tabla con scroll -->
-<div id="task-table" class="table-container" style="max-height: 80vh; width: 100%; overflow-x: auto; overflow-y: auto;">
-    <!-- Tabla de tareas -->
-    <table class="min-w-full table-auto task-table bg-white dark:bg-gray-800">
-        <thead>
-            <tr>
-                <th data-sort-key="id" style="cursor: pointer;">ID</th>
-                <th data-sort-key="fecha_vencimiento" data-field="filter_fecha_vencimiento" style="cursor: pointer;">Fecha Vencimiento</th>
-                <th data-sort-key="fecha_planificacion" data-field="filter_fecha_planificacion" style="cursor: pointer;">Planificación</th>
-                <th data-sort-key="users.name" data-field="filter-user" style="cursor: pointer;">Asignado a</th>
-                <th data-sort-key="cliente.nombre_fiscal" data-field="cliente" class="col-cliente" id="header-client" style="cursor: pointer;">Cliente</th>
-                <th data-sort-key="asunto.nombre" data-field="asunto" style="cursor: pointer;">Asunto</th>
-                <th data-sort-key="descripcion" data-field="filter_descripcion" style="cursor: pointer;" class="col-descripcion">Descripción</th>
-                <th data-sort-key="observaciones" data-field="filter_observaciones" style="cursor: pointer;" class="col-observaciones">Observaciones</th>
-                <th data-sort-key="facturable" data-field="filter-facturable" style="cursor: pointer;">Facturable</th>
-                <th data-sort-key="facturado" data-field="filter-facturado" style="cursor: pointer;">Facturado</th>
-                <th data-sort-key="estado" data-field="filter-estado" style="cursor: pointer;">Estado</th>
-                <th data-sort-key="tiempo_previsto" data-field="filter_tiempo_previsto" style="cursor: pointer;">Tiempo Previsto</th>
-                <th data-sort-key="tiempo_real" data-field="filter_tiempo_real" style="cursor: pointer;">Tiempo Real</th>
-                <th data-sort-key="tipo.nombre" data-field="tipo" style="cursor: pointer;">Tipo</th>
-                <th data-sort-key="subtipo" data-field="filter-subtipo" style="cursor: pointer;">Subtipo</th>
-                <th data-sort-key="fecha_inicio" data-field="filter_fecha_inicio" style="cursor: pointer;">Fecha Inicio</th>
-            </tr>
-        </thead>
 
+<div class="table-container" style="max-height: 80vh; width: 100%; overflow-x: auto; overflow-y: auto;">
+    <table id="task-table" class="min-w-full table-auto task-table bg-white dark:bg-gray-800">
+        <thead>
+            <tr id="dynamic-headers"></tr>
+            </thead>
         <tbody>
-            <!-- Aquí se rellenarán las tareas dinámicamente mediante JS -->
+            <!-- Las filas se rellenarán dinámicamente -->
         </tbody>
     </table>
 </div>
+
 
 
 <div class="pagination-container" id="pagination-controls">

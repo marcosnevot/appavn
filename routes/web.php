@@ -60,6 +60,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/tareas/filtrar', [TaskController::class, 'filter'])->name('tareas.filtrar');
     Route::get('/tareas/getTasks', [TaskController::class, 'getTasks'])->name('tareas.get');
 
+    Route::get('/tareas/getTableSchema', [TaskController::class, 'getTableSchema']);
+    Route::post('/tareas/savePreferences', [TaskController::class, 'savePreferences'])->middleware('auth');
+    Route::get('/tareas/getPreferences', [TaskController::class, 'getPreferences'])->middleware('auth');
+    Route::get('/tareas/getData', [TaskController::class, 'getData'])->middleware('auth');
+
     Route::get('/tareas/{id}', [TaskController::class, 'show'])->name('tareas.show');
     Route::delete('/tareas/{id}', [TaskController::class, 'destroy'])->name('tareas.destroy');
     Route::get('/tareas/{id}/edit', [TaskController::class, 'edit'])->name('tareas.edit');
@@ -78,7 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/times', [TaskController::class, 'timesIndex'])->name('times.index');
     Route::get('/times/getTimes', [TaskController::class, 'getTimes'])->name('times.get');
 
-    
+
     Route::get('/notifications', function () {
         $notifications = auth()->user()->unreadNotifications()->orderBy('created_at', 'asc')->take(30)->get();
         return response()->json($notifications);
@@ -113,7 +118,6 @@ Route::middleware('auth')->group(function () {
 
 
     Route::post('/chat', [ChatGPTController::class, 'handleChat'])->name('chat.handle');
-
 });
 
 require __DIR__ . '/auth.php';

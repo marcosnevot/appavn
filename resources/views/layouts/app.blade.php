@@ -20,7 +20,10 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
-
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <!-- jQuery y DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
     <!-- Scripts -->
     @vite(['resources/css/panel.css','resources/css/calendar.css','resources/js/websockets.js','resources/css/admin.css','resources/css/tareas.css','resources/css/detailed-task.css','resources/css/customer-mail.css','resources/css/customers.css','resources/css/detailed-customer.css', 'resources/css/app.css', 'resources/js/app.js'])

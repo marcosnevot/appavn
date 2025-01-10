@@ -26,7 +26,162 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Cargar tareas inicialmente
-    loadTasks(1, 'fecha_planificacion', 'asc');
+    // loadTasks(1, 'fecha_planificacion', 'asc');
+    console.log($('#task-table')[0]);
+
+    $(document).ready(function () {
+        $.ajax({
+            url: '/tareas/getTableSchema',
+            type: 'GET',
+            success: function (columns) {
+                const headerRow = $('#dynamic-headers');
+                headerRow.empty();
+
+                // Generar encabezados dinámicamente
+                columns.forEach(column => {
+                    const th = $('<th>')
+                        .attr('data-sort-key', column.sortKey)
+                        .attr('data-field', column.field)
+                        .css('cursor', 'pointer')
+                        .text(column.name.replace(/_/g, ' ').toUpperCase());
+
+                    headerRow.append(th);
+
+                    // Agregar evento de clic derecho
+                    th.on('contextmenu', function (e) {
+                        e.preventDefault(); // Prevenir el menú contextual por defecto
+
+                        // Verificar si ya hay un input visible y ocultarlo
+                        $('.column-search-input').remove();
+
+                        // Crear un input de búsqueda
+                        const searchInput = $('<input>')
+                            .attr('type', 'text')
+                            .addClass('column-search-input')
+                            .attr('placeholder', `Buscar en ${column.name.replace(/_/g, ' ')}`)
+                            .css({
+                                position: 'absolute',
+                                zIndex: 1000,
+                                width: '150px',
+                            });
+
+                        // Posicionar el input debajo del encabezado
+                        const offset = $(this).offset();
+                        searchInput.css({
+                            top: offset.top + $(this).height(),
+                            left: offset.left,
+                        });
+
+                        $('body').append(searchInput); // Agregar al DOM
+                        searchInput.focus();
+
+                        // Filtrar la tabla al presionar Enter
+                        searchInput.on('keypress', function (e) {
+                            if (e.which === 13) { // Enter
+                                const columnIndex = $('#task-table th').index(th);
+                                const searchTerm = $(this).val();
+
+                                const table = $('#task-table').DataTable();
+                                table.column(columnIndex).search(searchTerm).draw();
+
+                                $(this).remove(); // Eliminar el input después de aplicar el filtro
+                            }
+                        });
+
+                        // Ocultar el input al perder el foco
+                        searchInput.on('blur', function () {
+                            $(this).remove();
+                        });
+                    });
+                });
+
+                // Inicializar DataTables después de agregar los encabezados
+                initializeDataTable(columns);
+            },
+            error: function () {
+                alert('Error al cargar las columnas de la tabla.');
+            },
+        });
+    });
+
+
+
+
+    function initializeDataTable(columns) {
+        const columnDefs = columns.map(column => {
+            let renderFunction;
+
+            // Definir renderizadores personalizados según la columna
+            switch (column.name) {
+                case 'fecha_vencimiento':
+                case 'fecha_planificacion':
+                case 'fecha_inicio':
+                    renderFunction = function (data) {
+                        return data ? new Date(data).toLocaleDateString() : 'Sin fecha';
+                    };
+                    break;
+
+                case 'descripcion':
+                case 'observaciones':
+                    renderFunction = function (data) {
+                        return data ? truncateText(data, 100) : '';
+                    };
+                    break;
+
+                case 'users':
+                    renderFunction = function (data) {
+                        return data && data.length > 0 ? data.map(user => user.name).join(', ') : 'Sin asignación';
+                    };
+                    break;
+
+                case 'facturable':
+                    renderFunction = function (data) {
+                        return data ? 'SI' : 'NO';
+                    };
+                    break;
+
+                case 'estado':
+                    renderFunction = function (data, type, row) {
+                        const estadoClass = data ? `estado-${data.toLowerCase()}` : 'estado-default';
+                        return `<span class="${estadoClass}">${data || 'Desconocido'}</span>`;
+                    };
+                    break;
+
+                default:
+                    renderFunction = function (data) {
+                        return data || '';
+                    };
+                    break;
+            }
+
+            return {
+                data: column.name,
+                name: column.name,
+                render: renderFunction,
+            };
+        });
+
+        $('#task-table').DataTable({
+            destroy: true,
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '/tareas/getData',
+                type: 'GET',
+                data: function (d) {
+                    d.filters = window.currentFilters; // Enviar filtros activos
+                },
+            },
+            columns: columnDefs,
+            responsive: true,
+            lengthChange: false,
+            pageLength: 50,
+            searching: true, // Activar búsqueda global
+        });
+
+    }
+
+
 
 
 
