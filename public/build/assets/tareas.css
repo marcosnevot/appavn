@@ -1575,5 +1575,8 @@ input[type="date"].planificacion-date-picker:focus {
     font-size: 14px;
 }
 
-
+div.dataTables_filter {
+    display: none;
+    /* Ocultar el contenedor de búsqueda global */
+}
 
